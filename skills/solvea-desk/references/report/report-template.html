@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{REPORT_TITLE}}</title>
+  <style>
+{{REPORT_CSS}}
+  </style>
+</head>
+<body>
+  <main class="report">
+    <article class="sheet">
+      <header class="masthead">
+        <p class="eyebrow">Shulex Desk</p>
+        <h1>{{REPORT_TITLE}}</h1>
+        <p class="subtitle">{{REPORT_SUBTITLE}}</p>
+        <div class="meta-strip">
+{{META_ITEMS}}
+        </div>
+      </header>
+
+      <section class="section">
+        <div class="kpi-grid">
+{{KPI_BLOCKS}}
+        </div>
+      </section>
+
+{{SECTIONS}}
+
+      <section class="section">
+        <h2>口径说明</h2>
+        <div class="formula-list">
+{{FORMULA_NOTES}}
+        </div>
+      </section>
+
+      <footer class="footer">
+{{FOOTER}}
+      </footer>
+    </article>
+  </main>
+</body>
+</html>

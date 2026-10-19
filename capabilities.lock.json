@@ -1,0 +1,902 @@
+{
+  "schemaVersion": 1,
+  "plugin": {
+    "pluginVersion": "0.1.0",
+    "cliVersion": "0.1.0",
+    "toolSchemaVersion": "1",
+    "serverApiVersion": "1"
+  },
+  "capabilities": [
+    {
+      "name": "agent-analytics",
+      "execution": "remote",
+      "access": "read-write",
+      "confirmation": "server-enforced-for-write",
+      "channels": [
+        "stable",
+        "canary",
+        "dev"
+      ],
+      "tests": [
+        "skill-present",
+        "command-mapping"
+      ]
+    },
+    {
+      "name": "agent-builder",
+      "execution": "remote",
+      "access": "read-write",
+      "confirmation": "server-enforced-for-write",
+      "channels": [
+        "stable",
+        "canary",
+        "dev"
+      ],
+      "tests": [
+        "skill-present",
+        "command-mapping"
+      ]
+    },
+    {
+      "name": "agent-tester",
+      "execution": "remote",
+      "access": "read-write",
+      "confirmation": "server-enforced-for-write",
+      "channels": [
+        "stable",
+        "canary",
+        "dev"
+      ],
+      "tests": [
+        "skill-present",
+        "command-mapping"
+      ]
+    },
+    {
+      "name": "delivery",
+      "execution": "remote",
+      "access": "read-write",
+      "confirmation": "server-enforced-for-write",
+      "channels": [
+        "stable",
+        "canary",
+        "dev"
+      ],
+      "tests": [
+        "skill-present",
+        "command-mapping"
+      ]
+    },
+    {
+      "name": "kb-builder",
+      "execution": "remote",
+      "access": "read-write",
+      "confirmation": "server-enforced-for-write",
+      "channels": [
+        "stable",
+        "canary",
+        "dev"
+      ],
+      "tests": [
+        "skill-present",
+        "command-mapping"
+      ]
+    },
+    {
+      "name": "poc",
+      "execution": "remote",
+      "access": "read-write",
+      "confirmation": "server-enforced-for-write",
+      "channels": [
+        "stable",
+        "canary",
+        "dev"
+      ],
+      "tests": [
+        "skill-present",
+        "command-mapping"
+      ]
+    },
+    {
+      "name": "runtime-inspector",
+      "execution": "remote",
+      "access": "read-write",
+      "confirmation": "server-enforced-for-write",
+      "channels": [
+        "dev",
+        "canary"
+      ],
+      "tests": [
+        "skill-present",
+        "command-mapping"
+      ]
+    },
+    {
+      "name": "shulex-support",
+      "execution": "hybrid",
+      "access": "read-write",
+      "confirmation": "server-enforced-for-write",
+      "channels": [
+        "stable",
+        "canary",
+        "dev"
+      ],
+      "tests": [
+        "skill-present",
+        "command-mapping"
+      ]
+    },
+    {
+      "name": "solvea-desk",
+      "execution": "remote",
+      "access": "read-write",
+      "confirmation": "server-enforced-for-write",
+      "channels": [
+        "stable",
+        "canary",
+        "dev"
+      ],
+      "tests": [
+        "skill-present",
+        "command-mapping"
+      ]
+    },
+    {
+      "name": "solvea-kit",
+      "execution": "remote",
+      "access": "read-write",
+      "confirmation": "server-enforced-for-write",
+      "channels": [
+        "stable",
+        "canary",
+        "dev"
+      ],
+      "tests": [
+        "skill-present",
+        "command-mapping"
+      ]
+    }
+  ],
+  "localTools": [
+    "cxclaw.auth_status",
+    "cxclaw.tenant_current",
+    "cxclaw.tenant_search",
+    "cxclaw.tenant_use",
+    "cxclaw.sls_query",
+    "cxclaw.file_read",
+    "cxclaw.git_status",
+    "cxclaw.json_format"
+  ],
+  "remoteTools": [
+    "cxclaw.api",
+    "cxclaw.capabilities"
+  ],
+  "solveaApiCommands": [
+    {
+      "name": "batch-update-isolation-keyword-bindings",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "batch-update-knowledge",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "batch-update-products",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "chat",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "chat-async",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "chat-report-*",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "chat-stream",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-agent",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-custom-quality-rule",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-folder",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-intent",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-isolation-keyword",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-label-group",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-label-node",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-managed-ai-field",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-plugin",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-product-knowledge",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-quality-alert-rule",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-strategy",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "create-template",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "delete-custom-quality-rule",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "delete-directory",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "delete-isolation-keyword",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "delete-label-group",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "delete-label-node",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "delete-managed-ai-field",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "delete-plugin",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "delete-quality-alert-rule",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "delete-templates",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "download-label-template",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "download-labels",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "edit-knowledge-tags",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "export-transcripts",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-agent",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-ai-field-guide",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-async-result",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-batch-test-tasks",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-chat-context",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-chatflow-graph",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-conversations-by-intent",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-custom-quality-rule",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-export-tasks",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-intent",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-knowledge",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-knowledge-isolation-keywords",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-label-detail-tree",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-label-tree",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-managed-ai-field",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-plugin",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-project",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-quality-alert-message",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-quality-alert-rule",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-quality-rule",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-quality-status",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-transcript",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "get-voice-transcript",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "initialize-ai-fields",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-agent-ai-fields",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-agents",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-ai-fields",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-directories",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-entities",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-intents",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-isolation-keywords",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-knowledge",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-knowledge-tags",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-label-groups",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-managed-ai-fields",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-plugins",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-quality-alert-messages",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-quality-alert-rules",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-quality-rules",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-strategies",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-templates",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-transcripts",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-voice-agents",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "list-voice-transcripts",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "move-directory",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "operate-knowledge",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "query-mock-data",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "replace-mock-data",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "report-agent",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "report-escalation",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "report-inspection",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "report-intent",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "report-knowledge",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "report-livechat",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "report-livechat-table",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "report-message",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "report-satisfaction",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "report-satisfaction-list",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "report-self-learning",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "report-transcript",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "resolve-transcript-chat-id",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "run-plugin",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "set-quality-status",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "submit-batch-test",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "toggle-intent",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "toggle-managed-ai-field",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "toggle-strategy",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-agent",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-chatflow",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-custom-quality-rule",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-directory",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-document-content",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-intent",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-isolation-keyword",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-knowledge",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-label-group",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-label-node",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-managed-ai-field",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-plugin",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-product-knowledge",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-quality-alert-rule",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-quality-rule",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-strategy",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "update-template",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "upload-batch-test-file",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "upload-labels",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "upload-qa",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    },
+    {
+      "name": "upload-web",
+      "tool": "cxclaw.api",
+      "execution": "remote",
+      "writeConfirmation": "server-policy"
+    }
+  ]
+}
