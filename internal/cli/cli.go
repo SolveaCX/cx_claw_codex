@@ -217,7 +217,7 @@ func runAPI(ctx context.Context, args []string, stdout io.Writer) error {
 		arguments["traceId"] = traceID
 	}
 	var response any
-	err = api.New(session).Do(ctx, http.MethodPost, "/codex/v1/mcp", map[string]any{
+	err = api.New(session).Do(ctx, http.MethodPost, "/mcp", map[string]any{
 		"jsonrpc": "2.0", "id": "cli", "method": "tools/call",
 		"params": map[string]any{"name": "cxclaw.api", "arguments": arguments},
 	}, &response, true)

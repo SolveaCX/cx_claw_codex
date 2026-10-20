@@ -61,7 +61,7 @@ func Check(ctx context.Context, session *config.Session) (*CheckResponse, error)
 	}
 	var response CheckResponse
 	path := fmt.Sprintf(
-		"/codex/v1/releases/check?channel=%s&currentVersion=%s",
+		"/releases/check?channel=%s&currentVersion=%s",
 		channel, buildinfo.PluginVersion,
 	)
 	if err := api.New(session).Do(ctx, http.MethodGet, path, nil, &response, false); err != nil {

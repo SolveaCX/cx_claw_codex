@@ -40,7 +40,7 @@ func Login(ctx context.Context, serverURL, channel string, output io.Writer) (*c
 	session := &config.Session{ServerURL: strings.TrimRight(serverURL, "/"), Channel: channel}
 	client := api.New(session)
 	var start deviceStartResponse
-	if err := client.Do(ctx, http.MethodPost, "/codex/v1/auth/device/start", map[string]any{
+	if err := client.Do(ctx, http.MethodPost, "/auth/device/start", map[string]any{
 		"clientVersion": buildinfo.CLIVersion,
 	}, &start, false); err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func Login(ctx context.Context, serverURL, channel string, output io.Writer) (*c
 			return nil, ctx.Err()
 		case <-time.After(interval):
 		}
-		status, data, err := postRaw(ctx, session.ServerURL+"/codex/v1/auth/device/token", map[string]any{
+		status, data, err := postRaw(ctx, session.ServerURL+"/auth/device/token", map[string]any{
 			"deviceCode": start.DeviceCode, "clientVersion": buildinfo.CLIVersion,
 		})
 		if err != nil {
@@ -93,7 +93,7 @@ func EnsureAccess(ctx context.Context, session *config.Session) error {
 	if session.RefreshToken == "" {
 		return errors.New("not logged in")
 	}
-	status, data, err := postRaw(ctx, strings.TrimRight(session.ServerURL, "/")+"/codex/v1/auth/refresh", map[string]any{
+	status, data, err := postRaw(ctx, strings.TrimRight(session.ServerURL, "/")+"/auth/refresh", map[string]any{
 		"refreshToken": session.RefreshToken, "clientVersion": buildinfo.CLIVersion,
 	})
 	if err != nil {
@@ -114,7 +114,7 @@ func EnsureAccess(ctx context.Context, session *config.Session) error {
 
 func Logout(ctx context.Context, session *config.Session) error {
 	if session != nil && session.RefreshToken != "" {
-		_, _, _ = postRaw(ctx, strings.TrimRight(session.ServerURL, "/")+"/codex/v1/auth/logout", map[string]any{
+		_, _, _ = postRaw(ctx, strings.TrimRight(session.ServerURL, "/")+"/auth/logout", map[string]any{
 			"refreshToken": session.RefreshToken,
 		})
 	}

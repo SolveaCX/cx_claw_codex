@@ -3,7 +3,7 @@
 内部员工使用的 CXClaw Codex 插件。它通过钉钉设备授权登录，在本地合并文件、Git、SLS 工具与 `solvea-kit` 远程 MCP 能力。
 
 ```bash
-cxclawctl login --server https://kit.example.com
+cxclawctl login --server https://kit.example.com/api_v2/solvea-kit
 cxclawctl tenant search acme --env prod
 cxclawctl tenant use 123 --env prod --purpose "badcase investigation"
 cxclawctl doctor

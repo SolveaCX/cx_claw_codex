@@ -241,7 +241,7 @@ func remoteTools(ctx context.Context, session *config.Session) ([]tool, error) {
 			Tools []tool `json:"tools"`
 		} `json:"result"`
 	}
-	err := api.New(session).Do(ctx, http.MethodPost, "/codex/v1/mcp", map[string]any{
+	err := api.New(session).Do(ctx, http.MethodPost, "/mcp", map[string]any{
 		"jsonrpc": "2.0", "id": "tools", "method": "tools/list", "params": map[string]any{},
 	}, &rpc, true)
 	return rpc.Result.Tools, err
@@ -249,7 +249,7 @@ func remoteTools(ctx context.Context, session *config.Session) ([]tool, error) {
 
 func remoteCall(ctx context.Context, session *config.Session, name string, arguments map[string]any) (any, error) {
 	var rpc map[string]any
-	err := api.New(session).Do(ctx, http.MethodPost, "/codex/v1/mcp", map[string]any{
+	err := api.New(session).Do(ctx, http.MethodPost, "/mcp", map[string]any{
 		"jsonrpc": "2.0", "id": fmt.Sprintf("call-%d", time.Now().UnixNano()),
 		"method": "tools/call", "params": map[string]any{"name": name, "arguments": arguments},
 	}, &rpc, true)

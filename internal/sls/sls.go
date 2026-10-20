@@ -56,7 +56,7 @@ var concurrency = struct {
 
 func Run(ctx context.Context, appSession *config.Session, query Query) (*Result, error) {
 	var temporary Session
-	if err := api.New(appSession).Do(ctx, http.MethodPost, "/codex/v1/sls/session", map[string]any{}, &temporary, true); err != nil {
+	if err := api.New(appSession).Do(ctx, http.MethodPost, "/sls/session", map[string]any{}, &temporary, true); err != nil {
 		return nil, err
 	}
 	if query.From <= 0 || query.To <= 0 || query.To < query.From ||
