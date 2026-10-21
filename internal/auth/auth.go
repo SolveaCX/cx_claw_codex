@@ -63,7 +63,7 @@ func Login(ctx context.Context, serverURL, channel string, output io.Writer) (*c
 		if err != nil {
 			return nil, err
 		}
-		if status == http.StatusPreconditionRequired {
+		if status == http.StatusPreconditionRequired || envelopeCode(data) == http.StatusPreconditionRequired {
 			continue
 		}
 		if status < 200 || status >= 300 {
@@ -120,6 +120,16 @@ func unwrapEnvelope(data []byte) []byte {
 		}
 	}
 	return data
+}
+
+func envelopeCode(data []byte) int {
+	var envelope struct {
+		Code int `json:"code"`
+	}
+	if json.Unmarshal(data, &envelope) != nil {
+		return 0
+	}
+	return envelope.Code
 }
 
 func Logout(ctx context.Context, session *config.Session) error {
