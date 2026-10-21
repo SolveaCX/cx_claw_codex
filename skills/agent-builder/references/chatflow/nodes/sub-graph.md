@@ -32,7 +32,7 @@
 先查可用 agent：
 
 ```bash
-cxclawctl api list-agents --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-agents --pretty
 ```
 
 ## 限制

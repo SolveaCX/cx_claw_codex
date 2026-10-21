@@ -86,8 +86,8 @@ TOOL 成功后写入的节点输出形态是：
 ## Resource Dependencies
 
 ```bash
-cxclawctl api list-plugins --pretty
-cxclawctl api list-ai-fields --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-plugins --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-ai-fields --pretty
 ```
 
 `--bind-tool-params` 只是辅助，不是业务决策来源：

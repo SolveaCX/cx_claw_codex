@@ -12,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
 LOCK = ROOT / "capabilities.lock.json"
+CLI = "${PLUGIN_ROOT}/bin/cxclaw-launcher"
 GROUPS = [
     "agent-analytics",
     "agent-builder",
@@ -45,31 +46,30 @@ def manifest() -> dict:
         "capabilities": [
             {
                 "name": group,
-                "execution": "hybrid" if group == "shulex-support" else "remote",
+                "execution": "local-cli",
                 "access": "read-write",
-                "confirmation": "server-enforced-for-write",
+                "confirmation": "cli-preview-confirm-commit",
                 "channels": ["dev", "canary"] if group == "runtime-inspector" else ["stable", "canary", "dev"],
                 "tests": ["skill-present", "command-mapping"],
             }
             for group in GROUPS
         ],
-        "localTools": [
-            "cxclaw.auth_status",
-            "cxclaw.tenant_current",
-            "cxclaw.tenant_search",
-            "cxclaw.tenant_use",
-            "cxclaw.sls_query",
-            "cxclaw.file_read",
-            "cxclaw.git_status",
-            "cxclaw.json_format",
+        "localCommands": [
+            f"{CLI} auth status",
+            f"{CLI} tenant current",
+            f"{CLI} tenant search",
+            f"{CLI} tenant use",
+            f"{CLI} sls query",
+            f"{CLI} api",
+            f"{CLI} commands",
+            f"{CLI} schema",
         ],
-        "remoteTools": ["cxclaw.api", "cxclaw.capabilities"],
         "solveaApiCommands": [
             {
                 "name": command,
-                "tool": "cxclaw.api",
-                "execution": "remote",
-                "writeConfirmation": "server-policy",
+                "command": f"{CLI} api {command}",
+                "execution": "local-cli",
+                "writeConfirmation": "cli-policy",
             }
             for command in commands
         ],
@@ -83,8 +83,12 @@ def validate() -> None:
     text = "\n".join(path.read_text(errors="replace") for path in SKILLS.rglob("*") if path.is_file())
     forbidden = [
         "python3 /skill-lib/solvea-api/solvea_api.py",
+        "SOLVEA_INTERNAL_PROXY_BASE_URL",
         "$SOLVEA_INTERNAL_PROXY_BASE_URL/sls/query",
         "/internal/proxy/sls/query",
+        "cxclawctl mcp serve",
+        "solvea-kit` 远程 MCP",
+        "solvea-kit /mcp",
     ]
     found = [item for item in forbidden if item in text]
     if found:

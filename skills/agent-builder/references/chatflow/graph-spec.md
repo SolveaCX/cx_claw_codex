@@ -179,10 +179,10 @@ source JSON 不写 `WAIT` 节点，也不要手动创建 `USER_INPUT` / `AGENT_T
 节点依赖外部资源时，先查询再写 id：
 
 ```bash
-cxclawctl api list-templates --keyword "platform" --pretty
-cxclawctl api list-plugins --pretty
-cxclawctl api list-ai-fields --pretty
-cxclawctl api list-agents --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-templates --keyword "platform" --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-plugins --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-ai-fields --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-agents --pretty
 ```
 
 资源查询口径：

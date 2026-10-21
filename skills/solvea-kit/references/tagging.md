@@ -22,16 +22,16 @@
 ### 标签组
 
 ```bash
-cxclawctl api list-label-groups --pretty
-cxclawctl api list-label-groups --name "Default" --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-label-groups --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-label-groups --name "Default" --pretty
 
-cxclawctl api create-label-group \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api create-label-group \
   --name "售后问题" --pretty
 
-cxclawctl api update-label-group --id <group_id> \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api update-label-group --id <group_id> \
   --data-file /workspace/state/solvea-kit/label_group_update.json --pretty
 
-cxclawctl api delete-label-group --id <group_id> --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-label-group --id <group_id> --pretty
 ```
 
 `update-label-group` 的 data-file 示例：
@@ -48,23 +48,23 @@ cxclawctl api delete-label-group --id <group_id> --pretty
 ### 标签节点
 
 ```bash
-cxclawctl api get-label-tree \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-label-tree \
   --tree-id <tree_id> --pretty
 
-cxclawctl api get-label-tree \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-label-tree \
   --tree-id <tree_id> --name "退款" --pretty
 
-cxclawctl api get-label-detail-tree \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-label-detail-tree \
   --tree-id <tree_id> --node-ids <node_id> --pretty
 
-cxclawctl api create-label-node \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api create-label-node \
   --tree-id <tree_id> --name "退货退款" --content "用户咨询退货、退款、取消订单等售后问题" --pretty
 
-cxclawctl api update-label-node \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api update-label-node \
   --tree-id <tree_id> --id <node_id> \
   --data-file /workspace/state/solvea-kit/label_node_update.json --pretty
 
-cxclawctl api delete-label-node \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-label-node \
   --tree-id <tree_id> --id <node_id> --pretty
 ```
 
@@ -154,7 +154,7 @@ python3 /skills/solvea-kit/scripts/generate_label_import_file.py \
 空标签组初始化：
 
 ```bash
-cxclawctl api upload-labels \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api upload-labels \
   --tree-id <tree_id> \
   --file /workspace/state/solvea-kit/labels_init.xlsx \
   --init --pretty
@@ -163,7 +163,7 @@ cxclawctl api upload-labels \
 已有标签更新：
 
 ```bash
-cxclawctl api upload-labels \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api upload-labels \
   --tree-id <tree_id> \
   --file /workspace/state/solvea-kit/labels_update.xlsx --pretty
 ```
@@ -173,7 +173,7 @@ cxclawctl api upload-labels \
 一般不需要让用户下载模板。只有在核对线上模板变化、排查导入失败，或需要人工离线编辑时才下载。普通场景直接用上面的生成脚本。
 
 ```bash
-cxclawctl api download-label-template \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api download-label-template \
   --template-type update \
   --output /workspace/state/solvea-kit/label_template.xlsx --pretty
 ```
@@ -181,7 +181,7 @@ cxclawctl api download-label-template \
 更新已有标签时，优先先导出现有标签，在导出的 xlsx 上修改：
 
 ```bash
-cxclawctl api download-labels \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api download-labels \
   --tree-id <tree_id> \
   --output /workspace/state/solvea-kit/current_labels.xlsx --pretty
 ```

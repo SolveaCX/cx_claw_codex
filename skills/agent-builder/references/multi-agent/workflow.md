@@ -15,7 +15,7 @@ MULTI_AGENT 是 legacy 形态，不支持新建，因为路由和工具动作分
 1. 如果用户只给 agent_id，先取完整对象：
 
 ```bash
-cxclawctl api get-agent --id <agent_id> --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-agent --id <agent_id> --pretty
 ```
 
 2. 将完整对象保存到：

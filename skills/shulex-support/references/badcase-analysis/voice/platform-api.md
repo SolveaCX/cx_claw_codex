@@ -1,28 +1,23 @@
-# VAPI / Twilio 内部代理接口
+# VAPI / Twilio 平台数据
 
-沙箱不直接调用 VAPI/Twilio CLI，不持有平台 token。所有平台查询都调用主服务内部代理。
+本地插件不持有 VAPI/Twilio 长期凭据。优先通过现有语音会话业务 API 和 SLS 取证。
 
 | 平台 | 用途 | 命令 | 使用时机 |
 |------|------|------|----------|
-| VAPI | call 详情 | `GET /voice/vapi/calls/<callId>` | 已有 VAPI callId 时 |
-| VAPI | call 日志 | `GET /voice/vapi/calls/<callId>/logs` | 需要平台原始事件/错误时 |
-| Twilio | call 详情 | `GET /voice/twilio/calls/<callSid>` | 已有 Twilio callSid 时 |
-| Twilio | 录音列表 | `GET /voice/twilio/calls/<callSid>/recordings` | 需要确认录音/时长时 |
-| Twilio | 事件列表 | `GET /voice/twilio/calls/<callSid>/events` | 需要确认平台事件/错误码时 |
+| 业务平台 | 会话列表 | `${PLUGIN_ROOT}/bin/cxclaw-launcher api list-voice-transcripts` | 按时间、状态缩小范围 |
+| 业务平台 | 会话详情 | `${PLUGIN_ROOT}/bin/cxclaw-launcher api get-voice-transcript --history-id <historyId>` | 查看 transcript 和已落库平台字段 |
+| SLS | provider 日志 | `${PLUGIN_ROOT}/bin/cxclaw-launcher sls query ...` | 按 callId/callSid 补齐原始错误 |
 
 ## 调用示例
 
 ```bash
-curl -sS "$SOLVEA_INTERNAL_PROXY_BASE_URL/voice/vapi/calls/<callId>"
-curl -sS "$SOLVEA_INTERNAL_PROXY_BASE_URL/voice/vapi/calls/<callId>/logs"
-curl -sS "$SOLVEA_INTERNAL_PROXY_BASE_URL/voice/twilio/calls/<callSid>"
-curl -sS "$SOLVEA_INTERNAL_PROXY_BASE_URL/voice/twilio/calls/<callSid>/recordings"
-curl -sS "$SOLVEA_INTERNAL_PROXY_BASE_URL/voice/twilio/calls/<callSid>/events"
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-voice-transcripts --begin-ts <ms> --end-ts <ms> --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-voice-transcript --history-id <historyId> --pretty
 ```
 
 ## 错误处理
 
-- `{"error":"voice proxy config missing"}`：主服务缺平台配置，降级为 SLS + 已知输入排查，不要求用户提供 token。
-- `{"error":"voice upstream request failed"}`：平台接口失败，记录 status/detail，继续用其它证据排查。
+- 业务接口为空：校验环境和时间窗，再按 callId/callSid 查 SLS。
+- SLS 也无结果：记录当前证据边界，结论标为“未确认”。
 
-不要猜表外接口；遇到 404/502 时停止该平台分支，改查 SLS 或向用户要更多标识。
+不要猜测未公开 provider 接口，也不要要求用户提供 VAPI/Twilio token。

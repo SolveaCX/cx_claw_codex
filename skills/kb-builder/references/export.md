@@ -20,7 +20,7 @@
 先读取完整目录树：
 
 ```bash
-cxclawctl api list-directories --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-directories --pretty
 ```
 
 `list-directories` 对应前端接口：
@@ -48,7 +48,7 @@ GET /api_v2/qam/project/{projectId}/directories?keyword=&kuPublished=
 查询知识：
 
 ```bash
-cxclawctl api list-knowledge \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge \
   --type ALL \
   --page-size 1000 \
   --page 1 \
@@ -58,7 +58,7 @@ cxclawctl api list-knowledge \
 指定目录查询：
 
 ```bash
-cxclawctl api list-knowledge \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge \
   --type ALL \
   --directory-id 105809 \
   --page-size 1000 \
@@ -173,7 +173,7 @@ python3 /skills/kb-builder/scripts/export_knowledge.py --all
 脚本内部不会遍历所有目录。它直接不传 `directoryId`，按页拉全量知识：
 
 ```bash
-cxclawctl api list-knowledge --type ALL --page-size 1000 --page 1 --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge --type ALL --page-size 1000 --page 1 --pretty
 ```
 
 第一页读取 `total`，继续翻页直到拉完。
@@ -183,7 +183,7 @@ cxclawctl api list-knowledge --type ALL --page-size 1000 --page 1 --pretty
 脚本内部会先从目录树展开该目录的所有子孙目录 id，包含父目录自身。然后按目录逐个分页拉取：
 
 ```bash
-cxclawctl api list-knowledge \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge \
   --type ALL \
   --directory-id <dir_id> \
   --page-size 1000 \

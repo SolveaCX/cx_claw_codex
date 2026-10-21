@@ -11,7 +11,8 @@
 
 1. 先确认排查对象：默认沿用当前 badcase 上下文；用户显式指定范围时以用户为准。
 2. 先用稳定标识缩小范围：`chatId`、`callId`、`callSid`、`traceId`、电话号码 + 时间段。
-3. SLS、VAPI、Twilio 都通过 `$SOLVEA_INTERNAL_PROXY_BASE_URL` 的内部接口查询，沙箱不持有平台密钥。
+3. SLS 通过本机 `${PLUGIN_ROOT}/bin/cxclaw-launcher sls query` 直查；语音会话通过 `${PLUGIN_ROOT}/bin/cxclaw-launcher api list-voice-transcripts`
+   和 `${PLUGIN_ROOT}/bin/cxclaw-launcher api get-voice-transcript` 查询，客户端不持有 VAPI/Twilio 长期密钥。
 4. 不生成独立语音报告模板；最终按 badcase 回复风格输出。
 5. 不要只凭单一数据源下结论，缺失证据必须说明。
 
@@ -20,8 +21,8 @@
 | 输入 | 优先动作 |
 |------|----------|
 | `chatId` | 查 SLS 定位 callId/callSid/voice trace |
-| VAPI `callId` | 查 VAPI 内部代理 + SLS callId 相关日志 |
-| Twilio `callSid` | 查 Twilio 内部代理 + SLS callSid 相关日志 |
+| VAPI `callId` | 查语音会话详情 + SLS callId 相关日志 |
+| Twilio `callSid` | 查语音会话详情 + SLS callSid 相关日志 |
 | `traceId` / `armsTrace` | 查 SLS 链路日志 |
 | 电话号码 + 时间段 | 先要求用户补充时间窗，再查 SLS/VAPI/Twilio |
 
@@ -33,13 +34,15 @@
 
 优先用 chatId/callId/callSid 做最小时间窗查询。连续 3 次空结果停止扩词，避免无节制查询。
 
-## 3. 查询 VAPI / Twilio 平台数据
+## 3. 查询语音平台数据
 
 读取 `/skills/shulex-support/references/badcase-analysis/voice/platform-api.md`。
 
-- 有 `callId`：优先查 VAPI call 详情和 call logs。
-- 有 `callSid`：优先查 Twilio call 详情、recordings、events。
-- 平台代理返回配置缺失时，不要求用户提供 token；降级为 SLS + 已知输入排查。
+- 先用 `${PLUGIN_ROOT}/bin/cxclaw-launcher api list-voice-transcripts` 缩小范围，再用
+  `${PLUGIN_ROOT}/bin/cxclaw-launcher api get-voice-transcript --history-id <historyId>` 读取详情。
+- 有 `callId` / `callSid` 时同时查 SLS，补齐 provider 原始错误和时间线。
+- 当前本地插件不下发 VAPI/Twilio 长期密钥，也不直接请求 provider 私有 API；产品接口和
+  SLS 都缺少证据时，明确标为“未确认”，不要要求用户粘贴 token。
 
 ## 4. 依赖或配置缺失
 

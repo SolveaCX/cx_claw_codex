@@ -100,10 +100,10 @@
 
 ```bash
 # 按 keyword 检索确认上传成功
-cxclawctl api list-knowledge --keyword "Kasa EP25" --page-size 50 --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge --keyword "Kasa EP25" --page-size 50 --pretty
 
 # 看目录的 kuCount 是否增加
-cxclawctl api list-directories --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-directories --pretty
 ```
 
 ## 已经有合并好的 qa_plan.json 时

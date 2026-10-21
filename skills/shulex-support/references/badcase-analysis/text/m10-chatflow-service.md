@@ -36,7 +36,7 @@ python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py inspect --age
 需要补充 Agent 类型、版本等元信息时，可执行：
 
 ```bash
-cxclawctl api get-agent --id <agentId> --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-agent --id <agentId> --pretty
 ```
 
 关注点：
@@ -168,7 +168,7 @@ JSON graph
 ### graph 入口、加载、执行
 
 ```bash
-cxclawctl sls query \
+${PLUGIN_ROOT}/bin/cxclaw-launcher sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"get_or_load_graph_def" OR rest:"graph_execution_start" OR rest:"graph_execution_finished" OR rest:"graph_execution_error")' \
@@ -178,7 +178,7 @@ cxclawctl sls query \
 ### 通用节点更新、节点输入、节点错误
 
 ```bash
-cxclawctl sls query \
+${PLUGIN_ROOT}/bin/cxclaw-launcher sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"node_update" OR rest:"node_input_build_failed" OR rest:"node error" OR rest:"Unhandled node error" OR rest:"node_cancelled")' \
@@ -188,7 +188,7 @@ cxclawctl sls query \
 ### 节点进入、条件、意图
 
 ```bash
-cxclawctl sls query \
+${PLUGIN_ROOT}/bin/cxclaw-launcher sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"node_enter" OR rest:"evaluate_condition" OR rest:"case_matched" OR rest:"no_case_matched" OR rest:"intent classification" OR rest:"load_intent_list")' \
@@ -198,7 +198,7 @@ cxclawctl sls query \
 ### RAG / KU 节点
 
 ```bash
-cxclawctl sls query \
+${PLUGIN_ROOT}/bin/cxclaw-launcher sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"rag_reply query_from_selector" OR rest:"rag_summary" OR rest:"rag_reply retrieve" OR rest:"retrieve_query" OR rest:"kb_reply retrieve")' \
@@ -208,7 +208,7 @@ cxclawctl sls query \
 ### 工具、Agent 工具、变量
 
 ```bash
-cxclawctl sls query \
+${PLUGIN_ROOT}/bin/cxclaw-launcher sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"tool_node args" OR rest:"tool_node result" OR rest:"tool_node routing" OR rest:"agent_tool_node" OR rest:"tool_executed" OR rest:"selected variable not found" OR rest:"variable extract" OR rest:"variable_assignment" OR rest:"variable_process")' \
@@ -218,7 +218,7 @@ cxclawctl sls query \
 ### 代码、子图、人审、等待
 
 ```bash
-cxclawctl sls query \
+${PLUGIN_ROOT}/bin/cxclaw-launcher sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"code_node" OR rest:"sub_graph" OR rest:"human_review" OR rest:"_user_input" OR rest:"output_handle" OR rest:"enter finish node")' \
@@ -228,7 +228,7 @@ cxclawctl sls query \
 ### fallback / ERROR
 
 ```bash
-cxclawctl sls query \
+${PLUGIN_ROOT}/bin/cxclaw-launcher sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"llm_call_with_fallbacks" OR severity:"ERROR")' \
@@ -238,7 +238,7 @@ cxclawctl sls query \
 如果 `armsTrace` 不可用，用 `chatId`、graphId / runId、接口路径、节点名和时间窗组合查询：
 
 ```bash
-cxclawctl sls query \
+${PLUGIN_ROOT}/bin/cxclaw-launcher sls query \
   --from <begin> \
   --to <end> \
   --query 'rest:"<chatId>" AND (rest:"graph_execution" OR rest:"node_update" OR rest:"node_enter" OR rest:"tool_node")' \

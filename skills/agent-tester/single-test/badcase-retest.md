@@ -7,7 +7,7 @@
 执行：
 
 ```bash
-cxclawctl api get-transcript \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-transcript \
   --chat-id <historicalChatId> \
   --pretty
 ```
@@ -62,7 +62,7 @@ cxclawctl api get-transcript \
 工具完成后，获取结果中的新 ChatId，再执行一次：
 
 ```bash
-cxclawctl api get-transcript \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-transcript \
   --chat-id <newTestChatId> \
   --pretty
 ```

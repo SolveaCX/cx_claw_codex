@@ -9,9 +9,9 @@
   "capabilities": [
     {
       "name": "agent-analytics",
-      "execution": "remote",
+      "execution": "local-cli",
       "access": "read-write",
-      "confirmation": "server-enforced-for-write",
+      "confirmation": "cli-preview-confirm-commit",
       "channels": [
         "stable",
         "canary",
@@ -24,9 +24,9 @@
     },
     {
       "name": "agent-builder",
-      "execution": "remote",
+      "execution": "local-cli",
       "access": "read-write",
-      "confirmation": "server-enforced-for-write",
+      "confirmation": "cli-preview-confirm-commit",
       "channels": [
         "stable",
         "canary",
@@ -39,9 +39,9 @@
     },
     {
       "name": "agent-tester",
-      "execution": "remote",
+      "execution": "local-cli",
       "access": "read-write",
-      "confirmation": "server-enforced-for-write",
+      "confirmation": "cli-preview-confirm-commit",
       "channels": [
         "stable",
         "canary",
@@ -54,9 +54,9 @@
     },
     {
       "name": "delivery",
-      "execution": "remote",
+      "execution": "local-cli",
       "access": "read-write",
-      "confirmation": "server-enforced-for-write",
+      "confirmation": "cli-preview-confirm-commit",
       "channels": [
         "stable",
         "canary",
@@ -69,9 +69,9 @@
     },
     {
       "name": "kb-builder",
-      "execution": "remote",
+      "execution": "local-cli",
       "access": "read-write",
-      "confirmation": "server-enforced-for-write",
+      "confirmation": "cli-preview-confirm-commit",
       "channels": [
         "stable",
         "canary",
@@ -84,9 +84,9 @@
     },
     {
       "name": "poc",
-      "execution": "remote",
+      "execution": "local-cli",
       "access": "read-write",
-      "confirmation": "server-enforced-for-write",
+      "confirmation": "cli-preview-confirm-commit",
       "channels": [
         "stable",
         "canary",
@@ -99,9 +99,9 @@
     },
     {
       "name": "runtime-inspector",
-      "execution": "remote",
+      "execution": "local-cli",
       "access": "read-write",
-      "confirmation": "server-enforced-for-write",
+      "confirmation": "cli-preview-confirm-commit",
       "channels": [
         "dev",
         "canary"
@@ -113,9 +113,9 @@
     },
     {
       "name": "shulex-support",
-      "execution": "hybrid",
+      "execution": "local-cli",
       "access": "read-write",
-      "confirmation": "server-enforced-for-write",
+      "confirmation": "cli-preview-confirm-commit",
       "channels": [
         "stable",
         "canary",
@@ -128,9 +128,9 @@
     },
     {
       "name": "solvea-desk",
-      "execution": "remote",
+      "execution": "local-cli",
       "access": "read-write",
-      "confirmation": "server-enforced-for-write",
+      "confirmation": "cli-preview-confirm-commit",
       "channels": [
         "stable",
         "canary",
@@ -143,9 +143,9 @@
     },
     {
       "name": "solvea-kit",
-      "execution": "remote",
+      "execution": "local-cli",
       "access": "read-write",
-      "confirmation": "server-enforced-for-write",
+      "confirmation": "cli-preview-confirm-commit",
       "channels": [
         "stable",
         "canary",
@@ -157,746 +157,742 @@
       ]
     }
   ],
-  "localTools": [
-    "cxclaw.auth_status",
-    "cxclaw.tenant_current",
-    "cxclaw.tenant_search",
-    "cxclaw.tenant_use",
-    "cxclaw.sls_query",
-    "cxclaw.file_read",
-    "cxclaw.git_status",
-    "cxclaw.json_format"
-  ],
-  "remoteTools": [
-    "cxclaw.api",
-    "cxclaw.capabilities"
+  "localCommands": [
+    "${PLUGIN_ROOT}/bin/cxclaw-launcher auth status",
+    "${PLUGIN_ROOT}/bin/cxclaw-launcher tenant current",
+    "${PLUGIN_ROOT}/bin/cxclaw-launcher tenant search",
+    "${PLUGIN_ROOT}/bin/cxclaw-launcher tenant use",
+    "${PLUGIN_ROOT}/bin/cxclaw-launcher sls query",
+    "${PLUGIN_ROOT}/bin/cxclaw-launcher api",
+    "${PLUGIN_ROOT}/bin/cxclaw-launcher commands",
+    "${PLUGIN_ROOT}/bin/cxclaw-launcher schema"
   ],
   "solveaApiCommands": [
     {
       "name": "batch-update-isolation-keyword-bindings",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api batch-update-isolation-keyword-bindings",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "batch-update-knowledge",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api batch-update-knowledge",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "batch-update-products",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api batch-update-products",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "chat",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api chat",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "chat-async",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api chat-async",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "chat-report-*",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api chat-report-*",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "chat-stream",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api chat-stream",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-agent",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-agent",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-custom-quality-rule",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-custom-quality-rule",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-folder",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-folder",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-intent",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-intent",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-isolation-keyword",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-isolation-keyword",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-label-group",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-label-group",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-label-node",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-label-node",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-managed-ai-field",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-managed-ai-field",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-plugin",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-plugin",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-product-knowledge",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-product-knowledge",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-quality-alert-rule",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-quality-alert-rule",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-strategy",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-strategy",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-template",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api create-template",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-custom-quality-rule",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-custom-quality-rule",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-directory",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-directory",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-isolation-keyword",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-isolation-keyword",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-label-group",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-label-group",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-label-node",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-label-node",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-managed-ai-field",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-managed-ai-field",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-plugin",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-plugin",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-quality-alert-rule",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-quality-alert-rule",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-templates",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-templates",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "download-label-template",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api download-label-template",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "download-labels",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api download-labels",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "edit-knowledge-tags",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api edit-knowledge-tags",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "export-transcripts",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api export-transcripts",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-agent",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-agent",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-ai-field-guide",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-ai-field-guide",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-async-result",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-async-result",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-batch-test-tasks",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-batch-test-tasks",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-chat-context",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-chat-context",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-chatflow-graph",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-chatflow-graph",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-conversations-by-intent",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-conversations-by-intent",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-custom-quality-rule",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-custom-quality-rule",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-export-tasks",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-export-tasks",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-intent",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-intent",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-knowledge",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-knowledge",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-knowledge-isolation-keywords",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-knowledge-isolation-keywords",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-label-detail-tree",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-label-detail-tree",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-label-tree",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-label-tree",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-managed-ai-field",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-managed-ai-field",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-plugin",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-plugin",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-project",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-project",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-quality-alert-message",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-quality-alert-message",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-quality-alert-rule",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-quality-alert-rule",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-quality-rule",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-quality-rule",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-quality-status",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-quality-status",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-transcript",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-transcript",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-voice-transcript",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api get-voice-transcript",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "initialize-ai-fields",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api initialize-ai-fields",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-agent-ai-fields",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-agent-ai-fields",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-agents",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-agents",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-ai-fields",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-ai-fields",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-directories",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-directories",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-entities",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-entities",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-intents",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-intents",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-isolation-keywords",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-isolation-keywords",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-knowledge",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-knowledge-tags",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge-tags",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-label-groups",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-label-groups",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-managed-ai-fields",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-managed-ai-fields",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-plugins",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-plugins",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-quality-alert-messages",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-quality-alert-messages",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-quality-alert-rules",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-quality-alert-rules",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-quality-rules",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-quality-rules",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-strategies",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-strategies",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-templates",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-templates",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-transcripts",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-transcripts",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-voice-agents",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-voice-agents",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-voice-transcripts",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api list-voice-transcripts",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "move-directory",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api move-directory",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "operate-knowledge",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api operate-knowledge",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "query-mock-data",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api query-mock-data",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "replace-mock-data",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api replace-mock-data",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-agent",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api report-agent",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-escalation",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api report-escalation",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-inspection",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api report-inspection",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-intent",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api report-intent",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-knowledge",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api report-knowledge",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-livechat",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api report-livechat",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-livechat-table",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api report-livechat-table",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-message",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api report-message",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-satisfaction",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api report-satisfaction",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-satisfaction-list",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api report-satisfaction-list",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-self-learning",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api report-self-learning",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-transcript",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api report-transcript",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "resolve-transcript-chat-id",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api resolve-transcript-chat-id",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "run-plugin",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api run-plugin",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "set-quality-status",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api set-quality-status",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "submit-batch-test",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api submit-batch-test",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "toggle-intent",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api toggle-intent",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "toggle-managed-ai-field",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api toggle-managed-ai-field",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "toggle-strategy",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api toggle-strategy",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-agent",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-agent",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-chatflow",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-chatflow",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-custom-quality-rule",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-custom-quality-rule",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-directory",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-directory",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-document-content",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-document-content",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-intent",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-intent",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-isolation-keyword",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-isolation-keyword",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-knowledge",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-knowledge",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-label-group",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-label-group",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-label-node",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-label-node",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-managed-ai-field",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-managed-ai-field",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-plugin",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-plugin",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-product-knowledge",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-product-knowledge",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-quality-alert-rule",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-quality-alert-rule",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-quality-rule",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-quality-rule",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-strategy",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-strategy",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-template",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api update-template",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "upload-batch-test-file",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api upload-batch-test-file",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "upload-labels",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api upload-labels",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "upload-qa",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api upload-qa",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     },
     {
       "name": "upload-web",
-      "tool": "cxclaw.api",
-      "execution": "remote",
-      "writeConfirmation": "server-policy"
+      "command": "${PLUGIN_ROOT}/bin/cxclaw-launcher api upload-web",
+      "execution": "local-cli",
+      "writeConfirmation": "cli-policy"
     }
   ]
 }

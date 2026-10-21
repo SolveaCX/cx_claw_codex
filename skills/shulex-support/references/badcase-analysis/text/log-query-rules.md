@@ -1,6 +1,6 @@
 # 日志查询约束
 
-统一证据收集阶段调用 `cxclawctl sls query` 时必须遵守以下规则，避免无节制地查日志。
+统一证据收集阶段调用 `${PLUGIN_ROOT}/bin/cxclaw-launcher sls query` 时必须遵守以下规则，避免无节制地查日志。
 
 ## 硬上限
 

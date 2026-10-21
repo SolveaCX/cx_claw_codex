@@ -5,19 +5,19 @@
 ## 常用命令
 
 ```bash
-cxclawctl api list-plugins --pretty
-cxclawctl api get-plugin --id <tool_id> --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-plugins --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-plugin --id <tool_id> --pretty
 python3 /skills/agent-builder/scripts/tools/validate_tool_config.py \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
-cxclawctl api create-plugin \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api create-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
-cxclawctl api update-plugin \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api update-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
-cxclawctl api run-plugin \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api run-plugin \
   --data-file /workspace/state/agent-builder/run_tool_config.json --pretty
-cxclawctl api replace-mock-data \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api replace-mock-data \
   --name <mock_type> --data-file /workspace/state/agent-builder/mock_records.json --pretty
-cxclawctl api query-mock-data \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api query-mock-data \
   --name <mock_type> --pretty
 ```
 

@@ -40,17 +40,17 @@ Strategy（策略）定义了：当某个条件（意图、触点、实体等）
 ## CLI
 
 ```bash
-cxclawctl api list-entities --pretty
-cxclawctl api list-strategies --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-entities --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-strategies --pretty
 
-cxclawctl api create-strategy \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api create-strategy \
   --data '{"name":"退款路由","trigger":"MESSAGE","condition":{...},"action":{"type":"AGENT","agentId":2270}}'
 
-cxclawctl api update-strategy --id <strategy_id> \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api update-strategy --id <strategy_id> \
   --data-file /workspace/state/solvea-kit/update_strategy.json
 
-cxclawctl api toggle-strategy --id <strategy_id> --enable
-cxclawctl api toggle-strategy --id <strategy_id> --disable
+${PLUGIN_ROOT}/bin/cxclaw-launcher api toggle-strategy --id <strategy_id> --enable
+${PLUGIN_ROOT}/bin/cxclaw-launcher api toggle-strategy --id <strategy_id> --disable
 ```
 
 ## 原则

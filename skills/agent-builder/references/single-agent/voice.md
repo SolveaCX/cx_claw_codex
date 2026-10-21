@@ -37,8 +37,8 @@ Voice Agent 是 `SINGLE_AGENT` 的语音特化：`type` 仍为 `SINGLE_AGENT`，
 ## CLI
 
 ```bash
-cxclawctl api list-voice-agents --pretty
-cxclawctl api create-agent \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-voice-agents --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api create-agent \
   --data-file /workspace/state/agent-builder/voice_agent_payload.json \
   --pretty
 ```

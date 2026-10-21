@@ -75,7 +75,7 @@
 VARIABLE 模式先查变量系统字段：
 
 ```bash
-cxclawctl api list-ai-fields --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-ai-fields --pretty
 ```
 
 ## 限制

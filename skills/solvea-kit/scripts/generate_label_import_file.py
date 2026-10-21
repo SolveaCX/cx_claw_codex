@@ -4,7 +4,7 @@
 This is a solvea-kit workflow helper, not a backend API wrapper. The generated
 xlsx is meant to be passed to:
 
-    cxclawctl api upload-labels --tree-id <id> --file <xlsx>
+    ${PLUGIN_ROOT}/bin/cxclaw-launcher api upload-labels --tree-id <id> --file <xlsx>
 """
 
 import os

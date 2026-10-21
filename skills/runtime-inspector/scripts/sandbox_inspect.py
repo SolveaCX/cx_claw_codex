@@ -9,7 +9,7 @@
   python3 /skills/runtime-inspector/scripts/sandbox_inspect.py --scenario paths   # 虚拟路径行为验证
   python3 /skills/runtime-inspector/scripts/sandbox_inspect.py --scenario deps    # 仅依赖库
 """
-import json, os, sys, argparse, importlib, subprocess
+import json, os, sys, argparse, importlib, subprocess, shutil
 sys.path.insert(0, os.path.join(os.environ["SOLVEA_LIB_DIR"], "skill-runtime"))
 from bootstrap import *
 import json
@@ -118,12 +118,12 @@ def check_env() -> None:
         print(f"  {'✅' if val else '⬜'}  {key}={'(set)' if val else '(not set)'}  {desc}")
 
     print()
-    print("ENV — 内部代理配置")
-    proxy_url = os.environ.get("SOLVEA_INTERNAL_PROXY_BASE_URL", "")
-    if proxy_url:
-        _ok("SOLVEA_INTERNAL_PROXY_BASE_URL", proxy_url)
+    print("CXClaw — 本地 CLI")
+    cli_path = shutil.which("${PLUGIN_ROOT}/bin/cxclaw-launcher")
+    if cli_path:
+        _ok("${PLUGIN_ROOT}/bin/cxclaw-launcher", cli_path)
     else:
-        _info("SOLVEA_INTERNAL_PROXY_BASE_URL", "未注入（shulex-support 会话诊断将无法查询日志）")
+        _fail("${PLUGIN_ROOT}/bin/cxclaw-launcher", "未找到；业务命令和 SLS 直查不可用")
 
     print()
     print("ENV — 安全校验（敏感变量不应泄露）")

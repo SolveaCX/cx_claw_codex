@@ -13,7 +13,7 @@
 ### CLI
 
 ```bash
-cxclawctl api chat -m "你好" --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api chat -m "你好" --pretty
 ```
 
 ---
@@ -25,9 +25,9 @@ cxclawctl api chat -m "你好" --pretty
 ### CLI
 
 ```bash
-cxclawctl api chat -m "你好" --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api chat -m "你好" --pretty
 # 从返回中取 chatId
-cxclawctl api chat -m "继续问" --chat-id <上轮chatId> --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api chat -m "继续问" --chat-id <上轮chatId> --pretty
 ```
 
 ### Python 示例
@@ -50,7 +50,7 @@ r2 = client.chat("继续问", chat_id=chat_id)
 | Badcase 溯源（按轮次） | POST | `/api_v2/gpt/bot/{botId}/chat/context/compare` | 返回检索知识、tool call 详情、最终 answer |
 
 ```bash
-cxclawctl api list-transcripts --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-transcripts --pretty
 ```
 
 Badcase 分析标准流程：
@@ -205,8 +205,8 @@ while True:
 | 轮询导出状态 | POST | `/api_v2/gpt/label/project/{pid}/getLabelTask` | status=SUCCESS 时取 file URL |
 
 ```bash
-cxclawctl api export-transcripts --pretty
-cxclawctl api get-export-tasks --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api export-transcripts --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-export-tasks --pretty
 ```
 
 ### 转化真实数据为测试用例

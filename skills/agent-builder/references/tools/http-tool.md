@@ -15,11 +15,11 @@
 | 根据真实响应构建输出 | POST | `/api_v2/gpt/ap/{projectId}/build/plugin` |
 
 ```bash
-cxclawctl api list-plugins --pretty
-cxclawctl api get-plugin --id <tool_id> --pretty
-cxclawctl api create-plugin \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-plugins --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-plugin --id <tool_id> --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api create-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
-cxclawctl api update-plugin \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api update-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 ```
 
@@ -267,7 +267,7 @@ python3 /skills/agent-builder/scripts/tools/validate_tool_config.py \
 创建完成后：
 
 ```bash
-cxclawctl api get-plugin --id <tool_id> --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-plugin --id <tool_id> --pretty
 ```
 
 以回查结果确认名称、URL、方法、参数树和 `actionStatuses` 已按预期保存。
@@ -304,7 +304,7 @@ cxclawctl api get-plugin --id <tool_id> --pretty
 ```
 
 ```bash
-cxclawctl api run-plugin \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api run-plugin \
   --data-file /workspace/state/agent-builder/run_tool_config.json \
   --pretty
 ```

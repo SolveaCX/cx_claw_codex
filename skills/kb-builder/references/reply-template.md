@@ -20,7 +20,7 @@
 所有命令都走：
 
 ```bash
-cxclawctl api <command> [args]
+${PLUGIN_ROOT}/bin/cxclaw-launcher api <command> [args]
 ```
 
 ### `list-templates`
@@ -37,7 +37,7 @@ cxclawctl api <command> [args]
 | `--pretty` | 否 | 格式化输出，排查时建议加 |
 
 ```bash
-cxclawctl api list-templates \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-templates \
   --keyword "广告" --page-size 20 --pretty
 ```
 
@@ -56,7 +56,7 @@ cxclawctl api list-templates \
 | `--pretty` | 否 | 格式化输出 |
 
 ```bash
-cxclawctl api create-template \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api create-template \
   --name "广告关闭" \
   --content "您好，您可以在APP右下角“我的”里关闭广告。" \
   --status ENABLED \
@@ -93,10 +93,10 @@ cxclawctl api create-template \
 
 ```bash
 # 下架
-cxclawctl api update-template --id 12008 --status DISABLED
+${PLUGIN_ROOT}/bin/cxclaw-launcher api update-template --id 12008 --status DISABLED
 
 # 改名 + 内容
-cxclawctl api update-template \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api update-template \
   --id 12008 --name "转人工" --content "<p>这是转人工的模版文案</p>" --pretty
 ```
 
@@ -117,7 +117,7 @@ cxclawctl api update-template \
 | `--data-file` | 否 | JSON 文件路径 |
 
 ```bash
-cxclawctl api delete-templates --ids 123 124 125 --confirm-delete
+${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-templates --ids 123 124 125 --confirm-delete
 ```
 
 ## 批量导入脚本

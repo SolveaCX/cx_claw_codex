@@ -37,7 +37,7 @@
 1. 批量读取知识及顶层 `tags`：
 
    ```bash
-   cxclawctl api list-knowledge \
+   ${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge \
      --directory-id <directory_id> --type QA --include-tags --page-size 500 --pretty
    ```
 
@@ -45,12 +45,12 @@
 2. 读取项目标签定义：
 
    ```bash
-   cxclawctl api list-knowledge-tags --pretty
+   ${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge-tags --pretty
    ```
 3. 读取隔离关键词文本和真实 ID：
 
    ```bash
-   cxclawctl api \
+   ${PLUGIN_ROOT}/bin/cxclaw-launcher api \
      list-isolation-keywords --all --page-size 500 --pretty
    ```
 4. CX 根据完全一致或语义关系生成中间态映射文件，并按映射生成知识到 `keywordIds` 的绑定计划。

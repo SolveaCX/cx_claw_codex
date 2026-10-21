@@ -7,10 +7,10 @@
 先读取现状。开启或关闭会影响项目后续 Agent 回复的质检行为，必须说明影响并在用户确认后写入：
 
 ```bash
-cxclawctl api get-quality-status --pretty
-cxclawctl api list-quality-rules \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-quality-status --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-quality-rules \
   --begin-ts <epoch_ms> --end-ts <epoch_ms> --pretty
-cxclawctl api set-quality-status --enable --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api set-quality-status --enable --pretty
 ```
 
 关闭时使用 `--disable`。不要修改 GPT 的 Nacos `quality-inspection-gate`；它是平台灰度与消息过滤配置，不是租户可管理的质检开关。
@@ -20,9 +20,9 @@ cxclawctl api set-quality-status --enable --pretty
 先读取规则清单与详情，再展示将要修改的范围、识别/拦截动作、启停状态和适用 Agent。系统规则只能更新，不能删除或更改为自定义规则：
 
 ```bash
-cxclawctl api get-quality-rule \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-quality-rule \
   --inspection-key <rule_key> --pretty
-cxclawctl api update-quality-rule \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api update-quality-rule \
   --data-file /workspace/state/solvea-kit/quality_rule_update.json --pretty
 ```
 
@@ -41,13 +41,13 @@ cxclawctl api update-quality-rule \
 先生成 JSON 并向用户展示，确认后再创建、更新或删除：
 
 ```bash
-cxclawctl api create-custom-quality-rule \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api create-custom-quality-rule \
   --data-file /workspace/state/solvea-kit/custom_quality_rule_create.json --pretty
-cxclawctl api get-custom-quality-rule \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-custom-quality-rule \
   --inspection-key <rule_key> --pretty
-cxclawctl api update-custom-quality-rule \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api update-custom-quality-rule \
   --data-file /workspace/state/solvea-kit/custom_quality_rule_update.json --pretty
-cxclawctl api delete-custom-quality-rule \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-custom-quality-rule \
   --inspection-key <rule_key> --pretty
 ```
 
@@ -58,16 +58,16 @@ cxclawctl api delete-custom-quality-rule \
 预警规则关联一个或多个质检规则，并可配置即时或每日汇总、邮箱或机器人 Webhook 通知。Webhook 和邮箱地址属于敏感配置：展示时脱敏，更新前必须确认。
 
 ```bash
-cxclawctl api list-quality-alert-rules --pretty
-cxclawctl api get-quality-alert-rule --id <alert_id> --pretty
-cxclawctl api create-quality-alert-rule \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-quality-alert-rules --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-quality-alert-rule --id <alert_id> --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api create-quality-alert-rule \
   --data-file /workspace/state/solvea-kit/quality_alert_create.json --pretty
-cxclawctl api update-quality-alert-rule \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api update-quality-alert-rule \
   --data-file /workspace/state/solvea-kit/quality_alert_update.json --pretty
-cxclawctl api delete-quality-alert-rule --id <alert_id> --pretty
-cxclawctl api list-quality-alert-messages \
+${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-quality-alert-rule --id <alert_id> --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api list-quality-alert-messages \
   --data-file /workspace/state/solvea-kit/quality_alert_messages_query.json --pretty
-cxclawctl api get-quality-alert-message --id <message_id> --pretty
+${PLUGIN_ROOT}/bin/cxclaw-launcher api get-quality-alert-message --id <message_id> --pretty
 ```
 
 ## 结果排查边界
