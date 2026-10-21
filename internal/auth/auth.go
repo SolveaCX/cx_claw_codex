@@ -70,7 +70,7 @@ func Login(ctx context.Context, serverURL, channel string, output io.Writer) (*c
 			return nil, fmt.Errorf("device login failed: HTTP %d", status)
 		}
 		var tokens tokenResponse
-		if err := json.Unmarshal(data, &tokens); err != nil {
+		if err := json.Unmarshal(unwrapEnvelope(data), &tokens); err != nil {
 			return nil, err
 		}
 		session.AccessToken = tokens.AccessToken
@@ -103,13 +103,23 @@ func EnsureAccess(ctx context.Context, session *config.Session) error {
 		return fmt.Errorf("refresh failed: HTTP %d", status)
 	}
 	var tokens tokenResponse
-	if err := json.Unmarshal(data, &tokens); err != nil {
+	if err := json.Unmarshal(unwrapEnvelope(data), &tokens); err != nil {
 		return err
 	}
 	session.AccessToken = tokens.AccessToken
 	session.RefreshToken = tokens.RefreshToken
 	session.AccessExpiry = time.Now().Unix() + tokens.ExpiresIn
 	return config.Save(session)
+}
+
+func unwrapEnvelope(data []byte) []byte {
+	var envelope map[string]json.RawMessage
+	if json.Unmarshal(data, &envelope) == nil {
+		if value, ok := envelope["data"]; ok && len(envelope) == 1 {
+			return value
+		}
+	}
+	return data
 }
 
 func Logout(ctx context.Context, session *config.Session) error {

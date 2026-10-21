@@ -9,18 +9,16 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/SolveaCX/cx_claw_codex/internal/api"
 	"github.com/SolveaCX/cx_claw_codex/internal/auth"
 	"github.com/SolveaCX/cx_claw_codex/internal/buildinfo"
+	"github.com/SolveaCX/cx_claw_codex/internal/business"
 	"github.com/SolveaCX/cx_claw_codex/internal/config"
-	"github.com/SolveaCX/cx_claw_codex/internal/mcp"
 	"github.com/SolveaCX/cx_claw_codex/internal/scheduler"
 	slsquery "github.com/SolveaCX/cx_claw_codex/internal/sls"
 	"github.com/SolveaCX/cx_claw_codex/internal/tenant"
@@ -39,40 +37,23 @@ func Run(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.
 			"toolSchemaVersion": buildinfo.ToolSchemaVersion, "serverApiVersion": buildinfo.ServerAPIVersion,
 		})
 	case "login":
-		flags := flag.NewFlagSet("login", flag.ContinueOnError)
-		flags.SetOutput(stderr)
-		server := flags.String("server", "", "solvea-kit base URL")
-		channel := flags.String("channel", "stable", "stable, canary or dev")
-		if err := flags.Parse(args[1:]); err != nil {
-			return err
-		}
-		if *server == "" {
-			return errors.New("--server is required")
-		}
-		session, err := auth.Login(ctx, *server, *channel, stdout)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(stdout, "已登录：%s\n", session.Email)
-		return nil
+		return runLogin(ctx, args[1:], stdout, stderr)
 	case "logout":
-		session, _ := config.Load()
-		if err := auth.Logout(ctx, session); err != nil {
-			return err
-		}
-		fmt.Fprintln(stdout, "已退出登录")
-		return nil
+		return runLogout(ctx, stdout)
+	case "auth":
+		return runAuth(ctx, args[1:], stdout, stderr)
 	case "tenant":
 		return runTenant(ctx, args[1:], stdout, stderr)
+	case "context":
+		return runContext(ctx, args[1:], stdout, stderr)
 	case "sls":
 		return runSLS(ctx, args[1:], stdout, stderr)
 	case "api":
-		return runAPI(ctx, args[1:], stdout)
-	case "mcp":
-		if len(args) == 2 && args[1] == "serve" {
-			return mcp.Serve(ctx, stdin, stdout)
-		}
-		return errors.New("usage: cxclawctl mcp serve")
+		return runAPI(ctx, args[1:], stdin, stdout)
+	case "commands", "capabilities":
+		return printCapabilities(stdout, args[0] == "commands")
+	case "schema":
+		return printSchema(args[1:], stdout)
 	case "doctor":
 		return doctor(args[1:], stdout, stderr)
 	case "update":
@@ -91,6 +72,68 @@ func Run(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.
 	}
 }
 
+func runLogin(ctx context.Context, args []string, stdout, stderr io.Writer) error {
+	flags := flag.NewFlagSet("login", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	server := flags.String("server", "", "shulex-cloud authorization base URL")
+	channel := flags.String("channel", "stable", "stable, canary or dev")
+	if err := flags.Parse(args); err != nil {
+		return err
+	}
+	if *server == "" {
+		return errors.New("--server is required")
+	}
+	session, err := auth.Login(ctx, *server, *channel, stderr)
+	if err != nil {
+		return err
+	}
+	return printJSON(stdout, map[string]any{
+		"ok": true, "employee": map[string]string{"id": session.EmployeeID, "email": session.Email},
+		"channel": session.Channel,
+	})
+}
+
+func runLogout(ctx context.Context, stdout io.Writer) error {
+	session, _ := config.Load()
+	if err := auth.Logout(ctx, session); err != nil {
+		return err
+	}
+	return printJSON(stdout, map[string]any{"ok": true, "loggedOut": true})
+}
+
+func runAuth(ctx context.Context, args []string, stdout, stderr io.Writer) error {
+	if len(args) == 0 {
+		return errors.New("usage: cxclawctl auth login|status|refresh|logout")
+	}
+	switch args[0] {
+	case "login":
+		return runLogin(ctx, args[1:], stdout, stderr)
+	case "logout":
+		return runLogout(ctx, stdout)
+	case "status":
+		session, err := config.Load()
+		if err != nil {
+			return printJSON(stdout, map[string]any{"ok": true, "loggedIn": false})
+		}
+		return printJSON(stdout, map[string]any{
+			"ok": true, "loggedIn": true, "employeeId": session.EmployeeID,
+			"email": session.Email, "accessExpiresAt": session.AccessExpiry, "channel": session.Channel,
+		})
+	case "refresh":
+		session, err := config.Load()
+		if err != nil {
+			return errors.New("未登录，请先运行 cxclawctl auth login")
+		}
+		session.AccessExpiry = 0
+		if err := auth.EnsureAccess(ctx, session); err != nil {
+			return err
+		}
+		return printJSON(stdout, map[string]any{"ok": true, "accessExpiresAt": session.AccessExpiry})
+	default:
+		return fmt.Errorf("unknown auth command: %s", args[0])
+	}
+}
+
 func runTenant(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 {
 		return errors.New("usage: cxclawctl tenant search|use|current")
@@ -101,16 +144,19 @@ func runTenant(ctx context.Context, args []string, stdout, stderr io.Writer) err
 	}
 	switch args[0] {
 	case "current":
-		return printJSON(stdout, session.Tenant)
+		return printJSON(stdout, publicTenant(session.Tenant))
 	case "search":
 		flags := flag.NewFlagSet("tenant search", flag.ContinueOnError)
 		flags.SetOutput(stderr)
-		environment := flags.String("env", "prod", "prod or staging")
+		environment := flags.String("env", "", "test/staging or prod")
 		if err := flags.Parse(args[1:]); err != nil {
 			return err
 		}
 		if flags.NArg() != 1 {
 			return errors.New("tenant search requires one query")
+		}
+		if *environment == "" {
+			return errors.New("--env is required; choose test/staging or prod explicitly")
 		}
 		items, err := tenant.Search(ctx, session, flags.Arg(0), *environment)
 		if err != nil {
@@ -120,13 +166,16 @@ func runTenant(ctx context.Context, args []string, stdout, stderr io.Writer) err
 	case "use":
 		flags := flag.NewFlagSet("tenant use", flag.ContinueOnError)
 		flags.SetOutput(stderr)
-		environment := flags.String("env", "prod", "prod or staging")
+		environment := flags.String("env", "", "test/staging or prod")
 		purpose := flags.String("purpose", "", "access purpose")
 		if err := flags.Parse(args[1:]); err != nil {
 			return err
 		}
 		if flags.NArg() != 1 {
 			return errors.New("tenant use requires one account ID")
+		}
+		if *environment == "" {
+			return errors.New("--env is required; choose test/staging or prod explicitly")
 		}
 		accountID, err := strconv.ParseInt(flags.Arg(0), 10, 64)
 		if err != nil || accountID <= 0 {
@@ -135,9 +184,33 @@ func runTenant(ctx context.Context, args []string, stdout, stderr io.Writer) err
 		if err := tenant.Use(ctx, session, accountID, *environment, *purpose); err != nil {
 			return err
 		}
-		return printJSON(stdout, session.Tenant)
+		return printJSON(stdout, publicTenant(session.Tenant))
 	default:
 		return fmt.Errorf("unknown tenant command: %s", args[0])
+	}
+}
+
+func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) error {
+	if len(args) == 0 {
+		return errors.New("usage: cxclawctl context use|current|clear")
+	}
+	switch args[0] {
+	case "use":
+		return runTenant(ctx, append([]string{"use"}, args[1:]...), stdout, stderr)
+	case "current":
+		return runTenant(ctx, []string{"current"}, stdout, stderr)
+	case "clear":
+		session, err := loadAuthenticated(ctx)
+		if err != nil {
+			return err
+		}
+		session.Tenant = config.Tenant{}
+		if err := config.Save(session); err != nil {
+			return err
+		}
+		return printJSON(stdout, map[string]any{"ok": true, "cleared": true})
+	default:
+		return fmt.Errorf("unknown context command: %s", args[0])
 	}
 }
 
@@ -160,6 +233,9 @@ func runSLS(ctx context.Context, args []string, stdout, stderr io.Writer) error 
 	if err != nil {
 		return err
 	}
+	if err := tenant.Ensure(ctx, session); err != nil {
+		return err
+	}
 	result, err := slsquery.Run(ctx, session, slsquery.Query{
 		From: *from, To: *to, Query: *query, Line: *line, Offset: *offset, Reverse: *reverse,
 	})
@@ -169,7 +245,7 @@ func runSLS(ctx context.Context, args []string, stdout, stderr io.Writer) error 
 	return printJSON(stdout, result)
 }
 
-func runAPI(ctx context.Context, args []string, stdout io.Writer) error {
+func runAPI(ctx context.Context, args []string, stdin io.Reader, stdout io.Writer) error {
 	if len(args) == 0 {
 		return errors.New("usage: cxclawctl api <command> [arguments]")
 	}
@@ -181,50 +257,95 @@ func runAPI(ctx context.Context, args []string, stdout io.Writer) error {
 	commandArgs := make([]string, 0, len(args)-1)
 	confirmation := ""
 	idempotency := ""
-	traceID := ""
+	phase := "execute"
+	confirmationFromStdin := false
 	for index := 1; index < len(args); index++ {
 		switch args[index] {
+		case "--phase":
+			index++
+			if index >= len(args) {
+				return errors.New("--phase requires preview or commit")
+			}
+			phase = args[index]
 		case "--confirmation-token":
 			index++
 			if index >= len(args) {
 				return errors.New("--confirmation-token requires a value")
 			}
 			confirmation = args[index]
+		case "--confirmation-token-stdin":
+			confirmationFromStdin = true
 		case "--idempotency-key":
 			index++
 			if index >= len(args) {
 				return errors.New("--idempotency-key requires a value")
 			}
 			idempotency = args[index]
-		case "--trace-id":
-			index++
-			if index >= len(args) {
-				return errors.New("--trace-id requires a value")
-			}
-			traceID = args[index]
 		default:
 			commandArgs = append(commandArgs, args[index])
 		}
 	}
-	arguments := map[string]any{"command": command, "args": commandArgs}
-	if confirmation != "" {
-		arguments["confirmationToken"] = confirmation
+	if confirmationFromStdin {
+		data, err := io.ReadAll(io.LimitReader(stdin, 16<<10))
+		if err != nil {
+			return err
+		}
+		confirmation = strings.TrimSpace(string(data))
 	}
-	if idempotency != "" {
-		arguments["idempotencyKey"] = idempotency
+	if err := tenant.Ensure(ctx, session); err != nil {
+		return err
 	}
-	if traceID != "" {
-		arguments["traceId"] = traceID
-	}
-	var response any
-	err = api.New(session).Do(ctx, http.MethodPost, "/mcp", map[string]any{
-		"jsonrpc": "2.0", "id": "cli", "method": "tools/call",
-		"params": map[string]any{"name": "cxclaw.api", "arguments": arguments},
-	}, &response, true)
+	requestHash, err := business.RequestHash(command, commandArgs)
 	if err != nil {
 		return err
 	}
-	return printJSON(stdout, response)
+	write := business.IsWrite(command)
+	if write && phase == "preview" {
+		return printJSON(stdout, map[string]any{
+			"ok": true, "phase": "preview", "command": command, "arguments": commandArgs,
+			"requestHash":       requestHash,
+			"confirmationToken": business.ConfirmationToken(session.RefreshToken, requestHash, time.Now()),
+			"expiresIn":         300,
+		})
+	}
+	if write {
+		if phase != "commit" {
+			return errors.New("write command requires --phase preview, then --phase commit after explicit user confirmation")
+		}
+		if confirmation == "" || idempotency == "" {
+			return errors.New("commit requires --confirmation-token-stdin and --idempotency-key")
+		}
+		if err := business.VerifyConfirmation(session.RefreshToken, confirmation, requestHash, time.Now()); err != nil {
+			return err
+		}
+		if record, exists := session.Idempotency[idempotency]; exists {
+			if record.RequestHash != requestHash {
+				return errors.New("idempotency key was already used for a different request")
+			}
+			return printJSON(stdout, map[string]any{
+				"ok": true, "phase": "commit", "alreadyExecuted": true,
+				"idempotencyKey": idempotency, "completedAt": record.CompletedAt,
+			})
+		}
+	}
+	result, err := business.Run(ctx, session, command, commandArgs, stdin)
+	if err != nil {
+		return err
+	}
+	if write {
+		if session.Idempotency == nil {
+			session.Idempotency = map[string]config.IdempotencyRecord{}
+		}
+		pruneIdempotency(session.Idempotency, time.Now().Add(-24*time.Hour).Unix())
+		session.Idempotency[idempotency] = config.IdempotencyRecord{RequestHash: requestHash, CompletedAt: time.Now().Unix()}
+		if err := config.Save(session); err != nil {
+			return err
+		}
+	}
+	return printJSON(stdout, map[string]any{
+		"ok": true, "phase": map[bool]string{true: "commit", false: "execute"}[write],
+		"command": command, "data": result.Value, "verificationRequired": write,
+	})
 }
 
 func runUpdate(ctx context.Context, args []string, stdout, stderr io.Writer) error {
@@ -288,14 +409,16 @@ func doctor(args []string, stdout, stderr io.Writer) error {
 			return err
 		}
 	}
-	required := []string{"plugin.json", "mcp.json", "skills", "capabilities.lock.json"}
+	required := []string{"plugin.json", "skills", "capabilities.lock.json"}
 	for _, item := range required {
 		if _, err := os.Stat(filepath.Join(root, item)); err != nil {
 			return fmt.Errorf("doctor: missing %s", item)
 		}
 	}
-	fmt.Fprintf(stdout, "doctor ok: root=%s cli=%s\n", root, buildinfo.CLIVersion)
-	return nil
+	if err := business.CheckRuntime(context.Background(), root); err != nil {
+		return fmt.Errorf("doctor: %w", err)
+	}
+	return printJSON(stdout, map[string]any{"ok": true, "root": root, "cliVersion": buildinfo.CLIVersion, "python": "available"})
 }
 
 func devLink(args []string, stdout, stderr io.Writer) error {
@@ -364,12 +487,61 @@ func printJSON(output io.Writer, value any) error {
 	return encoder.Encode(value)
 }
 
+func publicTenant(value config.Tenant) map[string]any {
+	return map[string]any{
+		"accountId": value.AccountID, "accountCode": value.AccountCode, "accountName": value.AccountName,
+		"environment": value.Environment, "purpose": value.Purpose, "expiresAt": value.ExpiresAt,
+		"configured": value.AccountID > 0 && value.BusinessToken != "" && value.BusinessURL != "",
+	}
+}
+
+func pruneIdempotency(records map[string]config.IdempotencyRecord, cutoff int64) {
+	for key, record := range records {
+		if record.CompletedAt < cutoff {
+			delete(records, key)
+		}
+	}
+}
+
+func printCapabilities(output io.Writer, commandsOnly bool) error {
+	root, err := updatepkg.Root()
+	if err != nil {
+		return err
+	}
+	data, err := os.ReadFile(filepath.Join(root, "capabilities.lock.json"))
+	if err != nil {
+		return err
+	}
+	var manifest map[string]any
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		return err
+	}
+	if commandsOnly {
+		return printJSON(output, map[string]any{"ok": true, "commands": manifest["solveaApiCommands"]})
+	}
+	return printJSON(output, map[string]any{"ok": true, "manifest": manifest})
+}
+
+func printSchema(args []string, output io.Writer) error {
+	if len(args) != 1 {
+		return errors.New("usage: cxclawctl schema <command>")
+	}
+	return printJSON(output, map[string]any{
+		"ok": true, "command": args[0], "invocation": "cxclawctl api " + args[0] + " [arguments]",
+		"output": "JSON envelope", "write": business.IsWrite(args[0]),
+		"writeFlow": map[string]any{
+			"preview": "--phase preview", "commit": "--phase commit --confirmation-token-stdin --idempotency-key <key>",
+		},
+	})
+}
+
 func usage(output io.Writer) {
 	fmt.Fprintln(output, strings.TrimSpace(`cxclawctl commands:
-  login/logout
+  auth login|status|refresh|logout
   tenant search|use|current
+  context use|current|clear
   sls query
   api <command>
-  mcp serve
+  commands/capabilities/schema
   doctor/update/rollback/dev-link/version`))
 }

@@ -76,6 +76,7 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, out any,
 			return fmt.Errorf("server returned %d: %s", resp.StatusCode, strings.TrimSpace(string(data)))
 		}
 		if out != nil && len(data) > 0 {
+			data = unwrapEnvelope(data)
 			if err := json.Unmarshal(data, out); err != nil {
 				return fmt.Errorf("decode server response: %w", err)
 			}
@@ -83,4 +84,14 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, out any,
 		return nil
 	}
 	return errors.New("request failed")
+}
+
+func unwrapEnvelope(data []byte) []byte {
+	var envelope map[string]json.RawMessage
+	if json.Unmarshal(data, &envelope) == nil {
+		if value, ok := envelope["data"]; ok && len(envelope) == 1 {
+			return value
+		}
+	}
+	return data
 }

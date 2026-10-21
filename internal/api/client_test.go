@@ -10,9 +10,9 @@ import (
 	"github.com/SolveaCX/cx_claw_codex/internal/config"
 )
 
-func TestDoAppendsEndpointToExistingSolveaKitBasePath(t *testing.T) {
+func TestDoAppendsEndpointToExistingAuthorizationBasePath(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		if request.URL.Path != "/api_v2/solvea-kit/tenants/search" {
+		if request.URL.Path != "/api_v2/cloud/tenants/search" {
 			t.Fatalf("unexpected request path: %s", request.URL.Path)
 		}
 		writer.Header().Set("Content-Type", "application/json")
@@ -20,7 +20,7 @@ func TestDoAppendsEndpointToExistingSolveaKitBasePath(t *testing.T) {
 	}))
 	t.Cleanup(server.Close)
 
-	session := &config.Session{ServerURL: server.URL + "/api_v2/solvea-kit"}
+	session := &config.Session{ServerURL: server.URL + "/api_v2/cloud"}
 	var response map[string]any
 	if err := New(session).Do(
 		context.Background(),

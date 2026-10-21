@@ -61,8 +61,8 @@ func Check(ctx context.Context, session *config.Session) (*CheckResponse, error)
 	}
 	var response CheckResponse
 	path := fmt.Sprintf(
-		"/releases/check?channel=%s&currentVersion=%s",
-		channel, buildinfo.PluginVersion,
+		"/releases/check?channel=%s&currentVersion=%s&platform=%s&arch=%s",
+		channel, buildinfo.PluginVersion, runtime.GOOS, runtime.GOARCH,
 	)
 	if err := api.New(session).Do(ctx, http.MethodGet, path, nil, &response, false); err != nil {
 		return nil, err
@@ -344,9 +344,10 @@ func pruneVersions(root string, keep []string) error {
 
 var pluginAssets = []string{
 	"plugin.json",
-	"mcp.json",
 	"capabilities.lock.json",
 	"README.md",
+	"requirements-cli.txt",
+	"python",
 	"skills",
 }
 

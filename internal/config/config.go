@@ -17,24 +17,33 @@ const (
 )
 
 type Tenant struct {
-	AccountID   int64  `json:"accountId"`
-	AccountCode string `json:"accountCode"`
-	AccountName string `json:"accountName"`
-	Environment string `json:"environment"`
-	Purpose     string `json:"purpose"`
-	Context     string `json:"context"`
-	ExpiresAt   int64  `json:"expiresAt"`
+	AccountID     int64  `json:"accountId"`
+	AccountCode   string `json:"accountCode"`
+	AccountName   string `json:"accountName"`
+	Environment   string `json:"environment"`
+	Purpose       string `json:"purpose"`
+	Context       string `json:"context,omitempty"`
+	BusinessToken string `json:"businessToken,omitempty"`
+	BusinessURL   string `json:"businessUrl,omitempty"`
+	SLSURL        string `json:"slsUrl,omitempty"`
+	ExpiresAt     int64  `json:"expiresAt"`
+}
+
+type IdempotencyRecord struct {
+	RequestHash string `json:"requestHash"`
+	CompletedAt int64  `json:"completedAt"`
 }
 
 type Session struct {
-	ServerURL    string `json:"serverUrl"`
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
-	AccessExpiry int64  `json:"accessExpiry"`
-	EmployeeID   string `json:"employeeId"`
-	Email        string `json:"email"`
-	Channel      string `json:"channel"`
-	Tenant       Tenant `json:"tenant"`
+	ServerURL    string                       `json:"serverUrl"`
+	AccessToken  string                       `json:"accessToken"`
+	RefreshToken string                       `json:"refreshToken"`
+	AccessExpiry int64                        `json:"accessExpiry"`
+	EmployeeID   string                       `json:"employeeId"`
+	Email        string                       `json:"email"`
+	Channel      string                       `json:"channel"`
+	Tenant       Tenant                       `json:"tenant"`
+	Idempotency  map[string]IdempotencyRecord `json:"idempotency,omitempty"`
 }
 
 func Load() (*Session, error) {

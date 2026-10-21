@@ -103,7 +103,10 @@ func TestActivateAssetsUpdatesLocalPluginPackage(t *testing.T) {
 		if err := os.MkdirAll(filepath.Join(base, "skills", "demo"), 0o755); err != nil {
 			t.Fatal(err)
 		}
-		for _, name := range []string{"plugin.json", "mcp.json", "capabilities.lock.json", "README.md"} {
+		if err := os.MkdirAll(filepath.Join(base, "python"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		for _, name := range []string{"plugin.json", "capabilities.lock.json", "README.md", "requirements-cli.txt"} {
 			if err := os.WriteFile(filepath.Join(base, name), []byte(base), 0o644); err != nil {
 				t.Fatal(err)
 			}

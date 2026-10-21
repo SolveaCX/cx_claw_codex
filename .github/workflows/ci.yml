@@ -42,6 +42,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.23.x"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Build
         env:
           GOOS: ${{ matrix.goos }}
@@ -53,12 +56,17 @@ jobs:
           LDFLAGS="-s -w -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.PluginVersion=$VERSION -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.CLIVersion=$VERSION -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.UpdatePublicKeyBase64=${{ vars.CXCLAW_UPDATE_PUBLIC_KEY_BASE64 }}"
           go build -trimpath -ldflags "$LDFLAGS" -o "dist/package/bin/cxclawctl${{ matrix.suffix }}" ./cmd/cxclawctl
           go build -trimpath -ldflags "$LDFLAGS" -o "dist/package/bin/cxclaw-launcher${{ matrix.suffix }}" ./cmd/cxclaw-launcher
-          cp -R plugin.json mcp.json capabilities.lock.json README.md skills dist/package/
+          BOOTSTRAP_LDFLAGS="-s -w -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.PluginVersion=bootstrap -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.CLIVersion=$VERSION -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.UpdatePublicKeyBase64=${{ vars.CXCLAW_UPDATE_PUBLIC_KEY_BASE64 }}"
+          go build -trimpath -ldflags "$BOOTSTRAP_LDFLAGS" -o "dist/cxclaw-bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}" ./cmd/cxclaw-bootstrap
+          python -m pip install --disable-pip-version-check --no-compile --target dist/package/python -r requirements-cli.txt
+          cp -R plugin.json capabilities.lock.json README.md requirements-cli.txt skills dist/package/
           cd dist/package && zip -qr "../cxclaw-${VERSION}-${{ matrix.goos }}-${{ matrix.goarch }}.zip" .
       - uses: actions/upload-artifact@v4
         with:
           name: cxclaw-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/*.zip
+          path: |
+            dist/*.zip
+            dist/cxclaw-bootstrap-*
 
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
