@@ -6,26 +6,26 @@
 
 ## 单轮检查
 
-`sandbox_inspect.py` 支持全量或单项 scenario：
+`runtime sandbox` 支持全量或单项 scenario：
 
 ```bash
 # 全量（默认，等价于 --scenario all）
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/sandbox_inspect.py
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime sandbox
 
 # 仅环境变量注入与安全校验
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario env
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime sandbox --scenario env
 
 # 仅目录结构与读写权限
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario fs
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime sandbox --scenario fs
 
 # 仅 bash 执行路径行为（CWD、$WORKSPACE_DIR、相对路径写文件）
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario execute
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime sandbox --scenario execute
 
 # 仅虚拟路径行为（bash/Python 路径映射对齐）
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario paths
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime sandbox --scenario paths
 
 # 仅依赖库可用性
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario deps
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime sandbox --scenario deps
 ```
 
 ### 各 scenario 检查内容
@@ -45,7 +45,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/sand
 单独验证沙箱内能否通过 internal proxy 调用 Claude，不依赖 sandbox_inspect 全量：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/test_claude_proxy.py
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime sandbox --scenario claude_proxy
 ```
 
 打印 `ANTHROPIC_BASE_URL`、实际发一条 haiku 请求，输出 `PASS model=... in=... out=... elapsed=...s` 或 `FAIL error=...`。
@@ -55,7 +55,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/test
 验证沙箱内能否通过 internal proxy 调用 OpenAI-compatible 模型：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/test_openai_proxy.py
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime sandbox --scenario openai_proxy
 ```
 
 模型由主服务的 Nacos 配置统一决定。输出 `PASS model=...` 表示代理与模型权限均正常。
@@ -72,22 +72,22 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/test
 
 ```bash
 # 有用户文件
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/prepare.py --source /mounted/chat-files/user/{文件名}
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime prepare --source /mounted/chat-files/user/{文件名}
 
 # 无用户文件（自动生成测试数据）
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/prepare.py
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime prepare
 ```
 
 #### 步骤 2 — 处理并写入
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/process.py
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime process
 ```
 
 #### 步骤 3 — 确认写入正常
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario fs
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime sandbox --scenario fs
 ```
 
 确认 `workspace/outputs/` 和 `workspace/state/` 均 ✅ 可写且有文件。
@@ -99,7 +99,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/sand
 #### 步骤 A — 跑断言脚本（直接验证 eager 还原）
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/verify_persistence.py
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime verify
 ```
 
 脚本直接用 `Path.read_text()` 读 `OUTPUTS_DIR.glob("results_*.json")` 和 `STATE_DIR / "inspect.json"`，**全程不调用 `read_file` 工具**。
@@ -112,10 +112,10 @@ eager 模型保障：上一轮写入 `workspace/outputs/` 和 `workspace/state/`
 #### 步骤 B — 全量检查（可选）
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario fs
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime sandbox --scenario fs
 ```
 
-`fs` scenario 中"上一轮 agent outputs"项会显示 `workspace/outputs/runtime-inspector/` 下文件数量，可肉眼对照第一轮的 process.py 输出。
+`fs` scenario 中"上一轮 agent outputs"项会显示 `workspace/outputs/runtime-inspector/` 下文件数量，可肉眼对照第一轮的 `runtime process` 输出。
 
 ---
 
