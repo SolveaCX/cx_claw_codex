@@ -2,6 +2,8 @@
 
 内部员工使用的 CXClaw Codex 插件。Codex 通过 skills 直接执行本地 `npx --yes cxclaw@latest`；CLI 提供 CXClaw 业务 command、租户切换、SLS 直查和自动更新，不启动本地 MCP，也不访问 `solvea-kit`。
 
+运行要求：Node.js 22+、Python 3.12 和已安装的 Codex CLI。
+
 首次安装可直接使用公开 GitHub Marketplace：
 
 ```bash
