@@ -180,11 +180,11 @@ bun run check:capabilities
 
 ## 发布
 
-发布前必须同步修改以下文件中的版本号：
+使用版本准备脚本同步修改 npm、插件清单和能力清单中的版本：
 
-- `package.json`
-- `plugin.json`
-- `.codex-plugin/plugin.json`
+```bash
+bun run release:prepare <版本号>
+```
 
 版本规则：
 
@@ -192,7 +192,18 @@ bun run check:capabilities
 - `vX.Y.Z-canary.N` 发布到 `canary`
 - `vX.Y.Z-dev.N` 发布到 `dev`
 
-推送 tag 后，GitHub Actions 会执行测试、构建 npm 包、生成插件 ZIP、创建 GitHub Release，并在全部步骤成功后推进对应的 `marketplace/<channel>` 分支。npm 发布需要仓库 Secret `NPM_TOKEN`；未配置时流水线会跳过 npm 发布，此时新版本 CLI 不会进入 npm registry。
+稳定版必须在 `release/vX.Y.Z` 分支准备版本并创建 PR。PR 经过评审并合入 `main` 后，GitHub Actions 才会创建 tag 和发布。不要直接推送稳定版 tag。
+
+`canary` 和 `dev` 预发布版在通过 CI 的提交上推送对应 tag 后发布：
+
+```bash
+git push origin vX.Y.Z-canary.N
+git push origin vX.Y.Z-dev.N
+```
+
+发布流水线会固定到触发发布的 Git commit，并依次执行测试、构建、能力校验、npm 发布、GitHub Release 和 Marketplace 通道推进。只有前一步成功才会执行下一步；npm 包未发布时不会推进 `marketplace/<channel>`。
+
+npm 发布需要在 GitHub 的 `npm-publish` Environment 或仓库中配置 Secret `NPM_TOKEN`。缺少凭据会让发布失败，不会跳过。
 
 发布产物包括：
 

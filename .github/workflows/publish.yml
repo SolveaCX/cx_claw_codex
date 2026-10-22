@@ -1,0 +1,175 @@
+name: Publish
+
+permissions: {}
+
+on:
+  push:
+    tags:
+      - "v*-*"
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+concurrency:
+  group: publish-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish npm, GitHub Release and Marketplace
+    if: >-
+      github.event_name == 'push' ||
+      (github.event.pull_request.merged == true &&
+       startsWith(github.event.pull_request.head.ref, 'release/v'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: npm-publish
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      EXPECTED_RELEASE_SHA: >-
+        ${{ github.event_name == 'pull_request'
+            && github.event.pull_request.merge_commit_sha
+            || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ env.EXPECTED_RELEASE_SHA }}
+
+      - name: Verify immutable release checkout
+        run: |
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          EXPECTED_SHA="$(git rev-parse "${EXPECTED_RELEASE_SHA}^{commit}")"
+          if [[ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]]; then
+            echo "::error::Expected release commit $EXPECTED_SHA, checked out $ACTUAL_SHA"
+            exit 1
+          fi
+
+      - name: Resolve release version and channel
+        id: release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="${PR_HEAD_REF#release/v}"
+          fi
+
+          if [[ "$VERSION" == *-canary.* ]]; then
+            CHANNEL="canary"
+          elif [[ "$VERSION" == *-dev.* ]]; then
+            CHANNEL="dev"
+          else
+            CHANNEL="stable"
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "channel=$CHANNEL" >> "$GITHUB_OUTPUT"
+          if [[ "$CHANNEL" == "stable" ]]; then
+            echo "dist_tag=latest" >> "$GITHUB_OUTPUT"
+          else
+            echo "dist_tag=$CHANNEL" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: oven-sh/setup-bun@v2
+        with: {bun-version: "1.3.13"}
+
+      - name: Validate release channel
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+          CHANNEL: ${{ steps.release.outputs.channel }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: bun scripts/validate-release-channel.ts
+
+      - name: Create stable release tag
+        if: github.event_name == 'pull_request'
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          TAG="v${VERSION}"
+          EXPECTED_SHA="$(git rev-parse HEAD)"
+
+          verify_remote_tag() {
+            git fetch --force --no-tags origin "+refs/tags/$TAG:refs/tags/$TAG"
+            ACTUAL_SHA="$(git rev-parse "refs/tags/$TAG^{commit}")"
+            if [[ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]]; then
+              echo "::error::Release tag $TAG points to $ACTUAL_SHA, expected $EXPECTED_SHA"
+              exit 1
+            fi
+            echo "Release tag $TAG already exists at the expected commit"
+          }
+
+          if [[ -n "$(git ls-remote --refs origin "refs/tags/$TAG")" ]]; then
+            verify_remote_tag
+          else
+            git tag --no-sign "$TAG" "$EXPECTED_SHA"
+            if ! git push origin "refs/tags/$TAG"; then
+              git tag -d "$TAG"
+              verify_remote_tag
+            fi
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          registry-url: https://registry.npmjs.org
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun test
+      - run: bun run build
+      - run: bun run check:capabilities
+      - run: bun run check:release
+      - run: bun run package:agent-plugin
+      - run: bun run package:codex-plugin
+
+      - name: Publish npm package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION: ${{ steps.release.outputs.version }}
+          DIST_TAG: ${{ steps.release.outputs.dist_tag }}
+        run: |
+          if [[ -z "$NODE_AUTH_TOKEN" ]]; then
+            echo "::error::NPM_TOKEN is not configured"
+            exit 1
+          fi
+
+          if npm view "cxclaw@${VERSION}" version >/dev/null 2>&1; then
+            echo "cxclaw@${VERSION} is already published; skipping npm publish"
+          else
+            npm publish --access public --tag "$DIST_TAG"
+          fi
+          npm dist-tag add "cxclaw@${VERSION}" "$DIST_TAG"
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.release.outputs.version }}
+          CHANNEL: ${{ steps.release.outputs.channel }}
+        run: |
+          ASSETS=(
+            dist/cxclaw-agent-plugin.zip
+            dist/cxclaw-agent-plugin.json
+            dist/cxclaw-agent-plugin.sha256
+            dist/cxclaw-codex-plugin.zip
+          )
+          if gh release view "v${VERSION}" >/dev/null 2>&1; then
+            gh release upload "v${VERSION}" "${ASSETS[@]}" --clobber
+          else
+            FLAGS=(--title "CXClaw ${VERSION}" --generate-notes)
+            if [[ "$CHANNEL" != "stable" ]]; then
+              FLAGS+=(--prerelease)
+            fi
+            gh release create "v${VERSION}" "${ASSETS[@]}" "${FLAGS[@]}"
+          fi
+
+      - name: Advance Marketplace channel
+        env:
+          CHANNEL: ${{ steps.release.outputs.channel }}
+        run: git push origin "HEAD:refs/heads/marketplace/${CHANNEL}" --force

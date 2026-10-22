@@ -35,11 +35,12 @@ def command_inventory() -> list[str]:
 
 def manifest() -> dict:
     commands = command_inventory()
+    version = json.loads((ROOT / "package.json").read_text())["version"]
     return {
         "schemaVersion": 1,
         "plugin": {
-            "pluginVersion": "0.1.0",
-            "cliVersion": "0.1.0",
+            "pluginVersion": version,
+            "cliVersion": version,
             "toolSchemaVersion": "1",
             "serverApiVersion": "1",
         },

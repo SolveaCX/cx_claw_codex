@@ -12,6 +12,7 @@
     "test": "bun test",
     "check:capabilities": "python3 scripts/check_capabilities.py",
     "check:release": "tsx scripts/check-release.ts",
+    "release:prepare": "tsx scripts/prepare-release.ts",
     "package:agent-plugin": "node scripts/package-agent-plugin.mjs",
     "package:codex-plugin": "node scripts/package-codex-plugin.mjs"
   },
