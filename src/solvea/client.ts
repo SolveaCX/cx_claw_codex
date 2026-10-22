@@ -20,7 +20,7 @@ export class SolveaClient {
   private get baseUrl() { return this.session.tenant!.businessUrl!.replace(/\/$/, ""); }
   private get env() { return this.session.tenant!.environment; }
 
-  private async request<T>(method: string, path: string, body?: unknown, query?: Record<string, string | number | boolean>): Promise<T> {
+  async request<T>(method: string, path: string, body?: unknown, query?: Record<string, string | number | boolean>): Promise<T> {
     const url = new URL(`${this.baseUrl}${path}`);
     for (const [key, value] of Object.entries(query ?? {})) url.searchParams.set(key, String(value));
     const cookie = this.env === "prod" ? "_token" : "_token_staging";
@@ -66,6 +66,10 @@ export class SolveaClient {
   private async get<T>(path: string, query?: Record<string, string | number | boolean>) { return this.request<T>("GET", path, undefined, query); }
   private async put<T>(path: string, body: unknown) { return this.request<T>("PUT", path, body); }
 
+  async rawCall<T = unknown>(method: string, path: string, body?: unknown, query?: Record<string, string | number | boolean>) {
+    return this.request<T>(method, path, body, query);
+  }
+
   private safePathSegment(value: string, name: string) {
     if (!value || value === "." || value === ".." || /[\\/?#%\u0000-\u001f\u007f]/.test(value)) {
       throw new Error(`${name} must be a safe non-empty path segment`);
@@ -90,6 +94,13 @@ export class SolveaClient {
   async getChatflowGraph(id: string) { return this.post("/api_v2/gpt/chatflow/queryGraph/latest", { agentId: Number(id) }); }
   async createAgent(data: JsonObject) { return this.post("/api_v2/gpt/ap/createAgent", { projectId: Number(await this.projectId()), ...data }); }
   async updateAgent(data: JsonObject) { return this.post("/api_v2/gpt/ap/updateAgent", data); }
+  async updateChatflow(agentId: string, graph: JsonObject, publish = false) {
+    const current = await this.getAgent(agentId);
+    const agent = Array.isArray(current) ? current[0] as JsonObject : current as JsonObject;
+    if (!agent || agent.type !== "CHAT_FLOW") throw new Error(`Agent ${agentId} is not CHAT_FLOW`);
+    const payload = { ...agent, agentId: agent.id ?? Number(agentId), meta: { ...(agent.meta as JsonObject ?? {}), chatFlowGraph: graph } };
+    return this.updateAgent({ ...payload, ...(publish ? { publish: true } : {}) });
+  }
 
   async listPlugins() { return this.post("/api_v2/gpt/ap/queryPlugin", { projectId: Number(await this.projectId()), needRelation: false }); }
   async getPlugin(id: string) { return this.post("/api_v2/gpt/ap/queryPlugin", { projectId: Number(await this.projectId()), pluginId: Number(id), convertStrategyV5: true }); }
@@ -172,6 +183,7 @@ export class SolveaClient {
   }
 
   private get qamPrefix() { return this.env === "prod" ? "/api_v2/qam" : "/sns_v1"; }
+  get qamPath() { return this.qamPrefix; }
   async listKnowledge(data: JsonObject) { return this.post(`${this.qamPrefix}/project/${await this.projectId()}/getKnowledge`, { type: "ALL", pageIndex: 1, pageSize: 50, keyword: "", ...data }); }
   async getKnowledge(id: string) { return this.get(`${this.qamPrefix}/project/${await this.projectId()}/ku/${encodeURIComponent(id)}`); }
   async updateKnowledge(id: string, data: JsonObject) { return this.request("PUT", `${this.qamPrefix}/project/${await this.projectId()}/ku`, { ...data, kuId: Number(id) }); }
@@ -184,5 +196,13 @@ export class SolveaClient {
 
   async transcript(chatId: string) { return this.get(`/api_v2/gpt/project/${await this.projectId()}/transcript/${encodeURIComponent(chatId)}`, { isCompare: true }); }
   async listTranscripts(data: JsonObject) { return this.post(`/api_v2/gpt/project/${await this.projectId()}/transcripts/filter`, data); }
+  async resolveTranscriptChatId(externalId: string, pageSize = 10) {
+    const result = await this.listTranscripts({ pageSize, pageIndex: 1, debug: false, keyword: externalId });
+    const rows = Array.isArray(result) ? result : (result as JsonObject)?.list;
+    const items = Array.isArray(rows) ? rows.filter(row => row && typeof row === "object") as JsonObject[] : [];
+    const exact = items.filter(row => String(row.externId ?? row.externalId ?? row.external_id ?? "") === externalId);
+    const matches = (exact.length ? exact : items).map(row => ({ chatId: row.chatId ?? row.id, externalId: row.externId ?? row.externalId ?? row.external_id, agentName: row.agentName ?? "", touchPoint: row.touchPoint ?? row.touchpoint ?? "", createdAt: row.createdAt ?? "" }));
+    return { externalId, chatId: exact.length || matches.length === 1 ? matches[0]?.chatId ?? null : null, matchedBy: exact.length ? "exactExternalId" : "keyword", matches };
+  }
   async chatContext(botId: string, data: JsonObject) { return this.post(`/api_v2/gpt/bot/${encodeURIComponent(botId)}/chat/context/compare`, data); }
 }

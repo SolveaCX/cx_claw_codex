@@ -8,7 +8,7 @@ describe("native Solvea command registry", () => {
     expect(isNativeSolveaCommand("list-managed-ai-fields")).toBe(true);
     expect(isNativeSolveaCommand("create-quality-alert-rule")).toBe(true);
     expect(isNativeSolveaCommand("delete-templates")).toBe(true);
-    expect(isNativeSolveaCommand("list-voice-agents")).toBe(false);
+    expect(isNativeSolveaCommand("list-voice-agents")).toBe(true);
     expect(isNativeSolveaCommand("unknown-command")).toBe(false);
   });
 });
