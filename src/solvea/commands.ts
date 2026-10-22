@@ -42,6 +42,24 @@ export async function runSolveaCommand(session: Session, command: string, args: 
     case "create-strategy": return client.createStrategy(await data(args));
     case "update-strategy": return client.updateStrategy(id(), await data(args));
     case "toggle-strategy": return client.toggleStrategy(id(), !flag(args, "--disable"));
+    case "get-quality-status": return client.qualityStatus();
+    case "set-quality-status": return client.setQualityStatus(!flag(args, "--disable"));
+    case "list-quality-rules": return client.qualityRules(Number(option(args, "--begin-ts") ?? 0) || undefined, Number(option(args, "--end-ts") ?? 0) || undefined);
+    case "get-quality-rule": return client.qualityRule(option(args, "--inspection-key", true)!);
+    case "update-quality-rule": return client.updateQualityRule(await data(args));
+    case "get-custom-quality-rule": return client.customQualityRule(option(args, "--inspection-key", true)!);
+    case "create-custom-quality-rule": return client.createCustomQualityRule(await data(args));
+    case "update-custom-quality-rule": return client.updateCustomQualityRule(await data(args));
+    case "delete-custom-quality-rule": return client.deleteCustomQualityRule(option(args, "--inspection-key", true)!);
+    case "list-knowledge": return client.listKnowledge(await optionalData(args));
+    case "get-knowledge": return client.getKnowledge(id());
+    case "update-knowledge": return client.updateKnowledge(id(), await data(args));
+    case "upload-qa": return client.uploadQa((await data(args)).items as unknown[]);
+    case "list-directories": return client.listDirectories();
+    case "create-folder": return client.createFolder(option(args, "--name", true)!, Number(option(args, "--parent-id") ?? 0));
+    case "update-directory": return client.updateDirectory(id(), await data(args));
+    case "delete-directory": return client.deleteDirectory(id());
+    case "list-knowledge-tags": return client.knowledgeTags(option(args, "--keyword") ?? "");
     case "get-transcript": return client.transcript(option(args, "--chat-id", true)!);
     case "list-transcripts": return client.listTranscripts(await data(args));
     case "get-chat-context": return client.chatContext(option(args, "--bot-id", true)!, await data(args));
@@ -60,6 +78,10 @@ export function isNativeSolveaCommand(command: string) {
     "list-plugins", "get-plugin", "create-plugin", "update-plugin", "delete-plugin", "chat", "chat-async",
     "get-async-result", "list-intents", "get-intent", "create-intent", "update-intent", "toggle-intent",
     "list-entities", "list-strategies", "create-strategy", "update-strategy", "toggle-strategy",
-    "get-transcript", "list-transcripts", "get-chat-context",
+    "get-transcript", "list-transcripts", "get-chat-context", "get-quality-status", "set-quality-status",
+    "list-quality-rules", "get-quality-rule", "update-quality-rule", "get-custom-quality-rule",
+    "create-custom-quality-rule", "update-custom-quality-rule", "delete-custom-quality-rule",
+    "list-knowledge", "get-knowledge", "update-knowledge", "upload-qa", "list-directories",
+    "create-folder", "update-directory", "delete-directory", "list-knowledge-tags",
   ]).has(command);
 }

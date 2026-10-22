@@ -106,6 +106,27 @@ export class SolveaClient {
   async updateStrategy(id: string, data: JsonObject) { return this.request("PUT", `/api_v2/gpt/project/${await this.projectId()}/strategy/${encodeURIComponent(id)}`, data); }
   async toggleStrategy(id: string, enabled: boolean) { return this.request("PUT", `/api_v2/gpt/project/${await this.projectId()}/strategy/${encodeURIComponent(id)}/status`, { status: enabled ? "ENABLED" : "DISABLED" }); }
 
+  async qualityStatus() { return this.get("/api_v2/intelli/inspection/ticket/status"); }
+  async setQualityStatus(enabled: boolean) { return this.post("/api_v2/intelli/inspection/ticket/open", { open: enabled, projectId: Number(await this.projectId()) }); }
+  async qualityRules(beginTimestamp?: number, endTimestamp?: number) { return this.get("/api_v2/intelli/inspection/ticket/rules", { ...(beginTimestamp === undefined ? {} : { beginTimestamp }), ...(endTimestamp === undefined ? {} : { endTimestamp }) }); }
+  async qualityRule(key: string) { return this.get("/api_v2/intelli/inspection/ticket/rules/detail", { inspectionKey: key }); }
+  async updateQualityRule(data: JsonObject) { return this.post("/api_v2/intelli/inspection/ticket/rules", data); }
+  async customQualityRule(key: string) { return this.post("/api_v2/intelli/inspection/ticket/customRules/detail", { inspectionKey: key }); }
+  async createCustomQualityRule(data: JsonObject) { return this.post("/api_v2/intelli/inspection/ticket/customRules/create", data); }
+  async updateCustomQualityRule(data: JsonObject) { return this.post("/api_v2/intelli/inspection/ticket/customRules/update", data); }
+  async deleteCustomQualityRule(key: string) { return this.post("/api_v2/intelli/inspection/ticket/customRules/delete", { inspectionKey: key }); }
+
+  private get qamPrefix() { return this.env === "prod" ? "/api_v2/qam" : "/sns_v1"; }
+  async listKnowledge(data: JsonObject) { return this.post(`${this.qamPrefix}/project/${await this.projectId()}/getKnowledge`, { type: "ALL", pageIndex: 1, pageSize: 50, keyword: "", ...data }); }
+  async getKnowledge(id: string) { return this.get(`${this.qamPrefix}/project/${await this.projectId()}/ku/${encodeURIComponent(id)}`); }
+  async updateKnowledge(id: string, data: JsonObject) { return this.request("PUT", `${this.qamPrefix}/project/${await this.projectId()}/ku`, { ...data, kuId: Number(id) }); }
+  async uploadQa(items: unknown[]) { return this.post(`${this.qamPrefix}/project/${await this.projectId()}/kus`, items); }
+  async listDirectories() { return this.get(`${this.qamPrefix}/project/${await this.projectId()}/directories`, { keyword: "", kuPublished: "" }); }
+  async createFolder(name: string, parentId = 0) { return this.post(`${this.qamPrefix}/project/${await this.projectId()}/directory`, { name, parentId, type: "GENERIC" }); }
+  async updateDirectory(id: string, data: JsonObject) { return this.request("PUT", `${this.qamPrefix}/project/${await this.projectId()}/directory/${encodeURIComponent(id)}`, data); }
+  async deleteDirectory(id: string) { return this.request("DELETE", `${this.qamPrefix}/project/${await this.projectId()}/directory/${encodeURIComponent(id)}`); }
+  async knowledgeTags(keyword = "") { return this.get(`${this.qamPrefix}/project/${await this.projectId()}/searchKeywordAndIntents`, { keyword }); }
+
   async transcript(chatId: string) { return this.get(`/api_v2/gpt/project/${await this.projectId()}/transcript/${encodeURIComponent(chatId)}`, { isCompare: true }); }
   async listTranscripts(data: JsonObject) { return this.post(`/api_v2/gpt/project/${await this.projectId()}/transcripts/filter`, data); }
   async chatContext(botId: string, data: JsonObject) { return this.post(`/api_v2/gpt/bot/${encodeURIComponent(botId)}/chat/context/compare`, data); }
