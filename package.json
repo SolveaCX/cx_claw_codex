@@ -9,7 +9,8 @@
   "files": [
     "bin",
     "dist/cli.js",
-    "dist/cli.js.map"
+    "dist/cli.js.map",
+    "capabilities.lock.json"
   ],
   "scripts": {
     "build": "tsup",
