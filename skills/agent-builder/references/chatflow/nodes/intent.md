@@ -60,7 +60,7 @@ INTENT 是业务分类路由节点，等价于“把客户表达归入有限客�
 如要复用已有意图，先查意图：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-intents --pretty
+npx --yes cxclaw@latest api list-intents --pretty
 ```
 
 ## 限制

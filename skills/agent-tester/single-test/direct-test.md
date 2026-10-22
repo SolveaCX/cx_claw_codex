@@ -3,7 +3,7 @@
 用户只给 Agent 名称时，先查询并精确匹配：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-agents --pretty
+npx --yes cxclaw@latest api list-agents --pretty
 ```
 
 默认使用定位的 `agentId`、当前 Bot ID、`LIVE_CHAT` 和当前用户草稿。用户说“随便测一下”但未给问题时，使用“你好，请介绍一下你可以帮助我处理哪些问题？”。

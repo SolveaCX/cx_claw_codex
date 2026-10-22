@@ -15,7 +15,7 @@ GET /api_v2/gpt/accounts/apikey
 ## Patch 已复制 Agent 的工具
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/patch_agent_tools.py \
+npx --yes cxclaw@latest script skills/agent-builder/scripts/patch_agent_tools.py \
   --agent-id <agent_id> \
   --tool-name new_Order_information_product \
   --tool-name new_Order_information_FBA \

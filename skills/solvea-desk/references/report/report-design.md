@@ -175,7 +175,7 @@ The renderer outputs this structure:
 Use the renderer:
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/solvea-desk/scripts/report/render_report.py \
+npx --yes cxclaw@latest script skills/solvea-desk/scripts/report/render_report.py \
   --task-id "<task_id>" \
   --report-slug "assignee_group_weekly"
 ```

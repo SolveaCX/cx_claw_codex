@@ -14,103 +14,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with: {go-version: "1.23.x"}
+      - uses: oven-sh/setup-bun@v2
+        with: {bun-version: "1.3.13"}
+      - uses: actions/setup-node@v4
+        with: {node-version: "22.x"}
       - uses: actions/setup-python@v5
-        with: {python-version: "3.12.12"}
+        with: {python-version: "3.12"}
       - uses: gitleaks/gitleaks-action@v2
-        continue-on-error: false
-      - run: go test ./...
-      - run: go test -race ./...
-      - run: go vet ./...
-      - run: python3 scripts/check_capabilities.py
-      - run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then python3 scripts/check_release.py "${GITHUB_REF_NAME#v}"; else python3 scripts/check_release.py; fi
-      - run: git diff --check
-
-  build:
-    needs: test
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - {runner: macos-13, goos: darwin, goarch: amd64, target: darwin-amd64, suffix: ""}
-          - {runner: macos-14, goos: darwin, goarch: arm64, target: darwin-arm64, suffix: ""}
-          - {runner: windows-2022, goos: windows, goarch: amd64, target: windows-amd64, suffix: ".exe"}
-          - {runner: ubuntu-22.04, goos: linux, goarch: amd64, target: linux-amd64, suffix: ""}
-          - {runner: ubuntu-22.04-arm, goos: linux, goarch: arm64, target: linux-arm64, suffix: ""}
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with: {go-version: "1.23.x"}
-      - uses: actions/setup-python@v5
-        with: {python-version: "3.12.12"}
-      - name: Build committed runtime package
-        shell: bash
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: "0"
-          UPDATE_KEY: ${{ vars.CXCLAW_UPDATE_PUBLIC_KEY_BASE64 }}
-        run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then VERSION="${GITHUB_REF_NAME#v}"; else VERSION="$(python3 scripts/check_release.py)"; fi
-          rm -rf dist && mkdir -p dist/package/bin
-          LDFLAGS="-s -w -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.PluginVersion=$VERSION -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.CLIVersion=$VERSION -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.UpdatePublicKeyBase64=$UPDATE_KEY"
-          go build -trimpath -ldflags "$LDFLAGS" -o "dist/package/bin/cxclawctl${{ matrix.suffix }}" ./cmd/cxclawctl
-          go build -trimpath -ldflags "$LDFLAGS" -o "dist/package/bin/cxclaw-launcher${{ matrix.suffix }}" ./cmd/cxclaw-launcher
-          BOOTSTRAP_LDFLAGS="-s -w -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.PluginVersion=0.0.0 -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.CLIVersion=$VERSION -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.UpdatePublicKeyBase64=$UPDATE_KEY"
-          go build -trimpath -ldflags "$BOOTSTRAP_LDFLAGS" -o "dist/cxclaw-bootstrap-${{ matrix.target }}${{ matrix.suffix }}" ./cmd/cxclaw-bootstrap
-          cp -R plugin.json .codex-plugin capabilities.lock.json README.md requirements-cli.txt skills dist/package/
-          bash scripts/build_runtime.sh "${{ matrix.target }}" dist/package/runtime
-          (cd dist/package && zip -qr "../cxclaw-runtime-${VERSION}-${{ matrix.target }}.zip" .)
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cxclaw-${{ matrix.target }}
-          path: dist/cxclaw-*
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun test
+      - run: bun run check:capabilities
+      - run: bun run check:release
 
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with: {path: dist, merge-multiple: true}
-      - uses: actions/setup-go@v5
-        with: {go-version: "1.23.x"}
-      - name: Build plugin archive from committed Git tree
-        run: |
-          mkdir -p dist/plugin
-          git archive --format=tar HEAD | tar -x -C dist/plugin
-          (cd dist/plugin && zip -qr ../cxclaw-codex-plugin.zip .agents .codex-plugin skills plugin.json capabilities.lock.json README.md)
-      - name: Generate release metadata and signatures
+      - uses: oven-sh/setup-bun@v2
+        with: {bun-version: "1.3.13"}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          registry-url: https://registry.npmjs.org
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: bun run check:release
+      - run: bun run package:agent-plugin
+      - run: bun run package:codex-plugin
+      - name: Publish npm package
         env:
-          CXCLAW_ED25519_PRIVATE_KEY_BASE64: ${{ secrets.CXCLAW_ED25519_PRIVATE_KEY_BASE64 }}
-          VERSION: ${{ github.ref_name }}
-        run: |
-          VERSION="${VERSION#v}"
-          go build -o /tmp/cxclaw-sign ./cmd/cxclaw-sign
-          for f in dist/*.zip; do
-            hash="$(sha256sum "$f" | cut -d' ' -f1)"
-            CXCLAW_ED25519_PRIVATE_KEY_BASE64="$CXCLAW_ED25519_PRIVATE_KEY_BASE64" /tmp/cxclaw-sign "$hash" > "$f.sig"
-          done
-          python3 - <<'PY'
-          import base64, hashlib, json, os, pathlib
-          version=os.environ['VERSION']; files={}
-          for p in pathlib.Path('dist').glob('*.zip'):
-              files[p.name]={'file':p.name,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'signature':base64.b64encode(base64.b64decode(p.with_suffix(p.suffix+'.sig').read_text().strip())).decode()}
-          channel='stable' if '-' not in version else ('canary' if '-canary.' in version else 'dev')
-          pathlib.Path('dist/cxclaw-release.json').write_text(json.dumps({'version':version,'channel':channel,'gitCommit':os.environ.get('GITHUB_SHA',''),'assets':files},indent=2)+'\n')
-          PY
-          cp dist/cxclaw-release.json dist/cxclaw-agent-plugin.json
-          sha256sum dist/cxclaw-agent-plugin.json | cut -d' ' -f1 > dist/cxclaw-agent-plugin.sha256
-          manifest_hash="$(sha256sum dist/cxclaw-release.json | cut -d' ' -f1)"
-          /tmp/cxclaw-sign "$manifest_hash" > dist/cxclaw-release.sig
-          : > dist/releases.sha256
-          for f in dist/*.zip dist/cxclaw-release.json dist/cxclaw-agent-plugin.json; do sha256sum "$f" >> dist/releases.sha256; done
-          gh release create "v${VERSION}" dist/*.zip dist/*.sig dist/cxclaw-release.json dist/cxclaw-agent-plugin.json dist/cxclaw-agent-plugin.sha256 dist/releases.sha256 --title "CXClaw ${VERSION}" --generate-notes
-          if [[ "$VERSION" == *-canary.* ]]; then channel=canary; elif [[ "$VERSION" == *-dev.* ]]; then channel=dev; else channel=stable; fi
-          git push origin "HEAD:refs/heads/marketplace/${channel}" --force
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --tag latest
+      - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          gh release create "v${VERSION}" dist/cxclaw-agent-plugin.zip dist/cxclaw-agent-plugin.json dist/cxclaw-agent-plugin.sha256 dist/cxclaw-codex-plugin.zip --title "CXClaw ${VERSION}" --generate-notes
+          if [[ "$VERSION" == *-canary.* ]]; then channel=canary; elif [[ "$VERSION" == *-dev.* ]]; then channel=dev; else channel=stable; fi
+          git push origin "HEAD:refs/heads/marketplace/${channel}" --force

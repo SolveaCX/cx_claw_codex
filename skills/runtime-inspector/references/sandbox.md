@@ -10,22 +10,22 @@
 
 ```bash
 # 全量（默认，等价于 --scenario all）
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/sandbox_inspect.py
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/sandbox_inspect.py
 
 # 仅环境变量注入与安全校验
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario env
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario env
 
 # 仅目录结构与读写权限
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario fs
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario fs
 
 # 仅 bash 执行路径行为（CWD、$WORKSPACE_DIR、相对路径写文件）
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario execute
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario execute
 
 # 仅虚拟路径行为（bash/Python 路径映射对齐）
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario paths
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario paths
 
 # 仅依赖库可用性
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario deps
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario deps
 ```
 
 ### 各 scenario 检查内容
@@ -45,7 +45,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/
 单独验证沙箱内能否通过 internal proxy 调用 Claude，不依赖 sandbox_inspect 全量：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/test_claude_proxy.py
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/test_claude_proxy.py
 ```
 
 打印 `ANTHROPIC_BASE_URL`、实际发一条 haiku 请求，输出 `PASS model=... in=... out=... elapsed=...s` 或 `FAIL error=...`。
@@ -55,7 +55,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/
 验证沙箱内能否通过 internal proxy 调用 OpenAI-compatible 模型：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/test_openai_proxy.py
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/test_openai_proxy.py
 ```
 
 模型由主服务的 Nacos 配置统一决定。输出 `PASS model=...` 表示代理与模型权限均正常。
@@ -72,22 +72,22 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/
 
 ```bash
 # 有用户文件
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/prepare.py --source /mounted/chat-files/user/{文件名}
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/prepare.py --source /mounted/chat-files/user/{文件名}
 
 # 无用户文件（自动生成测试数据）
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/prepare.py
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/prepare.py
 ```
 
 #### 步骤 2 — 处理并写入
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/process.py
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/process.py
 ```
 
 #### 步骤 3 — 确认写入正常
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario fs
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario fs
 ```
 
 确认 `workspace/outputs/` 和 `workspace/state/` 均 ✅ 可写且有文件。
@@ -99,7 +99,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/
 #### 步骤 A — 跑断言脚本（直接验证 eager 还原）
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/verify_persistence.py
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/verify_persistence.py
 ```
 
 脚本直接用 `Path.read_text()` 读 `OUTPUTS_DIR.glob("results_*.json")` 和 `STATE_DIR / "inspect.json"`，**全程不调用 `read_file` 工具**。
@@ -112,7 +112,7 @@ eager 模型保障：上一轮写入 `workspace/outputs/` 和 `workspace/state/`
 #### 步骤 B — 全量检查（可选）
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario fs
+npx --yes cxclaw@latest script skills/runtime-inspector/scripts/sandbox_inspect.py --scenario fs
 ```
 
 `fs` scenario 中"上一轮 agent outputs"项会显示 `workspace/outputs/runtime-inspector/` 下文件数量，可肉眼对照第一轮的 process.py 输出。

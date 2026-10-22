@@ -42,7 +42,7 @@ frontend 请求同时命中 `markdown`、`process`、`subagent` 中两个及以�
 | frontend | subagent | Subagent、task、嵌套执行过程、内部消息 | Agent 按 reference 调用 `task` | `references/frontend-rendering.md` |
 | frontend | all | 前端渲染、全量消息格式、完整验收 | 依次执行 markdown + process + subagent | `references/frontend-rendering.md` |
 
-涉及脚本的场景均用绝对虚拟路径调用：`$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/runtime-inspector/scripts/<name>.py [args]`
+涉及脚本的场景均用绝对虚拟路径调用：`npx --yes cxclaw@latest script skills/runtime-inspector/scripts/<name>.py [args]`
 
 ## 详细执行步骤
 

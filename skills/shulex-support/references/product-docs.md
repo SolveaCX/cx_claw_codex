@@ -12,7 +12,7 @@
 查看搜索结果时，优先采用标题、页面路径、内容片段都命中核心概念的结果；只因为泛词命中的结果不要引用。
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/shulex-support/scripts/support.py search-docs \
+npx --yes cxclaw@latest script skills/shulex-support/scripts/support.py search-docs \
   --query "<用户问题>" \
   --pretty
 ```
@@ -36,7 +36,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/shulex-support/scripts/sup
 当需要进一步定位或读取文档文件时，使用文件查询命令：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/shulex-support/scripts/support.py query-docs-filesystem \
+npx --yes cxclaw@latest script skills/shulex-support/scripts/support.py query-docs-filesystem \
   --command 'rg -il "<关键词>" / | head -10' \
   --pretty
 ```
@@ -45,12 +45,12 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/shulex-support/scripts/sup
 
 ```bash
 # 找相关文件
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/shulex-support/scripts/support.py query-docs-filesystem \
+npx --yes cxclaw@latest script skills/shulex-support/scripts/support.py query-docs-filesystem \
   --command 'rg -il "变量" / | head -10' \
   --pretty
 
 # 读取某个文档开头
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/shulex-support/scripts/support.py query-docs-filesystem \
+npx --yes cxclaw@latest script skills/shulex-support/scripts/support.py query-docs-filesystem \
   --command 'sed -n "1,160p" /solvea/bot_cn/function-manual/agents/variables/variable-definition.mdx' \
   --pretty
 ```

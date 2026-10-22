@@ -34,7 +34,7 @@ prompt，也不是按 old agent 数量建同样数量的节点，而是还原并
 长图先执行：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py inspect \
+npx --yes cxclaw@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py inspect \
   --input /workspace/state/agent-builder/multi-agent/read_<old_agent_id>_raw.json \
   --out-dir /workspace/state/agent-builder/multi-agent
 ```
@@ -167,7 +167,7 @@ source 阶段。
 生成 Mermaid 并直接贴给用户确认：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py emit-mapping-mermaid \
+npx --yes cxclaw@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py emit-mapping-mermaid \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --out-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/sop_mapping.mmd
 ```

@@ -1,11 +1,11 @@
 # SLS 日志查询
 
-文本 badcase 的日志查询统一执行 `$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query`。CLI 先向 `shulex-cloud` 申请 10～15 分钟只读 STS，再由本机使用 Aliyun Log Go SDK 直连 SLS；临时凭据只驻留内存，禁止写入文件、日志或普通命令输出。
+文本 badcase 的日志查询统一执行 `npx --yes cxclaw@latest sls query`。CLI 先向 `shulex-cloud` 申请 10～15 分钟只读 STS，再由本机使用 Aliyun Log Go SDK 直连 SLS；临时凭据只驻留内存，禁止写入文件、日志或普通命令输出。
 
 ## 基础用法
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <epoch-seconds> \
   --to <epoch-seconds> \
   --query '<SLS 查询 DSL>' \
@@ -35,7 +35,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
 ```bash
 # createdAt = 1775793526000 (ms) → 1775793526 (s)
 # ±5/10min 窗口
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from 1775793226 \
   --to 1775794126 \
   --query 'rest:"HTTP_ASPECT"' \
@@ -53,7 +53,7 @@ chatId → trace 一对一。先查 HTTP 入口 aspect 拿到 trace：
 > ⚠️ **禁止使用会话记录返回的 `traceId` 字段**——该值不可信，必须通过下面的 HTTP_ASPECT 查询重新定位 trace。
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <createdAt_sec - 300> \
   --to <createdAt_sec + 600> \
   --query 'rest:"HTTP_ASPECT" AND rest:"<chatId>" AND (rest:"/bot/<botId>/chat " OR rest:"/bot/<botId>/chat/async" OR rest:"/bot/<botId>/chat/stream")' \
@@ -74,7 +74,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
 
 ```bash
 # Step A：和同步路径一样，先用 chatId 拿 shulex-gpt 侧业务 trace
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <createdAt_sec - 300> \
   --to <createdAt_sec + 600> \
   --query 'rest:"HTTP_ASPECT" AND rest:"<chatId>" AND (rest:"/bot/<botId>/chat " OR rest:"/bot/<botId>/chat/async" OR rest:"/bot/<botId>/chat/stream")' \
@@ -82,7 +82,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
 # → trace = trace_GPT；同时记录该日志的 armsTrace 字段值
 
 # Step B：用 trace_GPT 拉一条 shulex-gpt 业务日志，取其 armsTrace
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <createdAt_sec - 300> \
   --to <createdAt_sec + 600> \
   --query 'trace:"<trace_GPT>" AND rest:"aiReply["' \
@@ -91,7 +91,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
 # → 如 aiReply 不存在（未走知识召回），换 shulex-gpt 侧任意业务日志关键字（如 rest:"BOT_REPLY" 或 rest:"chat["），目的只是拿到 armsTrace
 
 # Step C：用 armsTrace_X 查目标下游服务日志
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <createdAt_sec - 300> \
   --to <createdAt_sec + 600> \
   --query 'armsTrace:"<armsTrace_X>" AND rest:"searchKnowledge["' \
@@ -103,21 +103,21 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
 
 ```bash
 # qa-bot 知识召回
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace_X>" AND (rest:"searchKnowledge[" OR rest:"rerankKnowledge[" OR rest:"embeddingSearchAsync[")' \
   --line 20
 
 # qa-bot 意图识别
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace_X>" AND (rest:"intentParse" OR rest:"checkIntent" OR rest:"intentIdentify[")' \
   --line 20
 
 # qa-bot 兜底：armsTrace 不可用
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'rest:"<chatId>" AND (rest:"searchKnowledge[" OR rest:"intentIdentify[" OR rest:"checkIntent")' \
@@ -128,21 +128,21 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
 
 ```bash
 # ShulexService 通用 request_start / request_end / ERROR
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace_X>" AND (rest:"request_start" OR rest:"request_end" OR rest:"ERROR" OR rest:"http_cost_time")' \
   --line 20
 
 # ShulexService 按能力缩小
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace_X>" AND (rest:"intent_identify" OR rest:"intent_pure" OR rest:"general_ner" OR rest:"batch_classify" OR rest:"query_rewrite" OR rest:"ai_reply")' \
   --line 20
 
 # ShulexService 兜底：request_id / chatId
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query '(rest:"<request_id>" OR rest:"<chatId>") AND (rest:"request_start" OR rest:"request_end" OR rest:"ERROR")' \
@@ -153,21 +153,21 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
 
 ```bash
 # chatflow graph / node / condition
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace_X>" AND (rest:"graph_exec" OR rest:"node_enter" OR rest:"evaluate_condition" OR rest:"case_matched" OR rest:"no_case_matched")' \
   --line 20
 
 # chatflow RAG / KB / tool / variable
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace_X>" AND (rest:"rag_reply retrieve" OR rest:"kb_reply retrieve" OR rest:"tool_node" OR rest:"selected variable not found")' \
   --line 20
 
 # chatflow 兜底：chatId + 节点关键字
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'rest:"<chatId>" AND (rest:"graph_exec" OR rest:"node_enter" OR rest:"tool_node")' \
@@ -180,14 +180,14 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
 
 ```bash
 # GPT 回复后质检：实时送检、回复送检、结果与豁免
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'trace:"<trace_GPT>" AND (rest:"QualityCheckPostCheck" OR rest:"realTimeInspection" OR rest:"replyInspection" OR rest:"inspectionDataResponse" OR rest:"quality-inspection-gate" OR rest:"exempt_request" OR rest:"exempt_ai_reply")' \
   --line 20
 
 # trace 缺失时用 chatId 在 GPT 侧兜底；命中调用异常后再按 armsTrace 查 Intelli
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'rest:"<chatId>" AND (rest:"realTimeInspection" OR rest:"replyInspection" OR rest:"inspectionDataResponse" OR rest:"QualityCheckPostCheck")' \
@@ -200,14 +200,14 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
 
 ```bash
 # tars 变量系统字段抽取
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace_X>" AND (rest:"/service/field/internal/extract" OR rest:"AiFieldExtractService #")' \
   --line 20
 
 # tars 兜底：chatId + 变量系统日志
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'rest:"<chatId>" AND (rest:"AiFieldExtractService #" OR rest:"extract aiFieldExtractDTO" OR rest:"extract result aiFieldDbDTOList")' \
@@ -235,7 +235,7 @@ Kafka 生产端和消费端是**两条独立的 trace**，不能跨 Kafka 传播
 
 ```bash
 # 1a 定位入口请求，拿到 span
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <createdAt_sec - 300> \
   --to <createdAt_sec + 600> \
   --query 'rest:"HTTP_ASPECT" AND rest:"<chatId>" AND rest:"/bot/<botId>/chat/async"' \
@@ -243,7 +243,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
 # → 记录返回字段 span
 
 # 1b 用 span 找消费端 trace
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <createdAt_sec - 300> \
   --to <createdAt_sec + 1800> \
   --query 'span:"<span>"' \
@@ -262,14 +262,14 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
 
 ```bash
 # 模块相关日志
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'trace:"<trace>" AND rest:"<关键字>"' \
   --line <N>
 
 # 所有 ERROR（M8 系统异常排查用）
-$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
+npx --yes cxclaw@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'trace:"<trace>" AND severity:"ERROR"' \
@@ -278,6 +278,6 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
 
 ## 配置缺失处理
 
-若 `$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query` 返回未登录、未选择租户或 SLS 配置缺失，依次运行
-`$HOME/.codex/cxclaw/bin/cxclaw-launcher auth status`、`$HOME/.codex/cxclaw/bin/cxclaw-launcher tenant current` 定位问题。SLS 长期 AK/SK 只存在于
+若 `npx --yes cxclaw@latest sls query` 返回未登录、未选择租户或 SLS 配置缺失，依次运行
+`npx --yes cxclaw@latest auth status`、`npx --yes cxclaw@latest tenant current` 定位问题。SLS 长期 AK/SK 只存在于
 `shulex-cloud` 配置；CLI 每次查询前申请短期只读 STS，凭据只驻留进程内存。

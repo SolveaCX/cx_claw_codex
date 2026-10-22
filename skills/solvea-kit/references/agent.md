@@ -38,9 +38,9 @@ CHAT_FLOW 图构建、修改、校验和发布由 `chatflow` skill 维护，本�
 ### CLI
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-agents --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-agent --id <agent_id> --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api create-agent \
+npx --yes cxclaw@latest api list-agents --pretty
+npx --yes cxclaw@latest api get-agent --id <agent_id> --pretty
+npx --yes cxclaw@latest api create-agent \
   --data '{"name":"FAQ_Bot","type":"SINGLE_AGENT","prompt":"...","displayPrompt":"..."}' --pretty
 ```
 
@@ -125,14 +125,14 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher api create-agent \
 ### CLI
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-voice-agents --pretty
+npx --yes cxclaw@latest api list-voice-agents --pretty
 
 # 创建：payload 存成 json 文件，避免 shell 转义出问题（多语言 prompt 尤其推荐）
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api create-agent \
+npx --yes cxclaw@latest api create-agent \
   --data-file /workspace/tmp/voice_agent_payload.json --pretty
 
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-voice-transcripts --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-voice-transcript \
+npx --yes cxclaw@latest api list-voice-transcripts --pretty
+npx --yes cxclaw@latest api get-voice-transcript \
   --history-id 019d4dac-aa36-744d-8c5d-d54bc3f7e528 --pretty
 ```
 

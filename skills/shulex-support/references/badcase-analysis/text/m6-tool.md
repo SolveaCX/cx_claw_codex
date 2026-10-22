@@ -49,13 +49,13 @@ ChatFlowService.callTool(request)
 
 ```bash
 # 查工具列表（精简信息）
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-plugins --pretty
+npx --yes cxclaw@latest api list-plugins --pretty
 
 # 查工具详情（request/response params、actionStatus）
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-plugin --id <tool_id> --pretty
+npx --yes cxclaw@latest api get-plugin --id <tool_id> --pretty
 
 # 查变量系统字段（LLM source 的参数需要对应变量系统字段）
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-ai-fields --pretty
+npx --yes cxclaw@latest api list-ai-fields --pretty
 ```
 
 检查点：

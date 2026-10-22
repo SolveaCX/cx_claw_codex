@@ -43,7 +43,7 @@
 示例：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/solvea-desk/scripts/tickets/fetch_tickets.py \
+npx --yes cxclaw@latest script skills/solvea-desk/scripts/tickets/fetch_tickets.py \
   --view-id 1 \
   --filters-json '{"channelList":["ebay"],"agentIdList":[474501],"ticketStatusList":["open","pending"]}' \
   --page-size 100 \

@@ -15,11 +15,11 @@
 | 根据真实响应构建输出 | POST | `/api_v2/gpt/ap/{projectId}/build/plugin` |
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-plugins --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-plugin --id <tool_id> --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api create-plugin \
+npx --yes cxclaw@latest api list-plugins --pretty
+npx --yes cxclaw@latest api get-plugin --id <tool_id> --pretty
+npx --yes cxclaw@latest api create-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-plugin \
+npx --yes cxclaw@latest api update-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 ```
 
@@ -257,7 +257,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher api update-plugin \
 ## 静态验证与写入
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/tools/validate_tool_config.py \
+npx --yes cxclaw@latest script skills/agent-builder/scripts/tools/validate_tool_config.py \
   --data-file /workspace/state/agent-builder/tool_lookup_order.json \
   --pretty
 ```
@@ -267,7 +267,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/tool
 创建完成后：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-plugin --id <tool_id> --pretty
+npx --yes cxclaw@latest api get-plugin --id <tool_id> --pretty
 ```
 
 以回查结果确认名称、URL、方法、参数树和 `actionStatuses` 已按预期保存。
@@ -304,7 +304,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher api get-plugin --id <tool_id> --pretty
 ```
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api run-plugin \
+npx --yes cxclaw@latest api run-plugin \
   --data-file /workspace/state/agent-builder/run_tool_config.json \
   --pretty
 ```

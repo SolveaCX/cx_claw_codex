@@ -9,14 +9,14 @@
 所有用户提供的会话标识都先按内部 `chatId` 查询，包括看起来像外部系统 ID 的值：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-transcript --chat-id <用户提供的会话标识> --pretty
+npx --yes cxclaw@latest api get-transcript --chat-id <用户提供的会话标识> --pretty
 ```
 
 只有 `get-transcript --chat-id` 查不到、返回空或 404 时，才把同一个值作为外部会话 ID 走 Inbox 同源搜索解析内部 chatId，再拉详情：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api resolve-transcript-chat-id --external-id <用户提供的会话标识> --page-size 10 --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-transcript --chat-id <resolvedChatId> --pretty
+npx --yes cxclaw@latest api resolve-transcript-chat-id --external-id <用户提供的会话标识> --page-size 10 --pretty
+npx --yes cxclaw@latest api get-transcript --chat-id <resolvedChatId> --pretty
 ```
 
 解析返回多个候选时，优先使用 `matchedBy=exactExternalId` 的结果；没有精确匹配时，先向用户说明候选并确认目标会话，不要随意拿 keyword 首条继续诊断。

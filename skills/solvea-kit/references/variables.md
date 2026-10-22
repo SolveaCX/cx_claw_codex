@@ -5,15 +5,15 @@
 ## 查询与初始化
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-ai-field-guide --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-managed-ai-fields --page 1 --page-size 50 --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-managed-ai-field --id <field_id> --pretty
+npx --yes cxclaw@latest api get-ai-field-guide --pretty
+npx --yes cxclaw@latest api list-managed-ai-fields --page 1 --page-size 50 --pretty
+npx --yes cxclaw@latest api get-managed-ai-field --id <field_id> --pretty
 ```
 
 若 `get-ai-field-guide` 显示未初始化，先说明将创建系统预装字段，得到确认后再执行：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api initialize-ai-fields --pretty
+npx --yes cxclaw@latest api initialize-ai-fields --pretty
 ```
 
 ## 创建与更新
@@ -21,11 +21,11 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher api initialize-ai-fields --pretty
 先列出或读取已有字段，展示名称、描述、数据类型、选项、应用范围和预期用途，再请求确认。确认后的 JSON 写入 `/workspace/state/solvea-kit/`，通过 CLI 提交：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api create-managed-ai-field \
+npx --yes cxclaw@latest api create-managed-ai-field \
   --data-file /workspace/state/solvea-kit/ai_field_create.json --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-managed-ai-field \
+npx --yes cxclaw@latest api update-managed-ai-field \
   --data-file /workspace/state/solvea-kit/ai_field_update.json --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api toggle-managed-ai-field --id <field_id> --pretty
+npx --yes cxclaw@latest api toggle-managed-ai-field --id <field_id> --pretty
 ```
 
 常用字段：`name`、`description`、`dataType`、`aiFieldValueDTOS`（单选/多选选项）、`applyRang`、`useAgent`、`parentId`。不要猜测数据类型编码或应用范围；先读取同租户同类型字段作为模板。
@@ -35,7 +35,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher api toggle-managed-ai-field --id <field_
 删除前必须先读取详情和列表中的 `usedIn`。字段已被使用时，不承诺可删除；先说明影响并引导用户迁移 Agent、策略、模板或 CHAT_FLOW 引用。仅在字段未使用且用户确认后执行：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api delete-managed-ai-field --id <field_id> --pretty
+npx --yes cxclaw@latest api delete-managed-ai-field --id <field_id> --pretty
 ```
 
 ## 使用场景

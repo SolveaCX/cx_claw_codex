@@ -5,10 +5,10 @@ POC 专属分类入口。入口和状态归属 POC skill；通用意图分类实
 ## Commands
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/poc/scripts/classify.py --xlsx <xlsx> --messages-col <col> [--title-col <col>]
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/poc/scripts/classify.py --no-excel
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/poc/scripts/gen_report.py --brand <brand>
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/poc/scripts/gen_excel.py --brand <brand>
+npx --yes cxclaw@latest script skills/poc/scripts/classify.py --xlsx <xlsx> --messages-col <col> [--title-col <col>]
+npx --yes cxclaw@latest script skills/poc/scripts/classify.py --no-excel
+npx --yes cxclaw@latest script skills/poc/scripts/gen_report.py --brand <brand>
+npx --yes cxclaw@latest script skills/poc/scripts/gen_excel.py --brand <brand>
 ```
 
 ## Inputs

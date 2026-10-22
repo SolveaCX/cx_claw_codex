@@ -43,7 +43,7 @@ requires:
 所有数据通过以下入口获取：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api <command> ... --pretty
+npx --yes cxclaw@latest api <command> ... --pretty
 ```
 
 常用命令：

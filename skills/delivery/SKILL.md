@@ -32,13 +32,13 @@ requires:
 每次开始处理 Delivery 前，先运行：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/delivery/scripts/plan.py --init
+npx --yes cxclaw@latest script skills/delivery/scripts/plan.py --init
 ```
 
 阶段完成后用 `plan.py` 更新顶层状态，例如：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/delivery/scripts/plan.py \
+npx --yes cxclaw@latest script skills/delivery/scripts/plan.py \
   --status agents_created \
   --set intent.created_log_path=/workspace/outputs/delivery/created_<ts>.json
 ```
@@ -46,7 +46,7 @@ $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/delivery/scripts/plan.py \
 需要汇总当前交付物时运行：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/delivery/scripts/render_summary.py
+npx --yes cxclaw@latest script skills/delivery/scripts/render_summary.py
 ```
 
 ```json

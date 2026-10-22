@@ -11,8 +11,8 @@
 
 1. 先确认排查对象：默认沿用当前 badcase 上下文；用户显式指定范围时以用户为准。
 2. 先用稳定标识缩小范围：`chatId`、`callId`、`callSid`、`traceId`、电话号码 + 时间段。
-3. SLS 通过本机 `$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query` 直查；语音会话通过 `$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-voice-transcripts`
-   和 `$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-voice-transcript` 查询，客户端不持有 VAPI/Twilio 长期密钥。
+3. SLS 通过本机 `npx --yes cxclaw@latest sls query` 直查；语音会话通过 `npx --yes cxclaw@latest api list-voice-transcripts`
+   和 `npx --yes cxclaw@latest api get-voice-transcript` 查询，客户端不持有 VAPI/Twilio 长期密钥。
 4. 不生成独立语音报告模板；最终按 badcase 回复风格输出。
 5. 不要只凭单一数据源下结论，缺失证据必须说明。
 
@@ -38,8 +38,8 @@
 
 读取 `/skills/shulex-support/references/badcase-analysis/voice/platform-api.md`。
 
-- 先用 `$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-voice-transcripts` 缩小范围，再用
-  `$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-voice-transcript --history-id <historyId>` 读取详情。
+- 先用 `npx --yes cxclaw@latest api list-voice-transcripts` 缩小范围，再用
+  `npx --yes cxclaw@latest api get-voice-transcript --history-id <historyId>` 读取详情。
 - 有 `callId` / `callSid` 时同时查 SLS，补齐 provider 原始错误和时间线。
 - 当前本地插件不下发 VAPI/Twilio 长期密钥，也不直接请求 provider 私有 API；产品接口和
   SLS 都缺少证据时，明确标为“未确认”，不要要求用户粘贴 token。

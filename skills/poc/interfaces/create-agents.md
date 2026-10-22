@@ -8,13 +8,13 @@ POC 专属能力：创建全部意图，优先克隆 3 个预置业务 agent，�
 
 ```bash
 # POC 业务阶段：建全部意图 + 优先克隆 3 个业务 agent + 3 条业务策略
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/poc/scripts/create_agents.py --mode poc
+npx --yes cxclaw@latest script skills/poc/scripts/create_agents.py --mode poc
 
 # POC 兜底阶段：fallback chatflow agent 创建完成后，绑定所有 pending intents
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/poc/scripts/create_agents.py --mode poc --poc-fallback-agent-id <agent_id>
+npx --yes cxclaw@latest script skills/poc/scripts/create_agents.py --mode poc --poc-fallback-agent-id <agent_id>
 
 # POC 恢复阶段：预置 agent 不可用，用户确认从零新建或使用替代 agent 后，绑定业务策略
-$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/poc/scripts/create_agents.py --mode poc \
+npx --yes cxclaw@latest script skills/poc/scripts/create_agents.py --mode poc \
   --custom-agent-map /workspace/state/poc/custom_agent_map.json
 ```
 

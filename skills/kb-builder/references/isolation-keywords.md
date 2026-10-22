@@ -24,13 +24,13 @@ staging  /sns_v1
 对应公开 CLI：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-isolation-keywords --keyword "invoice" --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api create-isolation-keyword --keyword "invoice,test" --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-isolation-keyword --id 17 --keyword "0226" --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api delete-isolation-keyword --id 16 --confirm-delete --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-knowledge-isolation-keywords \
+npx --yes cxclaw@latest api list-isolation-keywords --keyword "invoice" --pretty
+npx --yes cxclaw@latest api create-isolation-keyword --keyword "invoice,test" --pretty
+npx --yes cxclaw@latest api update-isolation-keyword --id 17 --keyword "0226" --pretty
+npx --yes cxclaw@latest api delete-isolation-keyword --id 16 --confirm-delete --pretty
+npx --yes cxclaw@latest api get-knowledge-isolation-keywords \
   --id 486955 --type FILE --pretty
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api batch-update-isolation-keyword-bindings \
+npx --yes cxclaw@latest api batch-update-isolation-keyword-bindings \
   --data-file /workspace/state/kb-builder/isolation_keyword_binding.json --pretty
 ```
 

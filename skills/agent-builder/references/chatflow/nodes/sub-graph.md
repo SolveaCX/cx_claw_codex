@@ -32,7 +32,7 @@
 先查可用 agent：
 
 ```bash
-$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-agents --pretty
+npx --yes cxclaw@latest api list-agents --pretty
 ```
 
 ## 限制

@@ -119,11 +119,11 @@ def check_env() -> None:
 
     print()
     print("CXClaw — 本地 CLI")
-    cli_path = os.path.expanduser("~/.codex/cxclaw/bin/cxclaw-launcher")
+    cli_path = shutil.which("npx")
     if cli_path:
-        _ok("$HOME/.codex/cxclaw/bin/cxclaw-launcher", cli_path)
+        _ok("npx --yes cxclaw@latest", cli_path)
     else:
-        _fail("$HOME/.codex/cxclaw/bin/cxclaw-launcher", "未找到；业务命令和 SLS 直查不可用")
+        _fail("npx --yes cxclaw@latest", "未找到 Node.js/npm；业务命令和 SLS 直查不可用")
 
     print()
     print("ENV — 安全校验（敏感变量不应泄露）")
