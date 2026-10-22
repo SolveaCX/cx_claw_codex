@@ -51,7 +51,12 @@ jobs:
       - name: Publish npm package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --tag latest
+        run: |
+          if [[ -z "$NODE_AUTH_TOKEN" ]]; then
+            echo "NPM_TOKEN is not configured; skipping npm publish."
+          else
+            npm publish --access public --tag latest
+          fi
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
