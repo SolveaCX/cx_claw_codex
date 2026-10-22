@@ -7,6 +7,9 @@ describe("resource command hierarchy", () => {
     expect(resolveResourceCommand("intent", "update")).toBe("update-intent");
     expect(resolveResourceCommand("intent", "toggle")).toBe("toggle-intent");
     expect(resolveResourceCommand("agent", "get-chatflow")).toBe("get-chatflow-graph");
+    expect(resolveResourceCommand("field", "create")).toBe("create-managed-ai-field");
+    expect(resolveResourceCommand("template", "delete")).toBe("delete-templates");
+    expect(resolveResourceCommand("quality", "alerts")).toBe("list-quality-alert-rules");
   });
 
   test("rejects unknown actions with discoverable help", () => {

@@ -289,6 +289,102 @@
       "execution": "local-cli"
     },
     {
+      "resource": "mock",
+      "action": "query",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" mock query",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "mock",
+      "action": "replace",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" mock replace",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "field",
+      "action": "canvas",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" field canvas",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "field",
+      "action": "agent-range",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" field agent-range",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "field",
+      "action": "guide",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" field guide",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "field",
+      "action": "initialize",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" field initialize",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "field",
+      "action": "list",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" field list",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "field",
+      "action": "get",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" field get",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "field",
+      "action": "create",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" field create",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "field",
+      "action": "update",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" field update",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "field",
+      "action": "delete",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" field delete",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "field",
+      "action": "toggle",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" field toggle",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "template",
+      "action": "list",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" template list",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "template",
+      "action": "create",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" template create",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "template",
+      "action": "update",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" template update",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "template",
+      "action": "delete",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" template delete",
+      "execution": "local-cli"
+    },
+    {
       "resource": "knowledge",
       "action": "list",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" knowledge list",
@@ -394,6 +490,48 @@
       "resource": "quality",
       "action": "delete-custom-rule",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality delete-custom-rule",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "alerts",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality alerts",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "get-alert",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality get-alert",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "create-alert",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality create-alert",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "update-alert",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality update-alert",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "delete-alert",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality delete-alert",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "alert-messages",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality alert-messages",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "get-alert-message",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality get-alert-message",
       "execution": "local-cli"
     },
     {

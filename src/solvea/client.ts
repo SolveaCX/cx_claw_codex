@@ -66,6 +66,13 @@ export class SolveaClient {
   private async get<T>(path: string, query?: Record<string, string | number | boolean>) { return this.request<T>("GET", path, undefined, query); }
   private async put<T>(path: string, body: unknown) { return this.request<T>("PUT", path, body); }
 
+  private safePathSegment(value: string, name: string) {
+    if (!value || value === "." || value === ".." || /[\\/?#%\u0000-\u001f\u007f]/.test(value)) {
+      throw new Error(`${name} must be a safe non-empty path segment`);
+    }
+    return encodeURIComponent(value);
+  }
+
   async projectInfo() { return this.get<unknown[]>("/api_v2/gpt/bots"); }
   async projectId() {
     if (!this.project) {
@@ -89,6 +96,31 @@ export class SolveaClient {
   async createPlugin(data: JsonObject) { return this.post("/api_v2/gpt/ap/createPlugin", { projectId: Number(await this.projectId()), ...data }); }
   async updatePlugin(data: JsonObject) { return this.post("/api_v2/gpt/ap/updatePlugin", { projectId: Number(await this.projectId()), ...data }); }
   async deletePlugin(id: string) { return this.post("/api_v2/gpt/ap/deletePlugin", { projectId: Number(await this.projectId()), pluginId: Number(id) }); }
+  async runPlugin(config: unknown, requestBody?: JsonObject) {
+    return this.post("/api_v2/gpt/ap/runHttpPlugin", {
+      projectId: Number(await this.projectId()), botId: Number(await this.botId()),
+      externalHttpCallConfig: config,
+      ...(requestBody === undefined ? {} : { externalHttpCallRequestBody: requestBody }),
+    });
+  }
+  async replaceMockData(type: string, records: unknown[]) {
+    if (records.length > 10_000) throw new Error("records must contain at most 10000 items");
+    return this.post(`/api_v2/gpt/mockdata/reAddMockData/${this.safePathSegment(type, "mock type")}`, records);
+  }
+  async queryMockData(type: string) { return this.get("/api_v2/gpt/mockdata/queryMockData", { type: this.safePathSegment(type, "mock type"), globalData: false }); }
+
+  async listAiFields() { return this.post("/api_v2/gpt/chatflow/queryAiFields", {}); }
+  async listAgentAiFields() { return this.post("/api_v2/gpt/field/list/range", { fieldRange: ["all", "agent", "agent_preload_visible"] }); }
+  async aiFieldGuide() { return this.post("/api_v2/tars/api/field/manage/guide/record", {}); }
+  async initializeAiFields() { return this.get("/api_v2/tars/api/field/manage/pre/install"); }
+  async listManagedAiFields(pageIndex: number, pageSize: number, name: string) {
+    return this.post("/api_v2/tars/api/field/manage/page", { pageIndex, pageSize, name });
+  }
+  async getManagedAiField(id: string) { return this.get(`/api_v2/tars/api/field/manage/detail/${encodeURIComponent(id)}`); }
+  async createManagedAiField(data: JsonObject) { return this.post("/api_v2/tars/api/field/manage/create", data); }
+  async updateManagedAiField(data: JsonObject) { return this.post("/api_v2/tars/api/field/manage/update", data); }
+  async deleteManagedAiField(id: string) { return this.get(`/api_v2/tars/api/field/manage/delete/${encodeURIComponent(id)}`); }
+  async toggleManagedAiField(id: string) { return this.get(`/api_v2/tars/api/field/manage/switch/${encodeURIComponent(id)}`); }
 
   async chat(data: JsonObject) { const bot = String(data.botId ?? await this.botId()); return this.post(`/api_v2/gpt/bot/${bot}/chat`, { botId: Number(bot), projectId: Number(await this.projectId()), option: { debug: true }, ...data }); }
   async chatAsync(data: JsonObject) { const bot = String(data.botId ?? await this.botId()); return this.post(`/api_v2/gpt/bot/${bot}/chat/async`, { botId: Number(bot), projectId: Number(await this.projectId()), option: { debug: true }, ...data }); }
@@ -115,6 +147,29 @@ export class SolveaClient {
   async createCustomQualityRule(data: JsonObject) { return this.post("/api_v2/intelli/inspection/ticket/customRules/create", data); }
   async updateCustomQualityRule(data: JsonObject) { return this.post("/api_v2/intelli/inspection/ticket/customRules/update", data); }
   async deleteCustomQualityRule(key: string) { return this.post("/api_v2/intelli/inspection/ticket/customRules/delete", { inspectionKey: key }); }
+  async listQualityAlertRules() { return this.get("/api_v2/intelli/inspection/alert/list"); }
+  async getQualityAlertRule(id: string) { return this.get("/api_v2/intelli/inspection/alert/detail", { id }); }
+  async createQualityAlertRule(data: JsonObject) { return this.post("/api_v2/intelli/inspection/alert/create", data); }
+  async updateQualityAlertRule(data: JsonObject) { return this.post("/api_v2/intelli/inspection/alert/update", data); }
+  async deleteQualityAlertRule(id: string) { return this.get("/api_v2/intelli/inspection/alert/delete", { id }); }
+  async listQualityAlertMessages(data: JsonObject) { return this.post("/api_v2/intelli/inspection/alert/message/list", data); }
+  async getQualityAlertMessage(id: string) { return this.get("/api_v2/intelli/inspection/alert/message/detail", { id }); }
+
+  async listTemplates(data: JsonObject) { return this.post(`/api_v2/gpt/project/${await this.projectId()}/templates/filter`, data); }
+  async createTemplate(data: JsonObject) {
+    const content = String(data.content ?? "");
+    return this.post(`/api_v2/gpt/project/${await this.projectId()}/template`, {
+      name: data.name, content, status: data.status ?? "ENABLED",
+      multiContent: data.multiContent ?? { AUTO: content },
+      ...(data.scene ? { scene: data.scene } : {}),
+    });
+  }
+  async updateTemplate(id: string, data: JsonObject) {
+    return this.put(`/api_v2/gpt/project/${await this.projectId()}/template/${encodeURIComponent(id)}`, data);
+  }
+  async deleteTemplates(ids: number[]) {
+    return this.request("DELETE", `/api_v2/gpt/project/${await this.projectId()}/templates`, { templateIds: ids });
+  }
 
   private get qamPrefix() { return this.env === "prod" ? "/api_v2/qam" : "/sns_v1"; }
   async listKnowledge(data: JsonObject) { return this.post(`${this.qamPrefix}/project/${await this.projectId()}/getKnowledge`, { type: "ALL", pageIndex: 1, pageSize: 50, keyword: "", ...data }); }
