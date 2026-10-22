@@ -13,7 +13,7 @@
 ### CLI
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api chat -m "你好" --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" chat send --message "你好" --pretty
 ```
 
 ---
@@ -25,9 +25,9 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api chat -m "你好" --pretty
 ### CLI
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api chat -m "你好" --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" chat send --message "你好" --pretty
 # 从返回中取 chatId
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api chat -m "继续问" --chat-id <上轮chatId> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" chat send --message "继续问" --chat-id <上轮chatId> --pretty
 ```
 
 ### Python 示例
@@ -50,7 +50,7 @@ r2 = client.chat("继续问", chat_id=chat_id)
 | Badcase 溯源（按轮次） | POST | `/api_v2/gpt/bot/{botId}/chat/context/compare` | 返回检索知识、tool call 详情、最终 answer |
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-transcripts --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript list --pretty
 ```
 
 Badcase 分析标准流程：

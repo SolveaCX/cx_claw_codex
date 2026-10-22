@@ -86,7 +86,7 @@ TOOL 成功后写入的节点输出形态是：
 ## Resource Dependencies
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-plugins --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool list --pretty
 node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-ai-fields --pretty
 ```
 

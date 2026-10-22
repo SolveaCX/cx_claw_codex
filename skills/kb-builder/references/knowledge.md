@@ -20,20 +20,20 @@
 QA / AI自学习知识：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-knowledge --id 3057821 --type QA --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge get --id 3057821 --type QA --pretty
 ```
 
 文档 / 网页知识使用同一个业务入口，但必须带对应类型；脚本会调用文档详情接口，而不是 QA 的详情接口：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-knowledge --id 3057821 --type FILE --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-knowledge --id 3057821 --type WEBSITE --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge get --id 3057821 --type FILE --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge get --id 3057821 --type WEBSITE --pretty
 ```
 
 产品知识：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-knowledge --id 3057821 --type PRODUCT --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge get --id 3057821 --type PRODUCT --pretty
 ```
 
 ## 更新问答 / AI自学习知识
@@ -46,7 +46,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-knowledge --id 3057821 --type PRODUC
 4. 确认后执行：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-knowledge --id 3057821 --data-file /workspace/state/kb-builder/knowledge_update.json --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge update --id 3057821 --data-file /workspace/state/kb-builder/knowledge_update.json --pretty
 ```
 
 5. 再次读取同一 ID，核对实际结果。

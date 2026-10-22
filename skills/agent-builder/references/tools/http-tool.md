@@ -15,11 +15,11 @@
 | 根据真实响应构建输出 | POST | `/api_v2/gpt/ap/{projectId}/build/plugin` |
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-plugins --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-plugin --id <tool_id> --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool list --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool get --id <tool_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool create \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool update \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 ```
 
@@ -267,7 +267,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/tools/va
 创建完成后：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-plugin --id <tool_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool get --id <tool_id> --pretty
 ```
 
 以回查结果确认名称、URL、方法、参数树和 `actionStatuses` 已按预期保存。

@@ -25,6 +25,24 @@ GROUPS = [
     "solvea-desk",
     "solvea-kit",
 ]
+RESOURCE_ACTIONS = {
+    "agent": ["list", "get", "create", "update", "get-chatflow"],
+    "intent": ["list", "get", "create", "update", "toggle"],
+    "strategy": ["list", "entities", "create", "update", "toggle"],
+    "tool": ["list", "get", "create", "update", "delete"],
+    "mock": ["query", "replace"],
+    "field": ["canvas", "agent-range", "guide", "initialize", "list", "get", "create", "update", "delete", "toggle"],
+    "template": ["list", "create", "update", "delete"],
+    "knowledge": ["list", "get", "update", "upload-qa", "tags"],
+    "directory": ["list", "create", "update", "delete"],
+    "quality": [
+        "status", "toggle", "rules", "get-rule", "update-rule", "get-custom-rule",
+        "create-custom-rule", "update-custom-rule", "delete-custom-rule", "alerts", "get-alert",
+        "create-alert", "update-alert", "delete-alert", "alert-messages", "get-alert-message",
+    ],
+    "transcript": ["list", "get", "context"],
+    "chat": ["send", "async", "result"],
+}
 
 
 def command_inventory() -> list[str]:
@@ -64,6 +82,16 @@ def manifest() -> dict:
             f"{CLI} api",
             f"{CLI} commands",
             f"{CLI} capabilities",
+        ],
+        "resourceCommands": [
+            {
+                "resource": resource,
+                "action": action,
+                "command": f"{CLI} {resource} {action}",
+                "execution": "local-cli",
+            }
+            for resource, actions in RESOURCE_ACTIONS.items()
+            for action in actions
         ],
         "solveaApiCommands": [
             {

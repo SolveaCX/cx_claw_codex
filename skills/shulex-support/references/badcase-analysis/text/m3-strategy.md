@@ -43,13 +43,13 @@ M3 只处理意图识别完成之后、Agent 或回复动作执行之前的问�
 ### 2. 读取当前配置
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-strategies --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" strategy list --pretty
 ```
 
 先按 `strategyId` 定位当轮实际策略，再找业务上预期命中的策略。条件字段含义不明确时读取：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-entities --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" strategy entities --pretty
 ```
 
 比较以下内容：

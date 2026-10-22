@@ -7,10 +7,10 @@
 先读取现状。开启或关闭会影响项目后续 Agent 回复的质检行为，必须说明影响并在用户确认后写入：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-quality-status --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-quality-rules \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" quality status --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" quality rules \
   --begin-ts <epoch_ms> --end-ts <epoch_ms> --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api set-quality-status --enable --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" quality toggle --enable --pretty
 ```
 
 关闭时使用 `--disable`。不要修改 GPT 的 Nacos `quality-inspection-gate`；它是平台灰度与消息过滤配置，不是租户可管理的质检开关。
@@ -20,9 +20,9 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api set-quality-status --enable --pretty
 先读取规则清单与详情，再展示将要修改的范围、识别/拦截动作、启停状态和适用 Agent。系统规则只能更新，不能删除或更改为自定义规则：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-quality-rule \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" quality get-rule \
   --inspection-key <rule_key> --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-quality-rule \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" quality update-rule \
   --data-file /workspace/state/solvea-kit/quality_rule_update.json --pretty
 ```
 
@@ -41,13 +41,13 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-quality-rule \
 先生成 JSON 并向用户展示，确认后再创建、更新或删除：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-custom-quality-rule \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" quality create-custom-rule \
   --data-file /workspace/state/solvea-kit/custom_quality_rule_create.json --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-custom-quality-rule \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" quality get-custom-rule \
   --inspection-key <rule_key> --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-custom-quality-rule \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" quality update-custom-rule \
   --data-file /workspace/state/solvea-kit/custom_quality_rule_update.json --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api delete-custom-quality-rule \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" quality delete-custom-rule \
   --inspection-key <rule_key> --pretty
 ```
 

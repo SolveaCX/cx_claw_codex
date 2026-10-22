@@ -9,14 +9,15 @@ description: Shulex 路由与运营配置工具包。用于意图、策略、变
 
 Solvea Kit 保留路由与运营相关配置：意图、策略、变量系统、AI 质检和标签树。Agent、工具、CHAT_FLOW、测试、知识库和分析类需求按下方分流。
 
-## Solvea API CLI
+## CXClaw CLI
 
-所有查询与写入操作，均使用 `/skill-lib/solvea-api/solvea_api.py`：
+已迁移的查询与写入操作统一使用“资源 + 动作”两层命令；只有尚未迁移的兼容命令才使用 `api <command>`：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api <command> --pretty
-# 例如：
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-agents --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent list --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" intent create --data-file intent.json --pretty
+# 临时兼容入口，Skill 不应为已迁移能力新增这种调用：
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api <legacy-command> --pretty
 ```
 
 ## 能力分流

@@ -80,7 +80,7 @@ flowchart TD
 更新已有 MULTI_AGENT 必须先取完整对象，不允许只提交局部 patch：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-agent --id <agent_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent get --id <agent_id> --pretty
 ```
 
 将完整对象保存到：
@@ -92,7 +92,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-agent --id <agent_id> --pretty
 修改后展示 diff 摘要和 Mermaid，请用户确认。确认后执行：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-agent \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent update \
   --data-file /workspace/state/agent-builder/multi-agent/update_<agent_id>_payload.json \
   --pretty
 ```

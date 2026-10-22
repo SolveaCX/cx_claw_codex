@@ -20,7 +20,7 @@
 先读取完整目录树：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-directories --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" directory list --pretty
 ```
 
 `list-directories` 对应前端接口：
@@ -48,7 +48,7 @@ GET /api_v2/qam/project/{projectId}/directories?keyword=&kuPublished=
 查询知识：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge list \
   --type ALL \
   --page-size 1000 \
   --page 1 \
@@ -58,7 +58,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge \
 指定目录查询：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge list \
   --type ALL \
   --directory-id 105809 \
   --page-size 1000 \
@@ -173,7 +173,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_know
 脚本内部不会遍历所有目录。它直接不传 `directoryId`，按页拉全量知识：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge --type ALL --page-size 1000 --page 1 --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge list --type ALL --page-size 1000 --page 1 --pretty
 ```
 
 第一页读取 `total`，继续翻页直到拉完。
@@ -183,7 +183,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge --type ALL --page-size 10
 脚本内部会先从目录树展开该目录的所有子孙目录 id，包含父目录自身。然后按目录逐个分页拉取：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge list \
   --type ALL \
   --directory-id <dir_id> \
   --page-size 1000 \

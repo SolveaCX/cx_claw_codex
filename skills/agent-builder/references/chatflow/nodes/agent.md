@@ -299,7 +299,7 @@ next_steps[].title = accept_wait
 ## Resource Dependencies
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-plugins --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool list --pretty
 node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-agent-ai-fields --pretty
 ```
 

@@ -118,7 +118,7 @@ CHAT_FLOW 草稿按当前用户隔离，版本号为 `-userId`。保存草稿不
 工具完成后，使用返回的新测试 `chatId` 获取一次完整会话记录：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-transcript \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
   --chat-id <newTestChatId> \
   --pretty
 ```

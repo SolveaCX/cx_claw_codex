@@ -32,7 +32,7 @@
 先查可用 agent：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-agents --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent list --pretty
 ```
 
 ## 限制

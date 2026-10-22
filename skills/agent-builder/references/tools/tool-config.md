@@ -32,7 +32,7 @@ CHAT_FLOW 有两种用法：
 ## 查看详情
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-plugin --id <tool_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool get --id <tool_id> --pretty
 ```
 
 重点看：
