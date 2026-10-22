@@ -1,6 +1,6 @@
 # SLS 日志查询
 
-文本 badcase 的日志查询统一执行 `npx --yes cxclaw@latest sls query`。CLI 先向 `shulex-cloud` 申请 10～15 分钟只读 STS，再由本机使用 Aliyun Log Go SDK 直连 SLS；临时凭据只驻留内存，禁止写入文件、日志或普通命令输出。
+文本 badcase 的日志查询统一执行 `npx --yes cxclaw@latest sls query`。CLI 先向 `shulex-cloud` 申请 10～15 分钟只读 STS，再由本机使用 `@alicloud/log` 直连 SLS；临时凭据只驻留内存，禁止写入文件、日志或普通命令输出。
 
 ## 基础用法
 

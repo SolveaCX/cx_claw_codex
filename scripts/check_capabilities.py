@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
 LOCK = ROOT / "capabilities.lock.json"
-CLI = "${PLUGIN_ROOT}/bin/cxclaw-launcher"
+CLI = "npx --yes cxclaw@latest"
 GROUPS = [
     "agent-analytics",
     "agent-builder",
@@ -62,7 +62,7 @@ def manifest() -> dict:
             f"{CLI} sls query",
             f"{CLI} api",
             f"{CLI} commands",
-            f"{CLI} schema",
+            f"{CLI} capabilities",
         ],
         "solveaApiCommands": [
             {

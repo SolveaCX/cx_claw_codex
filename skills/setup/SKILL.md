@@ -6,7 +6,7 @@ description: 安装 CXClaw 后完成钉钉登录、租户选择和本地环境�
 # CXClaw Setup
 
 1. 后续命令统一使用 `npx --yes cxclaw@latest`。运行
-   `npx --yes cxclaw@latest auth status`；bootstrap 已登录时不要重复授权，未登录再运行
+   `npx --yes cxclaw@latest auth status`；已经登录时不要重复授权，未登录再运行
    `npx --yes cxclaw@latest auth login --server <公司提供的 shulex-cloud 授权地址>`。
 2. 请用户在钉钉授权页完成验证。不要代替用户授权，也不要展示或记录 token。
 3. 用户要求测试环境时运行 `npx --yes cxclaw@latest tenant search <租户名称> --env test`；生产环境必须明确使用 `--env prod`，不能自行推断。
