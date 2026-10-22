@@ -24,7 +24,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api <legacy-command> --pretty
 
 | 用户诉求 | 去哪里 |
 |---|---|
-| 通用意图分类实现（供 POC / Delivery 调用） | 本 skill：`scripts/intent_classify.py` |
+| 通用意图分类实现（供 POC / Delivery 调用） | `workflow intent-classify` |
 | 意图创建、查询、更新、启停 | 本 skill：`references/intent.md` |
 | 策略创建、查询、更新、启停、entity condition | 本 skill：`references/strategy.md` |
 | 变量系统字段查询、初始化、创建、更新、删除、启停 | 本 skill：`references/variables.md` |
@@ -65,8 +65,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api <legacy-command> --pretty
 solvea-kit/
 ├── SKILL.md
 ├── scripts/
-│   ├── generate_label_import_file.py  # 根据标签 JSON 生成标签树导入 xlsx
-│   └── intent_classify.py             # 通用意图分类实现，POC/Delivery 通过 wrapper 调用
+│   └──（标签导入和意图分类已迁移到 `workflow` CLI）
 └── references/
     ├── intent.md
     ├── strategy.md

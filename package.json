@@ -3,7 +3,9 @@
   "version": "0.1.2",
   "description": "Solvea CXClaw CLI and Codex plugin runtime",
   "type": "module",
-  "bin": { "cxclawctl": "./bin/cxclawctl.mjs" },
+  "bin": {
+    "cxclawctl": "./bin/cxclawctl.mjs"
+  },
   "files": [
     "bin",
     "dist/cli.js",
@@ -28,11 +30,14 @@
     "package:agent-plugin": "node scripts/package-agent-plugin.mjs",
     "package:codex-plugin": "node scripts/package-codex-plugin.mjs"
   },
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@alicloud/log": "^1.2.6",
     "@napi-rs/keyring": "^2.1.2",
     "compare-versions": "^6.1.1",
+    "exceljs": "^4.4.0",
     "open": "^10.2.0"
   },
   "devDependencies": {
@@ -42,6 +47,9 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.0"
   },
-  "repository": { "type": "git", "url": "git+https://github.com/SolveaCX/cx_claw_codex.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SolveaCX/cx_claw_codex.git"
+  },
   "license": "UNLICENSED"
 }

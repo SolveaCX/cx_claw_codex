@@ -10,6 +10,7 @@ import { publicTenant, search, useTenant } from "./tenant.js";
 import { installMarketplace, installScheduler, update } from "./update.js";
 import { SERVER_API_VERSION, TOOL_SCHEMA_VERSION, VERSION } from "./version.js";
 import { runRuntime } from "./workflows/runtime.js";
+import { runSolveaKitWorkflow } from "./workflows/solvea-kit.js";
 
 const print = (value: unknown) => console.log(JSON.stringify(value, null, 2));
 const usage = () => [
@@ -63,6 +64,7 @@ async function main(args = process.argv.slice(2)) {
   if (command === "login" || command === "logout") return runAuth(command, args.slice(1));
   if (command === "tenant" || command === "context") return runTenant(action, rest);
   if (command === "runtime") return print(await runRuntime(action, rest));
+  if (command === "workflow") return print(await runSolveaKitWorkflow(action, rest));
   if (command === "api") { if (!action) throw new Error("api command is required"); await runApi(await authenticated(), action, rest); return; }
   if (command === "script") { if (!action) throw new Error("script path is required"); process.exitCode = await runPython(action, rest); return; }
   if (command === "sls" && action === "query") {

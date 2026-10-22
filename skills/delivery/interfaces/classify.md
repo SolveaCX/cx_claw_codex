@@ -1,6 +1,6 @@
 # Delivery Intent Classification
 
-Delivery 专属分类入口。入口和状态归属 Delivery skill；通用意图分类实现调用 `solvea-kit/scripts/intent_classify.py`，状态写入 `/workspace/state/delivery/progress.json`。
+Delivery 专属分类入口。入口和状态归属 Delivery skill；通用意图分类实现调用 `workflow intent-classify --owner delivery`，状态写入 `/workspace/state/delivery/progress.json`。
 
 ## Commands
 

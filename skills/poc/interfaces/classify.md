@@ -1,6 +1,6 @@
 # POC Intent Classification
 
-POC 专属分类入口。入口和状态归属 POC skill；通用意图分类实现调用 `solvea-kit/scripts/intent_classify.py`，状态写入 `/workspace/state/poc/progress.json`。
+POC 专属分类入口。入口和状态归属 POC skill；通用意图分类实现调用 `workflow intent-classify --owner poc`，状态写入 `/workspace/state/poc/progress.json`。
 
 ## Commands
 
