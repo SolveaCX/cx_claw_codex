@@ -52,6 +52,7 @@ export async function runSolveaCommand(session: Session, command: string, args: 
   const client = new SolveaClient(session);
   if (EXTENDED_COMMANDS.has(command)) return runExtendedCommand(client, command, args);
   if (REMAINING_COMMANDS.has(command)) return runRemainingCommand(client, command, args);
+  if (command.startsWith("chat-report-")) return runRemainingCommand(client, "report-message", args);
   const id = () => option(args, "--id", true)!;
   switch (command) {
     case "get-project": return client.projectInfo();
@@ -109,7 +110,7 @@ async function optionalData(args: string[]) {
 }
 
 export function isNativeSolveaCommand(command: string) {
-  return EXTENDED_COMMANDS.has(command) || REMAINING_COMMANDS.has(command) || new Set([
+  return command.startsWith("chat-report-") || EXTENDED_COMMANDS.has(command) || REMAINING_COMMANDS.has(command) || new Set([
     "get-project", "list-agents", "get-agent", "get-chatflow-graph", "create-agent", "update-agent",
     "list-plugins", "get-plugin", "create-plugin", "update-plugin", "delete-plugin", "chat", "chat-async",
     "get-async-result", "list-intents", "get-intent", "create-intent", "update-intent", "toggle-intent",
