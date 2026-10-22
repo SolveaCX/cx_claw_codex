@@ -69,4 +69,12 @@ describe("release package layout", () => {
       expect(requirements).toMatch(new RegExp(`^${name}==`, "m"));
     }
   });
+
+  test("keeps the native TypeScript API boundary separate from the legacy fallback", () => {
+    const business = readFileSync("src/business.ts", "utf8");
+    const commands = readFileSync("src/solvea/commands.ts", "utf8");
+    expect(business).toContain("runSolveaCommand");
+    expect(commands).toContain("TypeScript command not migrated yet");
+    expect(commands).not.toContain("spawn(");
+  });
 });
