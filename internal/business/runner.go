@@ -24,6 +24,29 @@ type Result struct {
 	Stderr string
 }
 
+func RunScript(ctx context.Context, relative string, args []string, stdin io.Reader, stdout, stderr io.Writer) error {
+	root, err := updatepkg.Root()
+	if err != nil {
+		return err
+	}
+	clean := filepath.Clean(strings.TrimPrefix(relative, string(os.PathSeparator)))
+	if clean == "." || clean == ".." || strings.HasPrefix(clean, ".."+string(os.PathSeparator)) || !strings.HasPrefix(filepath.ToSlash(clean), "skills/") {
+		return errors.New("script path must be inside skills/")
+	}
+	script := filepath.Join(root, clean)
+	if _, err := os.Stat(script); err != nil {
+		return fmt.Errorf("script is unavailable: %w", err)
+	}
+	python, err := PythonExecutableForRoot(root)
+	if err != nil {
+		return err
+	}
+	cmd := exec.CommandContext(ctx, python, append([]string{script}, args...)...)
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = stdin, stdout, stderr
+	cmd.Env = append(os.Environ(), "PYTHONPATH="+filepath.Join(root, "skills", "__lib__"))
+	return cmd.Run()
+}
+
 func Run(ctx context.Context, session *config.Session, command string, args []string, stdin io.Reader) (*Result, error) {
 	if session == nil || session.Tenant.BusinessToken == "" || session.Tenant.BusinessURL == "" {
 		return nil, errors.New("tenant business credentials are unavailable; select the tenant again")
@@ -36,7 +59,7 @@ func Run(ctx context.Context, session *config.Session, command string, args []st
 	if _, err := os.Stat(script); err != nil {
 		return nil, fmt.Errorf("business command runtime is missing: %w", err)
 	}
-	python, err := PythonExecutable()
+	python, err := PythonExecutableForRoot(root)
 	if err != nil {
 		return nil, err
 	}
@@ -91,32 +114,36 @@ func businessEnvironment(session *config.Session, root string) []string {
 		"SOLVEA_PROD_TOKEN="+session.Tenant.BusinessToken,
 		"CXCLAW_PLUGIN_ROOT="+root,
 	)
-	pythonPath := filepath.Join(root, "python")
-	if inherited := strings.TrimSpace(os.Getenv("PYTHONPATH")); inherited != "" {
-		pythonPath += string(os.PathListSeparator) + inherited
-	}
+	pythonPath := filepath.Join(root, "skills", "__lib__")
 	environment = append(environment, "PYTHONPATH="+pythonPath)
 	return environment
 }
 
-func PythonExecutable() (string, error) {
-	if configured := strings.TrimSpace(os.Getenv("CXCLAW_PYTHON")); configured != "" {
-		return configured, nil
-	}
-	candidates := []string{"python3", "python"}
+func PythonExecutableForRoot(root string) (string, error) {
+	candidates := []string{filepath.Join(root, "runtime", "python", "bin", "python3"), filepath.Join(root, "runtime", "python", "bin", "python")}
 	if runtime.GOOS == "windows" {
-		candidates = []string{"python.exe", "python3.exe", "py.exe"}
+		candidates = []string{filepath.Join(root, "runtime", "python", "python.exe")}
 	}
 	for _, candidate := range candidates {
-		if path, err := exec.LookPath(candidate); err == nil {
-			return path, nil
+		if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
+			return candidate, nil
 		}
 	}
-	return "", errors.New("Python 3 is required for CXClaw business commands; run cxclawctl doctor for details")
+	if os.Getenv("CXCLAW_DEV_MODE") == "1" {
+		if configured := strings.TrimSpace(os.Getenv("CXCLAW_PYTHON")); configured != "" {
+			return configured, nil
+		}
+		for _, candidate := range []string{"python3", "python"} {
+			if path, err := exec.LookPath(candidate); err == nil {
+				return path, nil
+			}
+		}
+	}
+	return "", errors.New("bundled CPython 3.12 runtime is missing; reinstall CXClaw or run cxclawctl doctor")
 }
 
 func CheckRuntime(ctx context.Context, root string) error {
-	python, err := PythonExecutable()
+	python, err := PythonExecutableForRoot(root)
 	if err != nil {
 		return err
 	}
@@ -124,8 +151,8 @@ func CheckRuntime(ctx context.Context, root string) error {
 	if _, err := os.Stat(script); err != nil {
 		return fmt.Errorf("business command runtime is missing: %w", err)
 	}
-	cmd := exec.CommandContext(ctx, python, "-c", "import sys,httpx,boto3; assert sys.version_info >= (3, 9)")
-	cmd.Env = append(os.Environ(), "PYTHONPATH="+filepath.Join(root, "python"))
+	cmd := exec.CommandContext(ctx, python, "-c", "import sys,httpx,boto3; assert sys.version_info[:3] == (3, 12, 12)")
+	cmd.Env = append(os.Environ(), "PYTHONPATH="+filepath.Join(root, "skills", "__lib__"))
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("Python business runtime dependencies are unavailable: %w: %s", err, strings.TrimSpace(string(output)))
 	}

@@ -42,7 +42,7 @@ VARIABLE_PROCESS 不向用户发送消息，也不等待用户输入；它处理
 赋值到变量系统字段前查：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-ai-fields --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-ai-fields --pretty
 ```
 
 ## 限制

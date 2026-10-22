@@ -40,17 +40,17 @@ Strategy（策略）定义了：当某个条件（意图、触点、实体等）
 ## CLI
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-entities --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-strategies --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-entities --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-strategies --pretty
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api create-strategy \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api create-strategy \
   --data '{"name":"退款路由","trigger":"MESSAGE","condition":{...},"action":{"type":"AGENT","agentId":2270}}'
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api update-strategy --id <strategy_id> \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-strategy --id <strategy_id> \
   --data-file /workspace/state/solvea-kit/update_strategy.json
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api toggle-strategy --id <strategy_id> --enable
-${PLUGIN_ROOT}/bin/cxclaw-launcher api toggle-strategy --id <strategy_id> --disable
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api toggle-strategy --id <strategy_id> --enable
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api toggle-strategy --id <strategy_id> --disable
 ```
 
 ## 原则

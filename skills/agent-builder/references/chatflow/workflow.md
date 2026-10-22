@@ -21,7 +21,7 @@
 所有 fragment 完成后，先合并 source，再只编译一次最终 source：
 
 ```bash
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py merge-source \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py merge-source \
   --fragment-file /workspace/state/agent-builder/chatflow/<task>/blocks/collect_order.json \
   --fragment-file /workspace/state/agent-builder/chatflow/<task>/blocks/lookup_order.json \
   --integration-file /workspace/state/agent-builder/chatflow/<task>/blocks/integration.json \
@@ -48,7 +48,7 @@ python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py merge-source 
 8. 编译同一份 source：
 
 ```bash
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py compile \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py compile \
   --source-file /workspace/state/agent-builder/chatflow/<task>_source.json \
   --graph-file /workspace/state/agent-builder/chatflow/<task>_graph.json \
   --pretty
@@ -57,7 +57,7 @@ python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py compile \
 9. 校验同一份 graph：
 
 ```bash
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py validate \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py validate \
   --graph-file /workspace/state/agent-builder/chatflow/<task>_graph.json \
   --pretty
 ```
@@ -80,7 +80,7 @@ python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py validate \
 1. 先 inspect 拉当前图，并写入本次 patch graph：
 
 ```bash
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py inspect \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py inspect \
   --agent-id <agent_id> \
   --out /workspace/state/agent-builder/chatflow/patch_<agent_id>_graph.json \
   --pretty
@@ -90,7 +90,7 @@ python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py inspect \
 3. validate patch graph 通过后默认 update 保存草稿，不发布：
 
 ```bash
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py update \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py update \
   --agent-id <agent_id> \
   --graph-file /workspace/state/agent-builder/chatflow/patch_<agent_id>_graph.json \
   --pretty
@@ -99,7 +99,7 @@ python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py update \
 4. 用户明确确认发布后，对同一份 graph 执行 publish：
 
 ```bash
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py publish \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py publish \
   --agent-id <agent_id> \
   --graph-file /workspace/state/agent-builder/chatflow/patch_<agent_id>_graph.json \
   --pretty

@@ -2,7 +2,6 @@ package business
 
 import (
 	"bytes"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -30,9 +29,21 @@ func TestBusinessEnvironmentReplacesInheritedTenantCredentials(t *testing.T) {
 	if !strings.Contains(joined, "SOLVEA_TOKEN=fresh-token") {
 		t.Fatal("selected tenant token was not supplied to child environment")
 	}
-	expectedPath := "PYTHONPATH=" + filepath.Join("/plugin", "python") + string(os.PathListSeparator) + "/existing/python"
+	expectedPath := "PYTHONPATH=" + filepath.Join("/plugin", "skills", "__lib__")
 	if !strings.Contains(joined, expectedPath) {
 		t.Fatalf("vendored Python dependencies missing from PYTHONPATH: %s", joined)
+	}
+	if strings.Contains(joined, "/existing/python") {
+		t.Fatal("system PYTHONPATH leaked into isolated runtime")
+	}
+}
+
+func TestPythonExecutableRequiresBundledRuntime(t *testing.T) {
+	root := t.TempDir()
+	t.Setenv("CXCLAW_DEV_MODE", "")
+	t.Setenv("CXCLAW_PYTHON", "/tmp/system-python")
+	if _, err := PythonExecutableForRoot(root); err == nil {
+		t.Fatal("production mode accepted system Python")
 	}
 }
 

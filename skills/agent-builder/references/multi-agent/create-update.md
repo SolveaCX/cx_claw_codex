@@ -60,7 +60,7 @@ flowchart TD
 5. 用户确认后执行：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api create-agent \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api create-agent \
   --data-file /workspace/state/agent-builder/multi-agent/create_<name>_payload.json \
   --pretty
 ```
@@ -136,7 +136,7 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api create-agent \
 更新已有 MULTI_AGENT 必须先取完整对象，不允许只提交局部 patch：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-agent --id <agent_id> --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-agent --id <agent_id> --pretty
 ```
 
 将完整对象保存到：
@@ -148,7 +148,7 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api get-agent --id <agent_id> --pretty
 修改后展示 diff 摘要和 Mermaid，请用户确认。确认后执行：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api update-agent \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-agent \
   --data-file /workspace/state/agent-builder/multi-agent/update_<agent_id>_payload.json \
   --pretty
 ```

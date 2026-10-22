@@ -1,0 +1,17 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/marketplace.schema.json",
+  "name": "cxclaw",
+  "owner": {
+    "name": "SolveaCX",
+    "url": "https://github.com/SolveaCX/cx_claw_codex"
+  },
+  "plugins": [
+    {
+      "name": "cxclaw",
+      "source": "./",
+      "description": "Solvea CXClaw skills for Codex",
+      "homepage": "https://github.com/SolveaCX/cx_claw_codex",
+      "license": "UNLICENSED"
+    }
+  ]
+}

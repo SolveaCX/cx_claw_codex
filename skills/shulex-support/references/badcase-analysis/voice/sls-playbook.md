@@ -1,11 +1,11 @@
 # 语音链路 SLS 查询 Playbook
 
-所有 SLS 查询都通过本机 `${PLUGIN_ROOT}/bin/cxclaw-launcher sls query` 使用 `shulex-cloud` 下发的短期只读 STS 直连阿里云，不经过业务服务查询代理。
+所有 SLS 查询都通过本机 `$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query` 使用 `shulex-cloud` 下发的短期只读 STS 直连阿里云，不经过业务服务查询代理。
 
 ## 基础模板
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher sls query \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query \
   --from <epoch-seconds> \
   --to <epoch-seconds> \
   --query 'rest:"<keyword>"' \

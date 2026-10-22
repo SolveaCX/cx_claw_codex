@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -15,6 +14,7 @@ import (
 	"syscall"
 
 	"github.com/SolveaCX/cx_claw_codex/internal/auth"
+	"github.com/SolveaCX/cx_claw_codex/internal/config"
 	"github.com/SolveaCX/cx_claw_codex/internal/update"
 )
 
@@ -35,8 +35,7 @@ func run(ctx context.Context, args []string) error {
 	flags := flag.NewFlagSet("cxclaw-bootstrap", flag.ContinueOnError)
 	server := flags.String("server", "", "shulex-cloud authorization base URL")
 	channel := flags.String("channel", "stable", "stable, canary or dev")
-	installRoot := flags.String("install-root", filepath.Join(home, ".codex", "plugins", "cxclaw"), "plugin source directory")
-	marketplaceRoot := flags.String("marketplace-root", home, "personal marketplace root")
+	installRoot := flags.String("install-root", filepath.Join(home, ".codex", "cxclaw"), "CXClaw runtime directory")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -47,9 +46,8 @@ func run(ctx context.Context, args []string) error {
 	if err != nil {
 		return err
 	}
-	marketRoot, err := filepath.Abs(*marketplaceRoot)
-	if err != nil {
-		return err
+	if !validChannel(*channel) {
+		return errors.New("--channel must be stable, canary or dev")
 	}
 	if err := os.MkdirAll(root, 0o755); err != nil {
 		return err
@@ -57,10 +55,7 @@ func run(ctx context.Context, args []string) error {
 	if err := os.Setenv("CXCLAW_PLUGIN_ROOT", root); err != nil {
 		return err
 	}
-	session, err := auth.Login(ctx, *server, *channel, os.Stderr)
-	if err != nil {
-		return err
-	}
+	session := &config.Session{Channel: *channel}
 	version, err := update.Install(ctx, session)
 	if err != nil {
 		return err
@@ -71,14 +66,51 @@ func run(ctx context.Context, args []string) error {
 	if err := installStableLauncher(root, version); err != nil {
 		return err
 	}
-	if err := registerMarketplace(marketRoot, root); err != nil {
+	if err := installMarketplace(ctx, *channel); err != nil {
+		return err
+	}
+	if _, err := auth.Login(ctx, *server, *channel, os.Stderr); err != nil {
 		return err
 	}
 	launcher := filepath.Join(root, "bin", launcherName())
 	if err := installScheduler(ctx, launcher, root); err != nil {
 		return fmt.Errorf("install automatic update task: %w", err)
 	}
-	fmt.Printf("CXClaw %s 已下载并注册到个人插件市场。请重启 Codex，并在插件目录确认 CXClaw 已启用。\n", version)
+	fmt.Printf("CXClaw %s 已安装并注册到 Git Marketplace。请新建 Codex 会话或重启 Codex。\n", version)
+	return nil
+}
+
+func validChannel(channel string) bool {
+	return channel == "stable" || channel == "canary" || channel == "dev"
+}
+
+var runCommand = func(ctx context.Context, name string, args ...string) ([]byte, error) {
+	return exec.CommandContext(ctx, name, args...).CombinedOutput()
+}
+
+func installMarketplace(ctx context.Context, channel string) error {
+	if !validChannel(channel) {
+		return errors.New("invalid marketplace channel")
+	}
+	if _, err := exec.LookPath("codex"); err != nil {
+		return errors.New("codex CLI is required to install the CXClaw plugin")
+	}
+	output, err := runCommand(ctx, "codex", "plugin", "marketplace", "add", "SolveaCX/cx_claw_codex", "--ref", "marketplace/"+channel)
+	if err != nil {
+		message := strings.ToLower(string(output))
+		if !strings.Contains(message, "already") && !strings.Contains(message, "exists") {
+			return fmt.Errorf("add CXClaw marketplace: %w: %s", err, strings.TrimSpace(string(output)))
+		}
+		if output, err = runCommand(ctx, "codex", "plugin", "marketplace", "upgrade", "cxclaw"); err != nil {
+			return fmt.Errorf("upgrade CXClaw marketplace: %w: %s", err, strings.TrimSpace(string(output)))
+		}
+	}
+	if output, err = runCommand(ctx, "codex", "plugin", "add", "cxclaw@cxclaw"); err != nil {
+		message := strings.ToLower(string(output))
+		if !strings.Contains(message, "already") && !strings.Contains(message, "installed") {
+			return fmt.Errorf("install CXClaw plugin: %w: %s", err, strings.TrimSpace(string(output)))
+		}
+	}
 	return nil
 }
 
@@ -136,65 +168,4 @@ func installStableLauncher(root, version string) error {
 		return err
 	}
 	return nil
-}
-
-func registerMarketplace(marketplaceRoot, pluginRoot string) error {
-	relativePlugin, err := filepath.Rel(marketplaceRoot, pluginRoot)
-	if err != nil {
-		return err
-	}
-	if relativePlugin == ".." || strings.HasPrefix(relativePlugin, ".."+string(os.PathSeparator)) {
-		return errors.New("plugin source must be inside the marketplace root")
-	}
-	path := filepath.Join(marketplaceRoot, ".agents", "plugins", "marketplace.json")
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return err
-	}
-	manifest := map[string]interface{}{}
-	if data, readErr := os.ReadFile(path); readErr == nil {
-		if err := json.Unmarshal(data, &manifest); err != nil {
-			return fmt.Errorf("existing marketplace is invalid JSON: %w", err)
-		}
-	} else if !os.IsNotExist(readErr) {
-		return readErr
-	}
-	if _, exists := manifest["name"]; !exists {
-		manifest["name"] = "solvea-internal"
-	}
-	if _, exists := manifest["interface"]; !exists {
-		manifest["interface"] = map[string]interface{}{"displayName": "Solvea Internal"}
-	}
-	plugins, _ := manifest["plugins"].([]interface{})
-	entry := map[string]interface{}{
-		"name": "cxclaw",
-		"source": map[string]interface{}{
-			"source": "local",
-			"path":   "./" + filepath.ToSlash(relativePlugin),
-		},
-		"policy": map[string]interface{}{
-			"installation":   "INSTALLED_BY_DEFAULT",
-			"authentication": "ON_INSTALL",
-		},
-		"category":  "Developer Tools",
-		"interface": map[string]interface{}{"displayName": "CXClaw"},
-	}
-	replaced := false
-	for index, raw := range plugins {
-		item, ok := raw.(map[string]interface{})
-		if ok && item["name"] == "cxclaw" {
-			plugins[index] = entry
-			replaced = true
-			break
-		}
-	}
-	if !replaced {
-		plugins = append(plugins, entry)
-	}
-	manifest["plugins"] = plugins
-	data, err := json.MarshalIndent(manifest, "", "  ")
-	if err != nil {
-		return err
-	}
-	data = append(data, '\n')
-	return os.WriteFile(path, data, 0o600)
 }

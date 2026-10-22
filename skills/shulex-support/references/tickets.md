@@ -7,14 +7,14 @@
 工单创建、列表查询、详情查询、追加消息，继续通过本 skill 的 CLI 调用 GPT support API：
 
 ```bash
-python3 /skills/shulex-support/scripts/support.py <command> --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/shulex-support/scripts/support.py <command> --pretty
 ```
 
 可用命令：
 
 ```bash
 # 创建工单（基本）
-python3 /skills/shulex-support/scripts/support.py create-ticket \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/shulex-support/scripts/support.py create-ticket \
   --content "<问题描述>" \
   --brand "<brand，可选>" \
   --issue-type "<工单类型 code，见下方问题分类表>" \
@@ -24,7 +24,7 @@ python3 /skills/shulex-support/scripts/support.py create-ticket \
   --pretty
 
 # 创建工单（带附件，可重复 --attachment）
-python3 /skills/shulex-support/scripts/support.py create-ticket \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/shulex-support/scripts/support.py create-ticket \
   --content "<问题描述>" \
   --issue-type "<工单类型 code>" \
   --attachment "<沙箱内文件路径>" \
@@ -32,18 +32,18 @@ python3 /skills/shulex-support/scripts/support.py create-ticket \
   --pretty
 
 # 分页查询工单列表
-python3 /skills/shulex-support/scripts/support.py list-tickets \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/shulex-support/scripts/support.py list-tickets \
   --page 1 \
   --page-size 20 \
   --pretty
 
 # 查询工单详情和消息
-python3 /skills/shulex-support/scripts/support.py get-ticket \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/shulex-support/scripts/support.py get-ticket \
   --ticket-number "<工单号>" \
   --pretty
 
 # 追加客户消息
-python3 /skills/shulex-support/scripts/support.py append-message \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/shulex-support/scripts/support.py append-message \
   --ticket-number "<工单号>" \
   --content "<用户补充描述>" \
   --pretty

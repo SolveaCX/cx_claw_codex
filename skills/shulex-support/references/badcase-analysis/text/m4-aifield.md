@@ -48,7 +48,7 @@ M4 处理 Agent 执行前已经形成的变量系统字段问题：
 ### 2. 读取当前配置
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-ai-fields --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-ai-fields --pretty
 ```
 
 按会话中的字段 ID / 名称定位当前配置，比较：

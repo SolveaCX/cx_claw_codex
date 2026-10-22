@@ -13,7 +13,7 @@
 ### CLI
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api chat -m "你好" --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api chat -m "你好" --pretty
 ```
 
 ---
@@ -25,9 +25,9 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api chat -m "你好" --pretty
 ### CLI
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api chat -m "你好" --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api chat -m "你好" --pretty
 # 从返回中取 chatId
-${PLUGIN_ROOT}/bin/cxclaw-launcher api chat -m "继续问" --chat-id <上轮chatId> --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api chat -m "继续问" --chat-id <上轮chatId> --pretty
 ```
 
 ### Python 示例
@@ -50,7 +50,7 @@ r2 = client.chat("继续问", chat_id=chat_id)
 | Badcase 溯源（按轮次） | POST | `/api_v2/gpt/bot/{botId}/chat/context/compare` | 返回检索知识、tool call 详情、最终 answer |
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-transcripts --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-transcripts --pretty
 ```
 
 Badcase 分析标准流程：
@@ -85,7 +85,7 @@ CHAT_FLOW Agent 不能用 `metadata.specified_agent_id`（或老版 `specified_a
 # Delivery 回归：先读 /skills/delivery/interfaces/delivery-test.md
 
 # 校验 chatflow 图结构（chatflow 能力在 agent-builder skill 下）
-python3 /skills/agent-builder/scripts/chatflow/validate_graph.py --data-file graph.json
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/validate_graph.py --data-file graph.json
 ```
 
 ### 测试用例格式（JSON Schema）
@@ -205,8 +205,8 @@ while True:
 | 轮询导出状态 | POST | `/api_v2/gpt/label/project/{pid}/getLabelTask` | status=SUCCESS 时取 file URL |
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api export-transcripts --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-export-tasks --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api export-transcripts --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-export-tasks --pretty
 ```
 
 ### 转化真实数据为测试用例

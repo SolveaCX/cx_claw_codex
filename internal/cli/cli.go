@@ -50,6 +50,11 @@ func Run(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.
 		return runSLS(ctx, args[1:], stdout, stderr)
 	case "api":
 		return runAPI(ctx, args[1:], stdin, stdout)
+	case "script":
+		if len(args) < 2 {
+			return errors.New("usage: cxclawctl script skills/<path.py> [args]")
+		}
+		return business.RunScript(ctx, args[1], args[2:], stdin, stdout, stderr)
 	case "commands", "capabilities":
 		return printCapabilities(stdout, args[0] == "commands")
 	case "schema":
@@ -368,6 +373,13 @@ func runUpdate(ctx context.Context, args []string, stdout, stderr io.Writer) err
 		return nil
 	}
 	if *scheduled {
+		root, rootErr := updatepkg.Root()
+		if rootErr == nil {
+			if _, err := os.Stat(filepath.Join(root, "updates.paused")); err == nil {
+				fmt.Fprintln(stdout, "自动更新已因回滚暂停")
+				return nil
+			}
+		}
 		var random [8]byte
 		if _, err := cryptorand.Read(random[:]); err == nil {
 			jitter := time.Duration(binary.LittleEndian.Uint64(random[:])%1800) * time.Second
@@ -414,6 +426,19 @@ func doctor(args []string, stdout, stderr io.Writer) error {
 		if _, err := os.Stat(filepath.Join(root, item)); err != nil {
 			return fmt.Errorf("doctor: missing %s", item)
 		}
+	}
+	manifestData, err := os.ReadFile(filepath.Join(root, "plugin.json"))
+	if err != nil {
+		return err
+	}
+	var manifest struct {
+		Version string `json:"version"`
+	}
+	if err := json.Unmarshal(manifestData, &manifest); err != nil {
+		return fmt.Errorf("doctor: invalid plugin.json: %w", err)
+	}
+	if manifest.Version != buildinfo.CLIVersion {
+		return fmt.Errorf("doctor: plugin version %s does not match CLI version %s", manifest.Version, buildinfo.CLIVersion)
 	}
 	if err := business.CheckRuntime(context.Background(), root); err != nil {
 		return fmt.Errorf("doctor: %w", err)

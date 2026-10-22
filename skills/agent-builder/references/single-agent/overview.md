@@ -5,7 +5,7 @@ SINGLE_AGENT 适合目标单一、分支少、一个 prompt 能说清职责的�
 ## 创建
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api create-agent \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api create-agent \
   --data-file /workspace/state/agent-builder/single_agent_payload.json \
   --pretty
 ```
@@ -28,8 +28,8 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api create-agent \
 更新前先查完整对象：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-agent --id <agent_id> --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api update-agent \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-agent --id <agent_id> --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-agent \
   --data-file /workspace/state/agent-builder/update_agent_<agent_id>.json \
   --pretty
 ```

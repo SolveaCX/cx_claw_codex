@@ -16,27 +16,27 @@
 统一使用 `/workspace/state/agent-builder/` 保存跨轮配置：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-plugins --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-plugins --pretty
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-plugin --id <tool_id> --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-plugin --id <tool_id> --pretty
 
-python3 /skills/agent-builder/scripts/tools/validate_tool_config.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/tools/validate_tool_config.py \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api create-plugin \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api create-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api update-plugin \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api replace-mock-data \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api replace-mock-data \
   --name <mock_type> \
   --data-file /workspace/state/agent-builder/mock_records.json --pretty
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api query-mock-data \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api query-mock-data \
   --name <mock_type> --pretty
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api run-plugin \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api run-plugin \
   --data-file /workspace/state/agent-builder/run_tool_config.json --pretty
 ```
 

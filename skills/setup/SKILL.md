@@ -5,13 +5,13 @@ description: 安装 CXClaw 后完成钉钉登录、租户选择和本地环境�
 
 # CXClaw Setup
 
-1. 后续命令统一使用 `${PLUGIN_ROOT}/bin/cxclaw-launcher`。运行
-   `${PLUGIN_ROOT}/bin/cxclaw-launcher auth status`；bootstrap 已登录时不要重复授权，未登录再运行
-   `${PLUGIN_ROOT}/bin/cxclaw-launcher auth login --server <公司提供的 shulex-cloud 授权地址>`。
+1. 后续命令统一使用 `$HOME/.codex/cxclaw/bin/cxclaw-launcher`。运行
+   `$HOME/.codex/cxclaw/bin/cxclaw-launcher auth status`；bootstrap 已登录时不要重复授权，未登录再运行
+   `$HOME/.codex/cxclaw/bin/cxclaw-launcher auth login --server <公司提供的 shulex-cloud 授权地址>`。
 2. 请用户在钉钉授权页完成验证。不要代替用户授权，也不要展示或记录 token。
-3. 用户要求测试环境时运行 `${PLUGIN_ROOT}/bin/cxclaw-launcher tenant search <租户名称> --env test`；生产环境必须明确使用 `--env prod`，不能自行推断。
-4. 用户确认目标租户后，运行 `${PLUGIN_ROOT}/bin/cxclaw-launcher tenant use <accountId> --env <test|prod> --purpose <用途>`。
-5. 运行 `${PLUGIN_ROOT}/bin/cxclaw-launcher doctor` 和
-   `${PLUGIN_ROOT}/bin/cxclaw-launcher update --install-scheduler`。只有两步都成功才报告安装完成。
+3. 用户要求测试环境时运行 `$HOME/.codex/cxclaw/bin/cxclaw-launcher tenant search <租户名称> --env test`；生产环境必须明确使用 `--env prod`，不能自行推断。
+4. 用户确认目标租户后，运行 `$HOME/.codex/cxclaw/bin/cxclaw-launcher tenant use <accountId> --env <test|prod> --purpose <用途>`。
+5. 运行 `$HOME/.codex/cxclaw/bin/cxclaw-launcher doctor` 和
+   `$HOME/.codex/cxclaw/bin/cxclaw-launcher update --install-scheduler`。只有两步都成功才报告安装完成。
 
 写操作必须先调用同一业务命令的 `--phase preview` 并展示结果；等待用户明确确认后，使用 `--phase commit --confirmation-token-stdin --idempotency-key <key>` 提交。不得把确认凭证写入命令参数、文件或日志。

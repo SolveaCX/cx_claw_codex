@@ -21,12 +21,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SolveaCX/cx_claw_codex/internal/api"
 	"github.com/SolveaCX/cx_claw_codex/internal/buildinfo"
 	"github.com/SolveaCX/cx_claw_codex/internal/config"
 )
 
 var safeVersion = regexp.MustCompile(`^[0-9A-Za-z._-]{1,64}$`)
+
+const githubReleasesURL = "https://api.github.com/repos/SolveaCX/cx_claw_codex/releases"
 
 type CheckResponse struct {
 	UpdateAvailable bool   `json:"updateAvailable"`
@@ -35,6 +36,27 @@ type CheckResponse struct {
 	SHA256          string `json:"sha256"`
 	Signature       string `json:"signature"`
 	DownloadURL     string `json:"downloadUrl"`
+}
+
+type githubRelease struct {
+	TagName    string        `json:"tag_name"`
+	Draft      bool          `json:"draft"`
+	Prerelease bool          `json:"prerelease"`
+	Assets     []githubAsset `json:"assets"`
+}
+type githubAsset struct {
+	Name               string `json:"name"`
+	BrowserDownloadURL string `json:"browser_download_url"`
+}
+
+type releaseManifest struct {
+	Version string `json:"version"`
+	Channel string `json:"channel"`
+	Assets  map[string]struct {
+		File      string `json:"file"`
+		SHA256    string `json:"sha256"`
+		Signature string `json:"signature"`
+	} `json:"assets"`
 }
 
 type Pointer struct {
@@ -47,27 +69,47 @@ func Root() (string, error) {
 	if value := os.Getenv("CXCLAW_PLUGIN_ROOT"); value != "" {
 		return filepath.Abs(value)
 	}
-	executable, err := os.Executable()
+	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Dir(filepath.Dir(executable)), nil
+	return filepath.Join(home, ".codex", "cxclaw"), nil
 }
 
 func Check(ctx context.Context, session *config.Session) (*CheckResponse, error) {
-	channel := session.Channel
-	if channel == "" {
-		channel = "stable"
+	channel := "stable"
+	if session != nil && session.Channel != "" {
+		channel = session.Channel
 	}
-	var response CheckResponse
-	path := fmt.Sprintf(
-		"/releases/check?channel=%s&currentVersion=%s&platform=%s&arch=%s",
-		channel, buildinfo.PluginVersion, runtime.GOOS, runtime.GOARCH,
-	)
-	if err := api.New(session).Do(ctx, http.MethodGet, path, nil, &response, false); err != nil {
+	release, asset, err := latestRelease(ctx, channel)
+	if err != nil {
 		return nil, err
 	}
-	return &response, nil
+	version := strings.TrimPrefix(release.TagName, "v")
+	if version == buildinfo.PluginVersion {
+		return &CheckResponse{Channel: channel, Version: version}, nil
+	}
+	assetName := runtimeAssetName(version)
+	if asset.Name != assetName {
+		return nil, fmt.Errorf("GitHub release %s has no runtime asset %s", release.TagName, assetName)
+	}
+	manifestAsset := findAsset(release, "cxclaw-release.json")
+	if manifestAsset.BrowserDownloadURL == "" {
+		return nil, errors.New("GitHub release metadata is missing")
+	}
+	signatureAsset := findAsset(release, "cxclaw-release.sig")
+	if signatureAsset.BrowserDownloadURL == "" {
+		return nil, errors.New("GitHub release manifest signature is missing")
+	}
+	manifest, err := fetchManifest(ctx, manifestAsset.BrowserDownloadURL, signatureAsset.BrowserDownloadURL)
+	if err != nil {
+		return nil, err
+	}
+	entry, ok := manifest.Assets[assetName]
+	if !ok || entry.SHA256 == "" || entry.Signature == "" {
+		return nil, fmt.Errorf("GitHub release metadata is missing %s integrity data", assetName)
+	}
+	return &CheckResponse{UpdateAvailable: true, Channel: channel, Version: version, SHA256: entry.SHA256, Signature: entry.Signature, DownloadURL: asset.BrowserDownloadURL}, nil
 }
 
 func Install(ctx context.Context, session *config.Session) (string, error) {
@@ -122,6 +164,13 @@ func Install(ctx context.Context, session *config.Session) (string, error) {
 	}
 	pointer, _ := readPointer(root)
 	previous := pointer.Current
+	if previous != "" {
+		if output, err := exec.CommandContext(ctx, "codex", "plugin", "marketplace", "upgrade", "cxclaw").CombinedOutput(); err != nil {
+			_ = activateAssets(root, filepath.Join(root, "versions", previous))
+			_ = os.RemoveAll(target)
+			return "", fmt.Errorf("upgrade Git marketplace: %w: %s", err, strings.TrimSpace(string(output)))
+		}
+	}
 	pointer.Previous = previous
 	pointer.Current = release.Version
 	pointer.History = retainHistory(
@@ -135,6 +184,114 @@ func Install(ctx context.Context, session *config.Session) (string, error) {
 		return "", fmt.Errorf("installed update but could not prune old versions: %w", err)
 	}
 	return release.Version, nil
+}
+
+func latestRelease(ctx context.Context, channel string) (githubRelease, githubAsset, error) {
+	if channel != "stable" && channel != "canary" && channel != "dev" {
+		return githubRelease{}, githubAsset{}, errors.New("invalid update channel")
+	}
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, githubReleasesURL, nil)
+	if err != nil {
+		return githubRelease{}, githubAsset{}, err
+	}
+	request.Header.Set("Accept", "application/vnd.github+json")
+	request.Header.Set("User-Agent", "cxclawctl/"+buildinfo.CLIVersion)
+	response, err := (&http.Client{Timeout: 30 * time.Second}).Do(request)
+	if err != nil {
+		return githubRelease{}, githubAsset{}, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return githubRelease{}, githubAsset{}, fmt.Errorf("GitHub releases returned HTTP %d", response.StatusCode)
+	}
+	var releases []githubRelease
+	if err := json.NewDecoder(io.LimitReader(response.Body, 4<<20)).Decode(&releases); err != nil {
+		return githubRelease{}, githubAsset{}, err
+	}
+	for _, release := range releases {
+		if release.Draft || !channelMatches(release.TagName, channel) {
+			continue
+		}
+		for _, asset := range release.Assets {
+			if asset.Name == runtimeAssetName(strings.TrimPrefix(release.TagName, "v")) {
+				return release, asset, nil
+			}
+		}
+	}
+	return githubRelease{}, githubAsset{}, fmt.Errorf("no %s release is available", channel)
+}
+
+func findAsset(release githubRelease, name string) githubAsset {
+	for _, asset := range release.Assets {
+		if asset.Name == name {
+			return asset
+		}
+	}
+	return githubAsset{}
+}
+
+func fetchManifest(ctx context.Context, url, signatureURL string) (releaseManifest, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return releaseManifest{}, err
+	}
+	request.Header.Set("Accept", "application/json")
+	request.Header.Set("User-Agent", "cxclawctl/"+buildinfo.CLIVersion)
+	response, err := (&http.Client{Timeout: 30 * time.Second}).Do(request)
+	if err != nil {
+		return releaseManifest{}, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return releaseManifest{}, fmt.Errorf("GitHub release metadata returned HTTP %d", response.StatusCode)
+	}
+	body, err := io.ReadAll(io.LimitReader(response.Body, 2<<20))
+	if err != nil {
+		return releaseManifest{}, err
+	}
+	sigRequest, err := http.NewRequestWithContext(ctx, http.MethodGet, signatureURL, nil)
+	if err != nil {
+		return releaseManifest{}, err
+	}
+	sigRequest.Header.Set("User-Agent", "cxclawctl/"+buildinfo.CLIVersion)
+	sigResponse, err := (&http.Client{Timeout: 30 * time.Second}).Do(sigRequest)
+	if err != nil {
+		return releaseManifest{}, err
+	}
+	defer sigResponse.Body.Close()
+	if sigResponse.StatusCode != http.StatusOK {
+		return releaseManifest{}, fmt.Errorf("GitHub release signature returned HTTP %d", sigResponse.StatusCode)
+	}
+	sigText, err := io.ReadAll(io.LimitReader(sigResponse.Body, 16<<10))
+	if err != nil {
+		return releaseManifest{}, err
+	}
+	digest := sha256.Sum256(body)
+	if err := verifyDigestSignature(hex.EncodeToString(digest[:]), strings.TrimSpace(string(sigText))); err != nil {
+		return releaseManifest{}, fmt.Errorf("release metadata signature invalid: %w", err)
+	}
+	var manifest releaseManifest
+	if err := json.Unmarshal(body, &manifest); err != nil {
+		return releaseManifest{}, err
+	}
+	return manifest, nil
+}
+
+func channelMatches(tag, channel string) bool {
+	version := strings.TrimPrefix(tag, "v")
+	switch channel {
+	case "stable":
+		return !strings.Contains(version, "-")
+	case "canary":
+		return strings.Contains(version, "-canary.")
+	case "dev":
+		return strings.Contains(version, "-dev.")
+	}
+	return false
+}
+
+func runtimeAssetName(version string) string {
+	return fmt.Sprintf("cxclaw-runtime-%s-%s-%s.zip", version, runtime.GOOS, runtime.GOARCH)
 }
 
 func Rollback() (string, error) {
@@ -157,6 +314,13 @@ func Rollback() (string, error) {
 	}
 	pointer.Current, pointer.Previous = pointer.Previous, pointer.Current
 	if err := writePointer(root, pointer); err != nil {
+		return "", err
+	}
+	_ = exec.Command("codex", "plugin", "marketplace", "remove", "cxclaw").Run()
+	if output, err := exec.Command("codex", "plugin", "marketplace", "add", "SolveaCX/cx_claw_codex", "--ref", "v"+pointer.Current).CombinedOutput(); err != nil {
+		return "", fmt.Errorf("runtime rolled back but marketplace pin failed: %w: %s", err, strings.TrimSpace(string(output)))
+	}
+	if err := os.WriteFile(filepath.Join(root, "updates.paused"), []byte("rollback\n"), 0o600); err != nil {
 		return "", err
 	}
 	return pointer.Current, nil
@@ -210,12 +374,16 @@ func verify(path, expectedHash, signatureBase64 string) error {
 	if !strings.EqualFold(actual, expectedHash) {
 		return errors.New("update package SHA-256 mismatch")
 	}
+	return verifyDigestSignature(actual, signatureBase64)
+}
+
+func verifyDigestSignature(digest, signatureBase64 string) error {
 	publicKey, err := base64.StdEncoding.DecodeString(buildinfo.UpdatePublicKeyBase64)
 	if err != nil || len(publicKey) != ed25519.PublicKeySize {
 		return errors.New("update verification public key is not configured")
 	}
 	signature, err := base64.StdEncoding.DecodeString(signatureBase64)
-	if err != nil || !ed25519.Verify(publicKey, []byte(strings.ToLower(expectedHash)), signature) {
+	if err != nil || !ed25519.Verify(publicKey, []byte(strings.ToLower(digest)), signature) {
 		return errors.New("update package signature is invalid")
 	}
 	return nil
@@ -344,10 +512,11 @@ func pruneVersions(root string, keep []string) error {
 
 var pluginAssets = []string{
 	"plugin.json",
+	".codex-plugin",
 	"capabilities.lock.json",
 	"README.md",
 	"requirements-cli.txt",
-	"python",
+	"runtime",
 	"skills",
 }
 

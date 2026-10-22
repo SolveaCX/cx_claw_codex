@@ -66,7 +66,7 @@
 5. **合并 + dry-run**（脚本会把合并结果写到 `/workspace/outputs/kb-builder/qa_plan_{ts}.json` 留档）：
 
    ```bash
-   python3 /skills/kb-builder/scripts/import_qa.py --from-dir /workspace/tmp/kb-builder/qa_parts/ --dry-run
+   $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_qa.py --from-dir /workspace/tmp/kb-builder/qa_parts/ --dry-run
    ```
 
 6. **向用户汇报数量**，等待明确确认：
@@ -87,23 +87,23 @@
 7. **正式上传**：
 
    ```bash
-   python3 /skills/kb-builder/scripts/import_qa.py --from-dir /workspace/tmp/kb-builder/qa_parts/
+   $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_qa.py --from-dir /workspace/tmp/kb-builder/qa_parts/
    ```
 
    或者用 dry-run 阶段已落盘的 qa_plan 文件（避免重新合并）：
 
    ```bash
-   python3 /skills/kb-builder/scripts/import_qa.py --qa-file /workspace/outputs/kb-builder/qa_plan_<ts>.json
+   $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_qa.py --qa-file /workspace/outputs/kb-builder/qa_plan_<ts>.json
    ```
 
 ## 上传后验证
 
 ```bash
 # 按 keyword 检索确认上传成功
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge --keyword "Kasa EP25" --page-size 50 --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-knowledge --keyword "Kasa EP25" --page-size 50 --pretty
 
 # 看目录的 kuCount 是否增加
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-directories --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-directories --pretty
 ```
 
 ## 已经有合并好的 qa_plan.json 时
@@ -111,8 +111,8 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api list-directories --pretty
 直接传文件路径，不走 tmp：
 
 ```bash
-python3 /skills/kb-builder/scripts/import_qa.py --qa-file /path/to/qa_plan.json --dry-run
-python3 /skills/kb-builder/scripts/import_qa.py --qa-file /path/to/qa_plan.json
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_qa.py --qa-file /path/to/qa_plan.json --dry-run
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_qa.py --qa-file /path/to/qa_plan.json
 ```
 
 ## 常见错误

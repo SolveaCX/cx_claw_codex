@@ -31,7 +31,7 @@ auto | crawl4ai | tavily
 首版脚本化 pipeline 目标入口：
 
 ```bash
-python3 /skills/kb-builder/scripts/crawl_site.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/crawl_site.py \
   --url <source_url> \
   --mode auto \
   --provider auto \
@@ -39,19 +39,19 @@ python3 /skills/kb-builder/scripts/crawl_site.py \
   --max-pages 100 \
   --output /workspace/outputs/kb-builder/crawl_result_<ts>.json
 
-python3 /skills/kb-builder/scripts/build_directory_plan.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/build_directory_plan.py \
   --crawl-result /workspace/outputs/kb-builder/crawl_result_<ts>.json \
   --output /workspace/outputs/kb-builder/directory_plan_<ts>.json
 
 # 展示 directory_plan_<ts>.json，等待用户明确确认后写入 confirmed_tree
-python3 /skills/kb-builder/scripts/build_directory_plan.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/build_directory_plan.py \
   --crawl-result /workspace/outputs/kb-builder/crawl_result_<ts>.json \
   --output /workspace/outputs/kb-builder/directory_plan_<ts>.json \
   --write-confirmed-tree
 
-python3 /skills/kb-builder/scripts/create_dirs.py
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/create_dirs.py
 
-python3 /skills/kb-builder/scripts/extract_web_qa.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/extract_web_qa.py \
   --crawl-result /workspace/outputs/kb-builder/crawl_result_<ts>.json \
   --output-dir /workspace/tmp/kb-builder/qa_parts
 ```

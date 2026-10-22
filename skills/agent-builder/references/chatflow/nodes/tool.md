@@ -86,14 +86,14 @@ TOOL 成功后写入的节点输出形态是：
 ## Resource Dependencies
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-plugins --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-ai-fields --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-plugins --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-ai-fields --pretty
 ```
 
 `--bind-tool-params` 只是辅助，不是业务决策来源：
 
 ```bash
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py compile ... --bind-tool-params
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py compile ... --bind-tool-params
 ```
 
 实际行为：

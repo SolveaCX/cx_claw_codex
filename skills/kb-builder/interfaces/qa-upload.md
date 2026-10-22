@@ -6,16 +6,16 @@
 
 ```bash
 # QA parts 合并 + dry-run
-python3 /skills/kb-builder/scripts/import_qa.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_qa.py \
   --from-dir /workspace/tmp/kb-builder/qa_parts/ \
   --dry-run
 
 # 使用 dry-run 已落盘的 qa_plan 正式上传
-python3 /skills/kb-builder/scripts/import_qa.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_qa.py \
   --qa-file /workspace/outputs/kb-builder/qa_plan_<ts>.json
 
 # 或直接从 parts 合并并上传
-python3 /skills/kb-builder/scripts/import_qa.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_qa.py \
   --from-dir /workspace/tmp/kb-builder/qa_parts/
 ```
 

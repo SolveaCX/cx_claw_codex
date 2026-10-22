@@ -50,7 +50,7 @@ QA 主要看 `retrievedKus`。其中 `retrievedKus[].title/content` 是历史运
 需要判断知识当前是否仍有问题，或准备给出修改方案时，再按知识 ID 读取当前知识详情：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-knowledge --id <knowledge_id> --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-knowledge --id <knowledge_id> --pretty
 ```
 
 报告中明确区分“历史运行时内容”和“当前知识详情”。`list-knowledge --keyword` 可用于找候选，但不能代替按 ID 读取详情；不要为核对单条知识扫描整个知识库。

@@ -299,8 +299,8 @@ next_steps[].title = accept_wait
 ## Resource Dependencies
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-plugins --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-agent-ai-fields --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-plugins --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-agent-ai-fields --pretty
 ```
 
 `ai_field_ids` 只能从 `list-agent-ai-fields` 选择；该命令与前端 Agent 字段范围校验一致。`list-ai-fields` 是 Chatflow 画布的 SYSTEM selector / Prompt 字段接口，不能替代 Agent 范围校验。字段服务偶发不可用时可以先不用 `ai_field_ids`，或复用已有 graph 中已确认的字段 id；不要把字段服务错误当成节点配置错误。启用知识库前需要确认目录 id。

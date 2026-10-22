@@ -36,13 +36,13 @@ requires:
 每次开始处理 POC 前，先运行：
 
 ```bash
-python3 /skills/poc/scripts/plan.py --init
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/poc/scripts/plan.py --init
 ```
 
 阶段完成后用 `plan.py` 更新顶层状态，例如：
 
 ```bash
-python3 /skills/poc/scripts/plan.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/poc/scripts/plan.py \
   --status business_agents_created \
   --set intent.created_log_path=/workspace/outputs/poc/created_<ts>.json
 ```
@@ -50,7 +50,7 @@ python3 /skills/poc/scripts/plan.py \
 需要汇总当前交付物时运行：
 
 ```bash
-python3 /skills/poc/scripts/render_summary.py
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/poc/scripts/render_summary.py
 ```
 
 状态只记录跨阶段引用：

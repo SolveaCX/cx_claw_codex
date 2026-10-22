@@ -20,7 +20,7 @@
 先读取完整目录树：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-directories --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-directories --pretty
 ```
 
 `list-directories` 对应前端接口：
@@ -48,7 +48,7 @@ GET /api_v2/qam/project/{projectId}/directories?keyword=&kuPublished=
 查询知识：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-knowledge \
   --type ALL \
   --page-size 1000 \
   --page 1 \
@@ -58,7 +58,7 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge \
 指定目录查询：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-knowledge \
   --type ALL \
   --directory-id 105809 \
   --page-size 1000 \
@@ -95,7 +95,7 @@ POST /api_v2/qam/project/{projectId}/getKnowledge
 只有用户明确说了“全部 / 全量 / 所有 / 整个知识库 / 当前知识库全部 / all / everything”时，才直接执行全量导出：
 
 ```bash
-python3 /skills/kb-builder/scripts/export_knowledge.py --all
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/export_knowledge.py --all
 ```
 
 ### 指定目录导出
@@ -103,7 +103,7 @@ python3 /skills/kb-builder/scripts/export_knowledge.py --all
 用户指定一个目录时：
 
 ```bash
-python3 /skills/kb-builder/scripts/export_knowledge.py --directory-id 105809
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/export_knowledge.py --directory-id 105809
 ```
 
 默认会包含该目录及其所有子孙目录。
@@ -111,13 +111,13 @@ python3 /skills/kb-builder/scripts/export_knowledge.py --directory-id 105809
 只导出目录自身、不包含子目录时：
 
 ```bash
-python3 /skills/kb-builder/scripts/export_knowledge.py --directory-id 105809 --no-children
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/export_knowledge.py --directory-id 105809 --no-children
 ```
 
 ### 多目录导出
 
 ```bash
-python3 /skills/kb-builder/scripts/export_knowledge.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/export_knowledge.py \
   --directory-id 105809 \
   --directory-id 82764
 ```
@@ -127,7 +127,7 @@ python3 /skills/kb-builder/scripts/export_knowledge.py \
 ### keyword 过滤
 
 ```bash
-python3 /skills/kb-builder/scripts/export_knowledge.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/export_knowledge.py \
   --directory-id 105809 \
   --keyword battery
 ```
@@ -135,7 +135,7 @@ python3 /skills/kb-builder/scripts/export_knowledge.py \
 ### 指定知识类型
 
 ```bash
-python3 /skills/kb-builder/scripts/export_knowledge.py --all --type QA
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/export_knowledge.py --all --type QA
 ```
 
 `--type` 默认为 `ALL`，可按接口支持传 `QA / FILE / WEBSITE / PRODUCT / LEARN_SELF / ALL`。
@@ -161,7 +161,7 @@ python3 /skills/kb-builder/scripts/export_knowledge.py --all --type QA
 只有用户已经明确“全部 / 全量 / 所有 / 整个知识库 / 当前知识库全部 / all / everything”时，不需要再问，直接运行：
 
 ```bash
-python3 /skills/kb-builder/scripts/export_knowledge.py --all
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/export_knowledge.py --all
 ```
 
 反例：用户只说“导出知识库”或“导出知识”，必须先列目录并询问范围，不能直接按全量处理。
@@ -173,7 +173,7 @@ python3 /skills/kb-builder/scripts/export_knowledge.py --all
 脚本内部不会遍历所有目录。它直接不传 `directoryId`，按页拉全量知识：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge --type ALL --page-size 1000 --page 1 --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-knowledge --type ALL --page-size 1000 --page 1 --pretty
 ```
 
 第一页读取 `total`，继续翻页直到拉完。
@@ -183,7 +183,7 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge --type ALL --page-size 100
 脚本内部会先从目录树展开该目录的所有子孙目录 id，包含父目录自身。然后按目录逐个分页拉取：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-knowledge \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-knowledge \
   --type ALL \
   --directory-id <dir_id> \
   --page-size 1000 \

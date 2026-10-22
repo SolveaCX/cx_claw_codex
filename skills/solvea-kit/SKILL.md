@@ -12,9 +12,9 @@ Solvea Kit 保留路由与运营相关配置：意图、策略、变量系统、
 所有查询与写入操作，均使用 `/skill-lib/solvea-api/solvea_api.py`：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api <command> --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api <command> --pretty
 # 例如：
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-agents --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-agents --pretty
 ```
 
 ## 能力分流

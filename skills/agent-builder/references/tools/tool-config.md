@@ -32,7 +32,7 @@ CHAT_FLOW 有两种用法：
 ## 查看详情
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-plugin --id <tool_id> --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-plugin --id <tool_id> --pretty
 ```
 
 重点看：

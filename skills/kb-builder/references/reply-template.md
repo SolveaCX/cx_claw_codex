@@ -20,7 +20,7 @@
 所有命令都走：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api <command> [args]
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api <command> [args]
 ```
 
 ### `list-templates`
@@ -37,7 +37,7 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api <command> [args]
 | `--pretty` | 否 | 格式化输出，排查时建议加 |
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-templates \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-templates \
   --keyword "广告" --page-size 20 --pretty
 ```
 
@@ -56,7 +56,7 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api list-templates \
 | `--pretty` | 否 | 格式化输出 |
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api create-template \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api create-template \
   --name "广告关闭" \
   --content "您好，您可以在APP右下角“我的”里关闭广告。" \
   --status ENABLED \
@@ -93,10 +93,10 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api create-template \
 
 ```bash
 # 下架
-${PLUGIN_ROOT}/bin/cxclaw-launcher api update-template --id 12008 --status DISABLED
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-template --id 12008 --status DISABLED
 
 # 改名 + 内容
-${PLUGIN_ROOT}/bin/cxclaw-launcher api update-template \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-template \
   --id 12008 --name "转人工" --content "<p>这是转人工的模版文案</p>" --pretty
 ```
 
@@ -117,7 +117,7 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api update-template \
 | `--data-file` | 否 | JSON 文件路径 |
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-templates --ids 123 124 125 --confirm-delete
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api delete-templates --ids 123 124 125 --confirm-delete
 ```
 
 ## 批量导入脚本
@@ -125,7 +125,7 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-templates --ids 123 124 125 --conf
 脚本路径：
 
 ```bash
-python3 /skills/kb-builder/scripts/import_templates.py [args]
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_templates.py [args]
 ```
 
 ### Excel / CSV 列
@@ -167,7 +167,7 @@ python3 /skills/kb-builder/scripts/import_templates.py [args]
 2. 先 dry-run：
 
    ```bash
-   python3 /skills/kb-builder/scripts/import_templates.py \
+   $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_templates.py \
      --xlsx /mounted/chat-files/user/templates.xlsx \
      --dry-run
    ```
@@ -175,7 +175,7 @@ python3 /skills/kb-builder/scripts/import_templates.py [args]
    表头不标准时显式传列名：
 
    ```bash
-   python3 /skills/kb-builder/scripts/import_templates.py \
+   $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_templates.py \
      --xlsx /mounted/chat-files/user/templates.xlsx \
      --name-col "Topic" \
      --content-col "Message" \
@@ -189,7 +189,7 @@ python3 /skills/kb-builder/scripts/import_templates.py [args]
    用户要求跳过重复模板名时，可以用脚本参数生成最终 plan：
 
    ```bash
-   python3 /skills/kb-builder/scripts/import_templates.py \
+   $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_templates.py \
      --xlsx /mounted/chat-files/user/templates.xlsx \
      --name-col "快捷词" \
      --content-col "回复内容" \
@@ -209,7 +209,7 @@ python3 /skills/kb-builder/scripts/import_templates.py [args]
 4. 用户明确回复“确认 / 上传吧 / 没问题”后，用已确认的 plan 正式导入：
 
    ```bash
-   python3 /skills/kb-builder/scripts/import_templates.py \
+   $HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/import_templates.py \
      --plan-file /workspace/outputs/kb-builder/template_import_plan_<ts>.json
    ```
 

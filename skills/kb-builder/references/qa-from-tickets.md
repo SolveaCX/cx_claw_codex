@@ -54,7 +54,7 @@ File: tickets.xlsx (lines 1-20 of 532)
 ## 步骤三：dry-run 确认提取逻辑
 
 ```bash
-python3 /skills/kb-builder/scripts/extract_ticket_qa.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/extract_ticket_qa.py \
   --xlsx /mounted/chat-files/user/tickets.xlsx --brand "{品牌名称}" \
   --messages-col conversations --title-col subject \
   --page 1 --page-size 100 --batch-size 5 --workers 3 --dry-run
@@ -74,7 +74,7 @@ dry-run 必须检查：
 
 ```bash
 # 全表分页提取：每页 100 行，页内每 5 条对话一次模型调用，并发 3 个 batch
-python3 /skills/kb-builder/scripts/batch_extract_ticket_qa.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/batch_extract_ticket_qa.py \
   --xlsx /mounted/chat-files/user/tickets.xlsx --brand "{品牌名称}" \
   --messages-col conversations --title-col subject \
   --page-size 100 --batch-size 5 --workers 3 --resume
@@ -91,7 +91,7 @@ wrapper 行为：
 必要时也可以只跑单页 worker（调试或补页）：
 
 ```bash
-python3 /skills/kb-builder/scripts/extract_ticket_qa.py \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/kb-builder/scripts/extract_ticket_qa.py \
   --xlsx /mounted/chat-files/user/tickets.xlsx --brand "{品牌名称}" \
   --messages-col conversations --title-col subject \
   --page 2 --page-size 100 --batch-size 5 --workers 3

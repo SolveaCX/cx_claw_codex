@@ -20,20 +20,20 @@
 QA / AI自学习知识：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-knowledge --id 3057821 --type QA --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-knowledge --id 3057821 --type QA --pretty
 ```
 
 文档 / 网页知识使用同一个业务入口，但必须带对应类型；脚本会调用文档详情接口，而不是 QA 的详情接口：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-knowledge --id 3057821 --type FILE --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-knowledge --id 3057821 --type WEBSITE --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-knowledge --id 3057821 --type FILE --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-knowledge --id 3057821 --type WEBSITE --pretty
 ```
 
 产品知识：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-knowledge --id 3057821 --type PRODUCT --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-knowledge --id 3057821 --type PRODUCT --pretty
 ```
 
 ## 更新问答 / AI自学习知识
@@ -46,7 +46,7 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api get-knowledge --id 3057821 --type PRODUCT
 4. 确认后执行：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api update-knowledge --id 3057821 --data-file /workspace/state/kb-builder/knowledge_update.json --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-knowledge --id 3057821 --data-file /workspace/state/kb-builder/knowledge_update.json --pretty
 ```
 
 5. 再次读取同一 ID，核对实际结果。
@@ -77,7 +77,7 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api update-knowledge --id 3057821 --data-file
 执行批量更新：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api batch-update-knowledge --data-file /workspace/state/kb-builder/batch_knowledge_update.json --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api batch-update-knowledge --data-file /workspace/state/kb-builder/batch_knowledge_update.json --pretty
 ```
 
 - 每条记录支持 `kuId`（或 `id`）、`title`、`content`、`directoryId`、`published` 等字段。
@@ -101,10 +101,10 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api batch-update-knowledge --data-file /works
 
 ```bash
 # 文档
-${PLUGIN_ROOT}/bin/cxclaw-launcher api update-document-content --id 3057821 --type FILE --data-file /workspace/state/kb-builder/document_update.json --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-document-content --id 3057821 --type FILE --data-file /workspace/state/kb-builder/document_update.json --pretty
 
 # 网页
-${PLUGIN_ROOT}/bin/cxclaw-launcher api update-document-content --id 3057821 --type WEBSITE --data-file /workspace/state/kb-builder/document_update.json --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-document-content --id 3057821 --type WEBSITE --data-file /workspace/state/kb-builder/document_update.json --pretty
 ```
 
 更新后用原类型重新读取详情。`filePath` 仅用于已上传的新 Markdown 文件；普通正文修改使用 `fileText`。
@@ -144,10 +144,10 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api update-document-content --id 3057821 --ty
 
 ```bash
 # 非删除操作
-${PLUGIN_ROOT}/bin/cxclaw-launcher api operate-knowledge --data-file /workspace/state/kb-builder/knowledge_operations.json --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api operate-knowledge --data-file /workspace/state/kb-builder/knowledge_operations.json --pretty
 
 # 计划中包含删除时，仅在收到上述强确认后增加
-${PLUGIN_ROOT}/bin/cxclaw-launcher api operate-knowledge --data-file /workspace/state/kb-builder/knowledge_operations.json --confirm-delete --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api operate-knowledge --data-file /workspace/state/kb-builder/knowledge_operations.json --confirm-delete --pretty
 ```
 
 CLI 会再次按类型读取每个目标，移动时还会确认目标目录存在，然后一次提交。提交后重新查询：删除要确认记录已不存在，其他操作要核对目录、发布状态或可见性。

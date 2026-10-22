@@ -183,7 +183,7 @@ executeAgent[<chatId>]: call ai agent stream, currentLoopCount={}, call fail, re
 ## Config 层
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-agent --id <agentId> --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-agent --id <agentId> --pretty
 ```
 
 检查点：

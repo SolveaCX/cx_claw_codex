@@ -31,7 +31,7 @@
 下钻时必须复用 Report 的时间范围、时区对应的毫秒边界，以及适用的 Bot、渠道、Agent、意图条件。前端未选择渠道时不要追加 `--touch-point`，表示全部渠道。
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-transcripts \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-transcripts \
   --begin-ts "$BEGIN_MS" \
   --end-ts "$END_MS" \
   --page 1 \
@@ -42,7 +42,7 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api list-transcripts \
 筛选 LiveChat 已转人工 Agent 会话记录：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-transcripts \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-transcripts \
   --begin-ts "$BEGIN_MS" \
   --end-ts "$END_MS" \
   --touch-point LIVE_CHAT \
@@ -78,7 +78,7 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api list-transcripts \
 `list-transcripts` 只返回摘要。需要查看消息内容、AgentAction、转人工上下文或具体异常时，再调用：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-transcript \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-transcript \
   --chat-id <chatId> \
   --pretty
 ```
@@ -98,13 +98,13 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api get-transcript \
 只有确实需要大量明细文件时才使用：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api export-transcripts \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api export-transcripts \
   --begin-ts "$BEGIN_MS" \
   --end-ts "$END_MS" \
   --time-offset 8 \
   --pretty
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-export-tasks --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-export-tasks --pretty
 ```
 
 轮询到任务 `status=SUCCESS` 后再使用返回的文件地址。

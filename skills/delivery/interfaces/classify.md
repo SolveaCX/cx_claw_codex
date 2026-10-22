@@ -5,10 +5,10 @@ Delivery 专属分类入口。入口和状态归属 Delivery skill；通用意�
 ## Commands
 
 ```bash
-python3 /skills/delivery/scripts/classify.py --xlsx <xlsx> --messages-col <col> [--title-col <col>]
-python3 /skills/delivery/scripts/classify.py --no-excel
-python3 /skills/delivery/scripts/gen_report.py --brand <brand>
-python3 /skills/delivery/scripts/gen_excel.py --brand <brand>
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/delivery/scripts/classify.py --xlsx <xlsx> --messages-col <col> [--title-col <col>]
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/delivery/scripts/classify.py --no-excel
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/delivery/scripts/gen_report.py --brand <brand>
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/delivery/scripts/gen_excel.py --brand <brand>
 ```
 
 ## Inputs

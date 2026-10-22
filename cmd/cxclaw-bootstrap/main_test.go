@@ -1,40 +1,48 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
-func TestRegisterMarketplacePreservesExistingPlugins(t *testing.T) {
-	root := t.TempDir()
-	pluginRoot := filepath.Join(root, ".codex", "plugins", "cxclaw")
-	if err := os.MkdirAll(filepath.Join(root, ".agents", "plugins"), 0o755); err != nil {
+func TestInstallMarketplaceRunsOfficialCommands(t *testing.T) {
+	original := runCommand
+	t.Cleanup(func() { runCommand = original })
+	var calls [][]string
+	runCommand = func(_ context.Context, name string, args ...string) ([]byte, error) {
+		calls = append(calls, append([]string{name}, args...))
+		return nil, nil
+	}
+	dir := t.TempDir()
+	if err := os.Symlink(os.Args[0], filepath.Join(dir, "codex")); err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(root, ".agents", "plugins", "marketplace.json")
-	existing := []byte(`{"name":"personal","plugins":[{"name":"existing"}]}`)
-	if err := os.WriteFile(path, existing, 0o600); err != nil {
+	t.Setenv("PATH", dir)
+	if err := installMarketplace(context.Background(), "stable"); err != nil {
 		t.Fatal(err)
 	}
+	want := [][]string{
+		{"codex", "plugin", "marketplace", "add", "SolveaCX/cx_claw_codex", "--ref", "marketplace/stable"},
+		{"codex", "plugin", "add", "cxclaw@cxclaw"},
+	}
+	if !reflect.DeepEqual(calls, want) {
+		t.Fatalf("commands = %#v", calls)
+	}
+}
 
-	if err := registerMarketplace(root, pluginRoot); err != nil {
-		t.Fatal(err)
+func TestInstallMarketplaceRejectsInvalidChannel(t *testing.T) {
+	if err := installMarketplace(context.Background(), "stable;rm"); err == nil {
+		t.Fatal("unsafe channel accepted")
 	}
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var manifest struct {
-		Name    string                   `json:"name"`
-		Plugins []map[string]interface{} `json:"plugins"`
-	}
-	if err := json.Unmarshal(data, &manifest); err != nil {
-		t.Fatal(err)
-	}
-	if manifest.Name != "personal" || len(manifest.Plugins) != 2 {
-		t.Fatalf("existing marketplace content was not preserved: %s", data)
+}
+
+func TestInstallMarketplaceReportsCodexMissing(t *testing.T) {
+	t.Setenv("PATH", t.TempDir())
+	if err := installMarketplace(context.Background(), "stable"); err == nil {
+		t.Fatal("missing codex accepted")
 	}
 }
 

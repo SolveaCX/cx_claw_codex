@@ -179,10 +179,10 @@ source JSON 不写 `WAIT` 节点，也不要手动创建 `USER_INPUT` / `AGENT_T
 节点依赖外部资源时，先查询再写 id：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-templates --keyword "platform" --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-plugins --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-ai-fields --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-agents --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-templates --keyword "platform" --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-plugins --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-ai-fields --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-agents --pretty
 ```
 
 资源查询口径：
@@ -209,32 +209,32 @@ ${PLUGIN_ROOT}/bin/cxclaw-launcher api list-agents --pretty
 ## CLI
 
 ```bash
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py --help --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py --help --pretty
 
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py compile \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py compile \
   --source-file /workspace/state/agent-builder/chatflow/chatflow_source.json \
   --graph-file /workspace/state/agent-builder/chatflow/chatflow_graph.json \
   --pretty
 
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py validate \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py validate \
   --graph-file /workspace/state/agent-builder/chatflow/chatflow_graph.json \
   --pretty
 
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py inspect \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py inspect \
   --agent-name Example_Chatflow \
   --pretty
 
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py deploy \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py deploy \
   --agent-name Example_Chatflow \
   --graph-file /workspace/state/agent-builder/chatflow/chatflow_graph.json \
   --pretty
 
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py update \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py update \
   --agent-id 2496 \
   --graph-file /workspace/state/agent-builder/chatflow/patch_2496_graph.json \
   --pretty
 
-python3 /skills/agent-builder/scripts/chatflow/chatflow_builder.py publish \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher script skills/agent-builder/scripts/chatflow/chatflow_builder.py publish \
   --agent-id 2496 \
   --graph-file /workspace/state/agent-builder/chatflow/patch_2496_graph.json \
   --pretty

@@ -21,21 +21,21 @@ CHAT_FLOW 内的 INTENT 节点直接在节点配置里定义意图（填 name + 
 ## CLI
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-intents --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-intents --pretty
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-intent --id <intent_id> --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-intent --id <intent_id> --pretty
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api create-intent \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api create-intent \
   --data '{"name":"退款","description":"用户要求退款","type":"Other","status":"ENABLED","category":"E_COMMERCE"}'
 
 # 更新意图描述（PUT body 字段是 description，name 必传）
-${PLUGIN_ROOT}/bin/cxclaw-launcher api update-intent --id <intent_id> \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-intent --id <intent_id> \
   --data-file /workspace/state/solvea-kit/intent_update.json
 
 # 短描述可直接使用 --data；长描述先写入 JSON 文件，再通过 --data-file 提交
 
-${PLUGIN_ROOT}/bin/cxclaw-launcher api toggle-intent --id <intent_id> --disable
-${PLUGIN_ROOT}/bin/cxclaw-launcher api toggle-intent --id <intent_id> --enable
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api toggle-intent --id <intent_id> --disable
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api toggle-intent --id <intent_id> --enable
 ```
 
 ## update-intent 字段说明（GET / PUT 字段命名不一致，必看）

@@ -24,13 +24,13 @@ staging  /sns_v1
 对应公开 CLI：
 
 ```bash
-${PLUGIN_ROOT}/bin/cxclaw-launcher api list-isolation-keywords --keyword "invoice" --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api create-isolation-keyword --keyword "invoice,test" --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api update-isolation-keyword --id 17 --keyword "0226" --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api delete-isolation-keyword --id 16 --confirm-delete --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api get-knowledge-isolation-keywords \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-isolation-keywords --keyword "invoice" --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api create-isolation-keyword --keyword "invoice,test" --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api update-isolation-keyword --id 17 --keyword "0226" --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api delete-isolation-keyword --id 16 --confirm-delete --pretty
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api get-knowledge-isolation-keywords \
   --id 486955 --type FILE --pretty
-${PLUGIN_ROOT}/bin/cxclaw-launcher api batch-update-isolation-keyword-bindings \
+$HOME/.codex/cxclaw/bin/cxclaw-launcher api batch-update-isolation-keyword-bindings \
   --data-file /workspace/state/kb-builder/isolation_keyword_binding.json --pretty
 ```
 

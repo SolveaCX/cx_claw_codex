@@ -2,8 +2,8 @@
 
 ## 运行依赖
 
-- SLS：由本机 `${PLUGIN_ROOT}/bin/cxclaw-launcher sls query` 使用短期只读 STS 直连。
-- 语音会话：由 `${PLUGIN_ROOT}/bin/cxclaw-launcher api list-voice-transcripts` / `get-voice-transcript` 查询现有业务 API。
+- SLS：由本机 `$HOME/.codex/cxclaw/bin/cxclaw-launcher sls query` 使用短期只读 STS 直连。
+- 语音会话：由 `$HOME/.codex/cxclaw/bin/cxclaw-launcher api list-voice-transcripts` / `get-voice-transcript` 查询现有业务 API。
 - 沙箱不需要 VAPI CLI、Twilio CLI、aliyun CLI、本地 `.env` 或平台 token。
 
 ## 降级规则
