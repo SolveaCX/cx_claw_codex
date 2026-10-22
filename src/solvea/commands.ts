@@ -47,6 +47,27 @@ async function transcriptFilters(args: string[]): Promise<JsonObject> {
   return filters;
 }
 
+async function knowledgeFilters(args: string[]): Promise<JsonObject> {
+  const filters: JsonObject = {
+    type: "ALL",
+    pageIndex: 1,
+    pageSize: 50,
+    keyword: "",
+    ...(await optionalData(args)),
+  };
+  const optional: Array<[string, string, (value: string) => unknown]> = [
+    ["type", "--type", String],
+    ["pageIndex", "--page", Number],
+    ["pageSize", "--page-size", Number],
+    ["keyword", "--keyword", String],
+  ];
+  for (const [field, name, convert] of optional) {
+    const value = option(args, name);
+    if (value !== undefined) filters[field] = convert(value);
+  }
+  return filters;
+}
+
 /** Native TypeScript business commands. Keep this table explicit so every command has a reviewable contract. */
 export async function runSolveaCommand(session: Session, command: string, args: string[]): Promise<unknown> {
   const client = new SolveaClient(session);
@@ -88,7 +109,7 @@ export async function runSolveaCommand(session: Session, command: string, args: 
     case "create-custom-quality-rule": return client.createCustomQualityRule(await data(args));
     case "update-custom-quality-rule": return client.updateCustomQualityRule(await data(args));
     case "delete-custom-quality-rule": return client.deleteCustomQualityRule(option(args, "--inspection-key", true)!);
-    case "list-knowledge": return client.listKnowledge(await optionalData(args));
+    case "list-knowledge": return client.listKnowledge(await knowledgeFilters(args));
     case "get-knowledge": return client.getKnowledge(id());
     case "update-knowledge": return client.updateKnowledge(id(), await data(args));
     case "upload-qa": return client.uploadQa((await data(args)).items as unknown[]);

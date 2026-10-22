@@ -58,7 +58,7 @@ const resources = {
     delete: action("delete-templates", "Delete reply templates", "--ids <id> [id...] --confirm-delete"),
   },
   knowledge: {
-    list: action("list-knowledge", "List knowledge", "[--data <json> | --data-file <path>]"),
+    list: action("list-knowledge", "List knowledge", "[--type <type>] [--page <number>] [--page-size <number>] [--keyword <text>] [--data <json> | --data-file <path>]"),
     get: action("get-knowledge", "Get one knowledge item", "--id <knowledge-id>"),
     update: action("update-knowledge", "Update a knowledge item", "--id <knowledge-id> (--data <json> | --data-file <path>)"),
     "upload-qa": action("upload-qa", "Upload QA items", "--data <json> | --data-file <path>"),
