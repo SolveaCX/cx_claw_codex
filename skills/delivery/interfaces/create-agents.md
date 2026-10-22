@@ -5,14 +5,14 @@ Delivery 专属能力：创建正式交付意图，优先复制固定广场 agen
 ## Commands
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/create_agents.py --mode delivery
+node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery create-agents --mode delivery
 
 # Delivery 恢复阶段：预置 agent 不可用，用户确认从零新建或使用替代 agent 后，绑定业务策略
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/create_agents.py --mode delivery \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery create-agents --mode delivery \
   --custom-agent-map /workspace/state/delivery/custom_agent_map.json
 
 # 创建后禁用多余 SYSTEM 意图
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/create_agents.py --disable-system
+node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery create-agents --disable-system
 ```
 
 `custom_agent_map.json` 使用 Delivery intent 名作为 key：
@@ -28,7 +28,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/create_agents
 
 1. 通过 `/skills/delivery/interfaces/classify.md` 完成分类。
 2. 展示分类结果，等用户确认。
-3. 执行 `/skills/delivery/scripts/create_agents.py --mode delivery`。
+3. 执行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery create-agents --mode delivery`。
 4. 读取 `/workspace/state/delivery/progress.json` 的 `created_log_path`。
 5. 读取 created log，展示意图、agent、strategy。
 6. 说明 skipped 项：

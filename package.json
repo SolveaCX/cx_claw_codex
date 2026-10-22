@@ -9,21 +9,14 @@
   "files": [
     "bin",
     "dist/cli.js",
-    "dist/cli.js.map",
-    "skills/**/scripts/**",
-    "skills/**/assets/**",
-    "skills/__lib__/**",
-    "skills/solvea-desk/references/report/*.html",
-    "skills/solvea-desk/references/report/*.css",
-    "capabilities.lock.json",
-    "requirements-cli.txt"
+    "dist/cli.js.map"
   ],
   "scripts": {
     "build": "tsup",
     "dev": "tsx src/cli.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test --path-ignore-patterns _tmp_",
-    "check:capabilities": "python3 scripts/check_capabilities.py",
+    "check:capabilities": "tsx scripts/check-capabilities.ts",
     "check:release": "tsx scripts/check-release.ts",
     "test:package": "tsx scripts/test-packed-package.ts",
     "release:prepare": "tsx scripts/prepare-release.ts",

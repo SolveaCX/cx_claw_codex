@@ -24,7 +24,7 @@ M10 只处理已经进入 CHAT_FLOW 之后的问题：
 从会话记录的 `strategyAction`、`context.ext` 或已知测试结果确认 `agentId`，然后执行：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py inspect --agent-id <agentId> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow inspect --agent-id <agentId> --pretty
 ```
 
 只要本轮确认进入 CHAT_FLOW，报告前必须读取当前生效的 ChatFlow 图配置。读取图配置的目的不是只做节点/边校验，而是看到全局业务流程，理解失败节点的上游来源、下游去向、变量和工具结果如何传递，必要时给出准确可行的配置建议。

@@ -20,7 +20,7 @@ CHAT_FLOW 文档实现节点、compile、validate 和 replay；旧图合同未�
 
 处理大型 JSON、迁移索引、工具定义批量核对时，优先用 `execute` 一次性运行 `jq` 做筛选、字段投影、
 计数和结构摘要，只输出紧凑结果，不要把完整 JSON 回传模型；必要时结合 `rg` / `sed`。复杂跨文件
-关联、复杂转换或生成逻辑再用短 Python 脚本。不要用多轮 `grep` / `read_file` 逐字段搜索同一批文件。
+关联、复杂转换或生成逻辑统一调用 `agent-builder` CLI 或 `api` 命令。不要让 Skill 临时编写脚本，也不要用多轮 `grep` / `read_file` 逐字段搜索同一批文件。
 简单查看单个文档仍用 `read_file`，但跨多个 id、工具、action status、selector 的检索必须批处理并把
 结果写入 `/workspace/tmp/` 或 `/workspace/state/agent-builder/` 供后续复用。
 

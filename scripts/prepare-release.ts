@@ -23,7 +23,7 @@ for (const path of ["package.json", "plugin.json", ".codex-plugin/plugin.json"])
   writeFileSync(path, updated);
 }
 
-execFileSync("python3", ["scripts/check_capabilities.py", "--write"], { stdio: "inherit" });
+execFileSync("bun", ["run", "check:capabilities", "--", "--write"], { stdio: "inherit" });
 console.log(`Prepared CXClaw ${version}`);
 if (version.includes("-")) {
   console.log(`Commit the changes, then push tag v${version} to publish the prerelease.`);

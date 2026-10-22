@@ -1,6 +1,6 @@
 # CXClaw
 
-CXClaw 是 Solvea 内部使用的 Codex 插件。它把原 CXClaw 的业务能力带到本地 Codex：Codex 负责理解任务和编排步骤，`cxclaw` CLI 负责登录、选择租户、调用业务接口、执行现有 Python 脚本和直查 SLS。
+CXClaw 是 Solvea 内部使用的 Codex 插件。它把原 CXClaw 的业务能力带到本地 Codex：Codex 负责理解任务和编排步骤，`cxclaw` CLI 负责登录、选择租户、调用业务接口、执行本地工作流和直查 SLS。所有业务代码统一使用 TypeScript，Skills 只描述流程并调用 CLI。
 
 插件不启动本地 MCP，也不依赖 `solvea-kit`。`shulex-cloud` 只提供钉钉授权、租户授权、服务配置和短期凭据；具体业务操作由本机 CLI 执行。
 
@@ -20,17 +20,9 @@ CXClaw 是 Solvea 内部使用的 Codex 插件。它把原 CXClaw 的业务能�
 
 - Codex CLI
 - Node.js 22 或更高版本，包含 `npm` 和 `npx`
-- Python 3.12
-- `requirements-cli.txt` 中锁定的 Python 依赖
 - 可用的系统安全凭据库：macOS Keychain、Windows Credential Manager 或 Linux Secret Service
 
-安装 Python 依赖：
-
-```bash
-python3.12 -m pip install -r requirements-cli.txt
-```
-
-CXClaw 不会回退使用其他 Python 大版本。Linux 没有 Secret Service 时会拒绝保存登录信息，不会把凭据写入明文文件。
+Linux 没有 Secret Service 时会拒绝保存登录信息，不会把凭据写入明文文件。
 
 ## 安装
 
@@ -98,8 +90,10 @@ npx --yes @shulex/cxclawctl@latest capabilities
 npx --yes @shulex/cxclawctl@latest agent get --id 456 --pretty
 npx --yes @shulex/cxclawctl@latest intent list --pretty
 
-# 执行插件内 Python 脚本
-npx --yes @shulex/cxclawctl@latest script skills/poc/scripts/plan.py --init
+# 使用 TypeScript CLI 执行本地工作流
+npx --yes @shulex/cxclawctl@latest poc plan --init
+npx --yes @shulex/cxclawctl@latest kb-builder crawl --url https://docs.example.com
+npx --yes @shulex/cxclawctl@latest solvea-desk fetch-tickets --task-id demo
 
 # 直接从本机查询 SLS；from/to 使用 Unix 秒级时间戳
 npx --yes @shulex/cxclawctl@latest sls query \
@@ -154,7 +148,7 @@ npx --yes @shulex/cxclawctl@latest update --install-scheduler
 - 登录信息只保存在操作系统安全凭据库。
 - SLS 长期 AK/SK 不下发到客户端；CLI 每次查询只申请短期只读 STS，并直接连接阿里云 SLS。
 - 客户端提供的 `tenantId`、`accountId` 和环境值不能直接作为授权依据，服务端签发的租户上下文才是最终权限边界。
-- 业务 token 不输出到终端或日志，只通过受控的子进程环境传给本地业务脚本。
+- 业务 token 不输出到终端或日志，只在请求对象的生命周期内传给 CLI 的 HTTP client。
 - `main` 分支只用于开发；员工使用由发布流程推进的 `marketplace/stable`、`marketplace/canary` 或 `marketplace/dev`。
 
 ## 本地开发
@@ -180,7 +174,7 @@ node bin/cxclawctl.mjs version
 修改 Skills 或业务 command 后，重新生成并校验能力清单：
 
 ```bash
-python3 scripts/check_capabilities.py --write
+bun run check:capabilities -- --write
 bun run check:capabilities
 ```
 
@@ -229,10 +223,10 @@ cxclaw-codex-plugin.zip
 .codex-plugin/plugin.json         Codex 插件清单
 plugin-cli.mjs                    将插件固定到同版本 npm CLI
 bin/cxclawctl.mjs                 npm CLI 入口
-src/                              TypeScript CLI 实现
-skills/                           Marketplace Skills 和 Python 业务脚本源码
+src/                              TypeScript CLI 和业务工作流实现
+skills/                           Marketplace Skills、reference 和静态资源
 capabilities.lock.json            Skills 与业务 command 能力映射
 scripts/                          能力校验和发布打包脚本
 ```
 
-npm 包只包含 CLI、Python 业务脚本、脚本所需静态资源和能力清单；`SKILL.md` 与普通 reference 文档只通过 Git Marketplace 分发，不在 npm 中重复打包。
+npm 包只包含 CLI 运行时代码；`SKILL.md`、reference 文档和静态资源只通过 Git Marketplace 分发，不在 npm 中重复打包。

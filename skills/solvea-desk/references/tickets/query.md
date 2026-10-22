@@ -1,6 +1,6 @@
 # Desk 当前工单列表接口
 
-`fetch_tickets.py` 忠实封装 `/api_v2/tars/api/ticket/list`：把受支持的请求条件传给后端，按接口分页拉取，并将响应列表原样写入 `datasource.xlsx` 的 `data` sheet。脚本不增加业务筛选语义，也不修改返回结果集。
+`solvea-desk fetch-tickets` 忠实封装 `/api_v2/tars/api/ticket/list`：把受支持的请求条件传给后端，按接口分页拉取，并将响应列表原样写入 `datasource.xlsx` 的 `data` sheet。脚本不增加业务筛选语义，也不修改返回结果集。
 
 ## 请求参数说明
 
@@ -43,7 +43,7 @@
 示例：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/fetch_tickets.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk fetch-tickets \
   --view-id 1 \
   --filters-json '{"channelList":["ebay"],"agentIdList":[474501],"ticketStatusList":["open","pending"]}' \
   --page-size 100 \
@@ -53,7 +53,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/fe
 
 只下推值已经明确的条件。用户只给负责人姓名时不要猜 `agentId`；可以下推其他已知条件，再在响应字段 `agent` 上完成本地分析。
 
-接口不支持按 `lastMessageTime`、`lastResponseTime`、`firstAgentResponseTime` 或 `lastUpdateTime` 传时间范围。用户要求这些口径时，先按后端已有条件拉取，再由 `analysis.py` 对响应字段进行筛选。不要创造额外的 fetch 参数或偷偷替换时间字段。
+接口不支持按 `lastMessageTime`、`lastResponseTime`、`firstAgentResponseTime` 或 `lastUpdateTime` 传时间范围。用户要求这些口径时，先按后端已有条件拉取，再由 `analysis step` 对响应字段进行筛选。不要创造额外的 fetch 参数或偷偷替换时间字段。
 
 脚本根据响应 `total` 判断是否还有下一页；没有 `total` 时以当前页是否满页兜底。`manifest.json.truncated=true` 表示命中 `max-pages` 或 `max-rows`，不能声称已经获取全部工单。原始分页响应保存在 `tmp_task_dir/raw_page_*.json`，仅用于排查和重放。
 

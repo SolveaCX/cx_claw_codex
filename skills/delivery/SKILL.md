@@ -34,13 +34,13 @@ requires:
 每次开始处理 Delivery 前，先运行：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/plan.py --init
+node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery plan --init
 ```
 
-阶段完成后用 `plan.py` 更新顶层状态，例如：
+阶段完成后用 `delivery plan` 更新顶层状态，例如：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/plan.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery plan \
   --status agents_created \
   --set intent.created_log_path=/workspace/outputs/delivery/created_<ts>.json
 ```
@@ -48,7 +48,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/plan.py \
 需要汇总当前交付物时运行：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/render_summary.py
+node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery render-summary
 ```
 
 ```json

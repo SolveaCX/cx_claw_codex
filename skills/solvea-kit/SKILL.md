@@ -24,7 +24,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api <legacy-command> --pretty
 
 | 用户诉求 | 去哪里 |
 |---|---|
-| 通用意图分类实现（供 POC / Delivery 调用） | `workflow intent-classify` |
+| 通用意图分类实现（供 POC / Delivery 调用） | `poc classify` / `delivery classify` |
 | 意图创建、查询、更新、启停 | 本 skill：`references/intent.md` |
 | 策略创建、查询、更新、启停、entity condition | 本 skill：`references/strategy.md` |
 | 变量系统字段查询、初始化、创建、更新、删除、启停 | 本 skill：`references/variables.md` |
@@ -64,7 +64,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api <legacy-command> --pretty
 ```text
 solvea-kit/
 ├── SKILL.md
-├── scripts/
+├── references/
 │   └──（标签导入和意图分类已迁移到 `workflow` CLI）
 └── references/
     ├── intent.md

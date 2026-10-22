@@ -3,7 +3,7 @@
 公开能力：从网站、产品站、帮助中心或文档站构建知识库目录与 QA，也支持在确认“保留网页原文”后创建网页资料。
 
 网页地址先做模式确认：保留原始网页时使用
-`../scripts/import_source_documents.py --plan-file <plan> --execute`；选择整理问答时才进入下面的 crawl → extract → import_qa 流程。
+`node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-source-documents --plan-file <plan> --execute`；选择整理问答时才进入下面的 crawl → extract → import-qa 流程。
 
 ## Modes
 
@@ -23,7 +23,7 @@ auto | crawl4ai | tavily
 
 - Crawl4AI 只用于适合网页抓取/整理的任务。
 - PDF / xlsx / qa_plan.json / 回复模板 / 导出 / 单条知识更新不使用 Crawl4AI。
-- Crawl4AI 作为 Python 依赖运行在 sandbox 内的 skill 脚本中，不接入主服务全局工具。
+- 网页抓取由本地 `kb-builder crawl` 统一执行，不依赖系统 Python 或 sandbox 脚本。
 - 默认 `provider=auto` 保持轻量兼容路径；需要 JS/动态页面抓取时显式使用 `provider=crawl4ai`。
 
 ## Stable commands
@@ -31,7 +31,7 @@ auto | crawl4ai | tavily
 首版脚本化 pipeline 目标入口：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/crawl_site.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder crawl \
   --url <source_url> \
   --mode auto \
   --provider auto \
@@ -39,19 +39,19 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/crawl_site.
   --max-pages 100 \
   --output /workspace/outputs/kb-builder/crawl_result_<ts>.json
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/build_directory_plan.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder directory-plan \
   --crawl-result /workspace/outputs/kb-builder/crawl_result_<ts>.json \
   --output /workspace/outputs/kb-builder/directory_plan_<ts>.json
 
 # 展示 directory_plan_<ts>.json，等待用户明确确认后写入 confirmed_tree
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/build_directory_plan.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder directory-plan \
   --crawl-result /workspace/outputs/kb-builder/crawl_result_<ts>.json \
   --output /workspace/outputs/kb-builder/directory_plan_<ts>.json \
   --write-confirmed-tree
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/create_dirs.py
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder create-directories
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/extract_web_qa.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder extract-web-qa \
   --crawl-result /workspace/outputs/kb-builder/crawl_result_<ts>.json \
   --output-dir /workspace/tmp/kb-builder/qa_parts
 ```
@@ -73,8 +73,8 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/extract_web
 - 用户或上游 SOP 明确给出目录 schema 时，按输入 schema 生成目录树，不额外增加 Product Introduction 等默认根目录。
 - 未给出目录 schema 时，使用 kb-builder 默认标准模板：Product Introduction / Brand Policy / Help Center / Pending Assignment。
 - `Help Center` 仅在发现帮助中心/FAQ/文档站时创建。
-- QA parts 兼容 `import_qa.py --from-dir`。
-- `create_dirs.py` 前必须已经存在 `/workspace/state/kb-builder/confirmed_tree.json`；没有用户确认时不得写入或创建目录。
+- QA parts 兼容 `kb-builder import-qa --from-dir`。
+- `kb-builder create-directories` 前必须已经存在 `/workspace/state/kb-builder/confirmed_tree.json`；没有用户确认时不得写入或创建目录。
 - 调用方不需要知道 crawl provider 内部策略。
 
 ## Non-guarantees

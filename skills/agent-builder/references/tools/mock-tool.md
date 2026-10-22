@@ -30,7 +30,7 @@ MockData 的 `mock_type` 必须包含工具 ID，所以创建顺序和普通 HTT
 1. `list-plugins --pretty` 查重，向用户说明将进行三类写操作：创建占位、全量替换 MockData、更新工具；取得确认。
 2. 创建最小占位工具，取得服务端返回的 `id`。
 3. 从 `fileName` 去掉最后一个扩展名得到 stem，再生成 `mock_type = <stem>_<id>`。例如 `logistics.mock.xlsx`、ID `321` 对应 `logistics.mock_321`。
-4. 按该 ID 准备最终工具配置，先运行 `validate_tool_config.py` 静态验证。
+4. 按该 ID 准备最终工具配置，先运行 `agent-builder validate-tool` 静态验证。
 5. 执行 `replace-mock-data --name <mock_type>` 全量替换数据。
 6. 在最终 payload 的普通 `headerParams` 中配置 `X-Token`，再执行 `update-plugin --data-file ... --pretty`。配置中 `method=POST`，URL 指向 `/api_v2/gpt/mockdata/searchMockData/<mock_type>`。
 7. 分别运行 `query-mock-data --name <mock_type>` 与 `get-plugin --id <id> --pretty` 回查数据和定义。
@@ -232,7 +232,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api replace-mock-data \
 用实际 `<tool_id>`、host 和安全注入后的本地 state 文件做静态验证，再更新：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/tools/validate_tool_config.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder validate-tool \
   --data-file /workspace/state/agent-builder/tool_lookup_logistics_mock.json \
   --pretty
 

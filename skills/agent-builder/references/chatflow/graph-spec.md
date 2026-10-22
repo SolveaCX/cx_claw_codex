@@ -209,32 +209,32 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent list --pretty
 ## CLI
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py --help --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow --help --pretty
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py compile \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow compile \
   --source-file /workspace/state/agent-builder/chatflow/chatflow_source.json \
   --graph-file /workspace/state/agent-builder/chatflow/chatflow_graph.json \
   --pretty
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py validate \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow validate \
   --graph-file /workspace/state/agent-builder/chatflow/chatflow_graph.json \
   --pretty
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py inspect \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow inspect \
   --agent-name Example_Chatflow \
   --pretty
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py deploy \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow deploy \
   --agent-name Example_Chatflow \
   --graph-file /workspace/state/agent-builder/chatflow/chatflow_graph.json \
   --pretty
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py update \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow update \
   --agent-id 2496 \
   --graph-file /workspace/state/agent-builder/chatflow/patch_2496_graph.json \
   --pretty
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py publish \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow publish \
   --agent-id 2496 \
   --graph-file /workspace/state/agent-builder/chatflow/patch_2496_graph.json \
   --pretty

@@ -6,7 +6,7 @@ The renderer uses the sibling files:
 - `report.css`: fixed self-contained CSS for the report.
 - `report-template.html`: fixed semantic HTML shell with renderer placeholders.
 
-Agents should not copy these files into `analysis.py`. Generate structured `report_data.json`, then call `scripts/report/render_report.py` to build the HTML.
+Agents should not copy these files into `analysis step`. Generate structured `report_data.json`, then call ``node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk render-report`` to build the HTML.
 
 ## Design Read
 
@@ -31,7 +31,7 @@ Avoid:
 
 ## Report Data Contract
 
-`analysis.py` writes `STATE_TASK_DIR/report_data.json`. The renderer accepts this shape:
+`analysis step` writes `STATE_TASK_DIR/report_data.json`. The renderer accepts this shape:
 
 ```json
 {
@@ -73,14 +73,14 @@ Rules:
 
 - `report_slug` must be ASCII lowercase snake_case, for example `weekly_ticket_summary`.
 - `report_data.json` must contain top-level `kpis` or `sections`; usually both. The renderer rejects free-form legacy shapes that only contain `overview`, `personal_performance`, `daily_trend`, or `status_distribution`.
-- `row_count` means the raw snapshot row count from `fetch_sources.py`; `render_report.py` fills it from `manifest.json.row_counts` when omitted. Do not use filtered analysis sample size here.
+- `row_count` means the raw snapshot row count from `solvea-desk fetch-sources`; `solvea-desk render-report` fills it from `manifest.json.row_counts` when omitted. Do not use filtered analysis sample size here.
 - Visible labels should be Chinese business labels. Raw field names can appear only in short audit notes when necessary.
 - Table columns should be ordered by business importance, not raw data order.
 - Use `numeric: true` for numeric columns so the renderer can right-align and use tabular numbers.
 - `sections[].chart` is optional. HTML reports support self-contained static `bar`、`line`、`pie`、`scatter` charts. Use the same chart type vocabulary as the `render_chart` tool.
 - `bar`、`line`、`scatter` charts use `{"chartType": "bar|line|scatter", "xKey": "...", "yKey": "...", "label": "..."}`.
 - `pie` charts use `{"chartType": "pie", "nameKey": "...", "valueKey": "...", "label": "..."}`. `xKey/yKey` can be used only when they clearly mean category/value.
-- `chart_type` and `type` are accepted as aliases, but new `analysis.py` should write `chartType`.
+- `chart_type` and `type` are accepted as aliases, but new `analysis step` should write `chartType`.
 - Chart sections always render a toggle: table is selected first, and the same `rows` can be viewed as the configured static chart.
 - Agents must not generate chart HTML, CSS, JavaScript, or full ECharts options for HTML reports. The renderer builds the static chart from the same summary `rows`, so token cost stays close to a table plus a small chart config.
 - Keep `sections[].rows` to report-sized summaries. Long raw detail belongs in `<report_slug>_detail.xlsx`.
@@ -88,7 +88,7 @@ Rules:
 
 ## Analysis Script Contract Template
 
-`analysis.py` should define small local helpers before building `report_data`. This avoids the common failure where `columns` is written as `["日期", "工单数"]` instead of renderer-readable objects.
+`analysis step` should define small local helpers before building `report_data`. This avoids the common failure where `columns` is written as `["日期", "工单数"]` instead of renderer-readable objects.
 
 Copy this shape and fill it with the current report's metrics and summary rows:
 
@@ -147,7 +147,7 @@ Rules for the template:
 - `columns` 必须是对象数组，每个对象至少有 `key` 和 `label`；不要写成字符串数组。
 - Every `rows` item must use the same keys declared in `columns`.
 - Chart data comes from the same `rows`; do not create separate `x` / `series` fields for HTML.
-- Run `render_report.py --validate-only` immediately after writing `report_data.json`.
+- Run `solvea-desk render-report --validate-only` immediately after writing `report_data.json`.
 
 ## Page Structure
 
@@ -175,7 +175,7 @@ The renderer outputs this structure:
 Use the renderer:
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/report/render_report.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk render-report \
   --task-id "<task_id>" \
   --report-slug "assignee_group_weekly"
 ```

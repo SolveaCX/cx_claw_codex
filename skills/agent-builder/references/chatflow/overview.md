@@ -42,7 +42,7 @@
 
 - 新建图使用 source JSON；整体重建可使用 source -> compile；已有 CHAT_FLOW 的增量修改使用 inspect 得到的完整 `chatFlowGraph`，包括新增/删除节点、修改边和调整条件分支。
 - 大图先按已确认的流程块完成 keyed source fragment，再合并为唯一 source 并只编译一次；不合并已编译 graph。
-- 固定动作使用 `chatflow_builder.py` CLI，不写临时 Python 脚本，不 import builder 函数。
+- 固定动作使用 `agent-builder chatflow` CLI，不写临时 Python 脚本，不 import builder 函数。
 - `compile` / `validate` 有 error 必须先修同一个 source 或 graph 文件，再重新执行。
 - 新建、发布前必须让用户确认；增量修改默认保存草稿，不发布。
 - 工具状态确定后必然发送的固定回复优先查模板并使用 `REPLY(TEMPLATE)`；若固定话术是某个上下文判断节点

@@ -1,6 +1,6 @@
 # 回复模板库管理
 
-优先用 `/skill-lib/solvea-api/solvea_api.py` 管理模板；用户上传 Excel / CSV 批量导入时，用 `scripts/import_templates.py`。
+优先用 `/skill-lib/solvea-api/cxclawctl api` 管理模板；用户上传 Excel / CSV 批量导入时，用 ``node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-templates``。
 
 ## 能力清单
 
@@ -9,8 +9,8 @@
 | 查模板 | `list-templates` | 否 | 返回 `id/name/content/status/scene` |
 | 创建单条模板 | `create-template` | 是 | 返回新模板 `id` |
 | 修改单条模板（改名 / 内容 / 状态） | `update-template --id ...` | 是 | 返回更新后的模板 |
-| 批量导入模板 | `import_templates.py --dry-run` → 用户确认 → 正式导入 | 是 | dry-run 生成 `template_import_plan_*`；正式导入生成 `template_import_result_*` |
-| 保留首条并跳过重复名 | `import_templates.py --skip-duplicates` | 是 | `skipped_duplicates` 记录被跳过的行 |
+| 批量导入模板 | `kb-builder import-templates --dry-run` → 用户确认 → 正式导入 | 是 | dry-run 生成 `template_import_plan_*`；正式导入生成 `template_import_result_*` |
+| 保留首条并跳过重复名 | `kb-builder import-templates --skip-duplicates` | 是 | `skipped_duplicates` 记录被跳过的行 |
 | 删除模板 | `delete-templates --ids ... --confirm-delete` | 是，必须确认模板名称和 id | 按 id 删除 |
 | 单条发布 / 下架 | `update-template --id ... --status ENABLED/DISABLED` | 是 | 改单条模板状态 |
 | 批量发布 / 下架 | 暂无批量 CLI | 是 | 单条走 `update-template`；批量走前端“批量更新” |
@@ -125,7 +125,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api delete-templates --ids 123 124 125 --con
 脚本路径：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_templates.py [args]
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-templates [args]
 ```
 
 ### Excel / CSV 列
@@ -167,7 +167,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_temp
 2. 先 dry-run：
 
    ```bash
-   node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_templates.py \
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-templates \
      --xlsx /mounted/chat-files/user/templates.xlsx \
      --dry-run
    ```
@@ -175,7 +175,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_temp
    表头不标准时显式传列名：
 
    ```bash
-   node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_templates.py \
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-templates \
      --xlsx /mounted/chat-files/user/templates.xlsx \
      --name-col "Topic" \
      --content-col "Message" \
@@ -189,7 +189,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_temp
    用户要求跳过重复模板名时，可以用脚本参数生成最终 plan：
 
    ```bash
-   node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_templates.py \
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-templates \
      --xlsx /mounted/chat-files/user/templates.xlsx \
      --name-col "快捷词" \
      --content-col "回复内容" \
@@ -209,7 +209,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_temp
 4. 用户明确回复“确认 / 上传吧 / 没问题”后，用已确认的 plan 正式导入：
 
    ```bash
-   node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_templates.py \
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-templates \
      --plan-file /workspace/outputs/kb-builder/template_import_plan_<ts>.json
    ```
 

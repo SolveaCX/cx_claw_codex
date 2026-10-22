@@ -6,16 +6,16 @@
 
 ```bash
 # QA parts 合并 + dry-run
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_qa.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-qa \
   --from-dir /workspace/tmp/kb-builder/qa_parts/ \
   --dry-run
 
 # 使用 dry-run 已落盘的 qa_plan 正式上传
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_qa.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-qa \
   --qa-file /workspace/outputs/kb-builder/qa_plan_<ts>.json
 
 # 或直接从 parts 合并并上传
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_qa.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-qa \
   --from-dir /workspace/tmp/kb-builder/qa_parts/
 ```
 
