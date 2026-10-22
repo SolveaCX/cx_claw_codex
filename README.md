@@ -94,8 +94,9 @@ npx --yes @shulex/cxclawctl@latest version
 npx --yes @shulex/cxclawctl@latest version --json
 npx --yes @shulex/cxclawctl@latest capabilities
 
-# 调用只读业务命令
-npx --yes @shulex/cxclawctl@latest api get-agent --id 456 --pretty
+# 调用只读业务命令；业务命令统一使用“资源 + 动作”两层结构
+npx --yes @shulex/cxclawctl@latest agent get --id 456 --pretty
+npx --yes @shulex/cxclawctl@latest intent list --pretty
 
 # 执行插件内 Python 脚本
 npx --yes @shulex/cxclawctl@latest script skills/poc/scripts/plan.py --init
@@ -117,12 +118,12 @@ npx --yes @shulex/cxclawctl@latest auth logout
 写操作必须先预览，再由用户明确确认。确认凭证通过 stdin 传入，不能写进命令参数、文件或日志。
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api update-agent \
+npx --yes @shulex/cxclawctl@latest agent update \
   --data-file update.json \
   --phase preview \
   --pretty
 
-printf '%s' "$CONFIRMATION_TOKEN" | npx --yes @shulex/cxclawctl@latest api update-agent \
+printf '%s' "$CONFIRMATION_TOKEN" | npx --yes @shulex/cxclawctl@latest agent update \
   --data-file update.json \
   --phase commit \
   --confirmation-token-stdin \

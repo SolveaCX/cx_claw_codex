@@ -36,7 +36,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow
 需要补充 Agent 类型、版本等元信息时，可执行：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-agent --id <agentId> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent get --id <agentId> --pretty
 ```
 
 关注点：

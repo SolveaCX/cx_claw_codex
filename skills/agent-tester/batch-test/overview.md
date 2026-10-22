@@ -4,7 +4,7 @@
 
 ## 入口路由
 
-先执行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-agent --id <agentId> --pretty`：
+先执行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" agent get --id <agentId> --pretty`：
 
 | 类型 | 系统入口 | task type | 数据 | 上限 |
 |---|---|---|---|---|

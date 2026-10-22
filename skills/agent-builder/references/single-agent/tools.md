@@ -5,8 +5,8 @@ SINGLE_AGENT 通过 `usedPlugins` 绑定可调用工具。对外叫“工具”�
 ## 查询工具
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-plugins --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-plugin --id <tool_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool list --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool get --id <tool_id> --pretty
 ```
 
 `list-plugins` 只看精简列表；确认 requestParam / responseParam / actionStatuses 时使用 `get-plugin` 查看完整定义。

@@ -31,7 +31,7 @@
 下钻时必须复用 Report 的时间范围、时区对应的毫秒边界，以及适用的 Bot、渠道、Agent、意图条件。前端未选择渠道时不要追加 `--touch-point`，表示全部渠道。
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-transcripts \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript list \
   --begin-ts "$BEGIN_MS" \
   --end-ts "$END_MS" \
   --page 1 \
@@ -42,7 +42,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-transcripts \
 筛选 LiveChat 已转人工 Agent 会话记录：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-transcripts \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript list \
   --begin-ts "$BEGIN_MS" \
   --end-ts "$END_MS" \
   --touch-point LIVE_CHAT \
@@ -78,7 +78,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-transcripts \
 `list-transcripts` 只返回摘要。需要查看消息内容、AgentAction、转人工上下文或具体异常时，再调用：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-transcript \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
   --chat-id <chatId> \
   --pretty
 ```

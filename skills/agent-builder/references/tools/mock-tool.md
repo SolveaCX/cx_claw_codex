@@ -47,7 +47,7 @@ MockData 的 `mock_type` 必须包含工具 ID，所以创建顺序和普通 HTT
 ```
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool create \
   --data-file /workspace/state/agent-builder/mock_placeholder.json \
   --pretty
 ```
@@ -236,7 +236,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/tools/va
   --data-file /workspace/state/agent-builder/tool_lookup_logistics_mock.json \
   --pretty
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool update \
   --data-file /workspace/state/agent-builder/tool_lookup_logistics_mock.json \
   --pretty
 ```
@@ -269,7 +269,7 @@ MockData 搜索接口只保留请求 JSON 中的顶层 primitive/wrapper 值和 
 node "<PLUGIN_ROOT>/plugin-cli.mjs" api query-mock-data \
   --name logistics_mock_<tool_id> --pretty
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-plugin --id <tool_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool get --id <tool_id> --pretty
 ```
 
 回查时确认：数据条数和嵌套类型正确；工具仍是 `EXTERNAL_HTTP_CALL`；`meta.category=EXCEL`；`fileName`、URL 中的 `mock_type` 与 ID 一致；方法为 POST；Header 为 `X-Token`。

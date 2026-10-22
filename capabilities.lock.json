@@ -167,6 +167,272 @@
     "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" commands",
     "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" capabilities"
   ],
+  "resourceCommands": [
+    {
+      "resource": "agent",
+      "action": "list",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" agent list",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "agent",
+      "action": "get",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" agent get",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "agent",
+      "action": "create",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" agent create",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "agent",
+      "action": "update",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" agent update",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "agent",
+      "action": "get-chatflow",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" agent get-chatflow",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "intent",
+      "action": "list",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" intent list",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "intent",
+      "action": "get",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" intent get",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "intent",
+      "action": "create",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" intent create",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "intent",
+      "action": "update",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" intent update",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "intent",
+      "action": "toggle",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" intent toggle",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "strategy",
+      "action": "list",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" strategy list",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "strategy",
+      "action": "entities",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" strategy entities",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "strategy",
+      "action": "create",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" strategy create",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "strategy",
+      "action": "update",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" strategy update",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "strategy",
+      "action": "toggle",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" strategy toggle",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "tool",
+      "action": "list",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" tool list",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "tool",
+      "action": "get",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" tool get",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "tool",
+      "action": "create",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" tool create",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "tool",
+      "action": "update",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" tool update",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "tool",
+      "action": "delete",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" tool delete",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "knowledge",
+      "action": "list",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" knowledge list",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "knowledge",
+      "action": "get",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" knowledge get",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "knowledge",
+      "action": "update",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" knowledge update",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "knowledge",
+      "action": "upload-qa",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" knowledge upload-qa",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "knowledge",
+      "action": "tags",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" knowledge tags",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "directory",
+      "action": "list",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" directory list",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "directory",
+      "action": "create",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" directory create",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "directory",
+      "action": "update",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" directory update",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "directory",
+      "action": "delete",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" directory delete",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "status",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality status",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "toggle",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality toggle",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "rules",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality rules",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "get-rule",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality get-rule",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "update-rule",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality update-rule",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "get-custom-rule",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality get-custom-rule",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "create-custom-rule",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality create-custom-rule",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "update-custom-rule",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality update-custom-rule",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "quality",
+      "action": "delete-custom-rule",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" quality delete-custom-rule",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "transcript",
+      "action": "list",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" transcript list",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "transcript",
+      "action": "get",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" transcript get",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "transcript",
+      "action": "context",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" transcript context",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "chat",
+      "action": "send",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" chat send",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "chat",
+      "action": "async",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" chat async",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "chat",
+      "action": "result",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" chat result",
+      "execution": "local-cli"
+    }
+  ],
   "solveaApiCommands": [
     {
       "name": "batch-update-isolation-keyword-bindings",

@@ -38,7 +38,7 @@ Voice Agent 是 `SINGLE_AGENT` 的语音特化：`type` 仍为 `SINGLE_AGENT`，
 
 ```bash
 node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-voice-agents --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-agent \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent create \
   --data-file /workspace/state/agent-builder/voice_agent_payload.json \
   --pretty
 ```

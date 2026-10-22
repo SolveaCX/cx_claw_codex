@@ -16,17 +16,17 @@
 统一使用 `/workspace/state/agent-builder/` 保存跨轮配置：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-plugins --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool list --pretty
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-plugin --id <tool_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool get --id <tool_id> --pretty
 
 node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/tools/validate_tool_config.py \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool create \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool update \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 
 node "<PLUGIN_ROOT>/plugin-cli.mjs" api replace-mock-data \

@@ -38,9 +38,9 @@ CHAT_FLOW 图构建、修改、校验和发布由 `chatflow` skill 维护，本�
 ### CLI
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-agents --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-agent --id <agent_id> --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-agent \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent list --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent get --id <agent_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent create \
   --data '{"name":"FAQ_Bot","type":"SINGLE_AGENT","prompt":"...","displayPrompt":"..."}' --pretty
 ```
 
@@ -128,7 +128,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-agent \
 node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-voice-agents --pretty
 
 # 创建：payload 存成 json 文件，避免 shell 转义出问题（多语言 prompt 尤其推荐）
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-agent \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent create \
   --data-file /workspace/tmp/voice_agent_payload.json --pretty
 
 node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-voice-transcripts --pretty

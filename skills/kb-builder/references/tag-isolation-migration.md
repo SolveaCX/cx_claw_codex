@@ -37,7 +37,7 @@
 1. 批量读取知识及顶层 `tags`：
 
    ```bash
-   node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge \
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge list \
      --directory-id <directory_id> --type QA --include-tags --page-size 500 --pretty
    ```
 
@@ -45,7 +45,7 @@
 2. 读取项目标签定义：
 
    ```bash
-   node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge-tags --pretty
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge tags --pretty
    ```
 3. 读取隔离关键词文本和真实 ID：
 

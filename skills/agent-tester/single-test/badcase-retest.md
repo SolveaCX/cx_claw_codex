@@ -7,7 +7,7 @@
 执行：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-transcript \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
   --chat-id <historicalChatId> \
   --pretty
 ```
@@ -62,7 +62,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-transcript \
 工具完成后，获取结果中的新 ChatId，再执行一次：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-transcript \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
   --chat-id <newTestChatId> \
   --pretty
 ```

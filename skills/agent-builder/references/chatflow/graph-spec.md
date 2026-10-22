@@ -180,9 +180,9 @@ source JSON 不写 `WAIT` 节点，也不要手动创建 `USER_INPUT` / `AGENT_T
 
 ```bash
 node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-templates --keyword "platform" --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-plugins --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool list --pretty
 node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-ai-fields --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-agents --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent list --pretty
 ```
 
 资源查询口径：

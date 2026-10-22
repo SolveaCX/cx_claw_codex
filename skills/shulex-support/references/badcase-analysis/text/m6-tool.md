@@ -49,10 +49,10 @@ ChatFlowService.callTool(request)
 
 ```bash
 # 查工具列表（精简信息）
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-plugins --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool list --pretty
 
 # 查工具详情（request/response params、actionStatus）
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-plugin --id <tool_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" tool get --id <tool_id> --pretty
 
 # 查变量系统字段（LLM source 的参数需要对应变量系统字段）
 node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-ai-fields --pretty

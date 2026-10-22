@@ -42,11 +42,11 @@ requires:
 
 | 查询内容 | 固定命令 |
 |---|---|
-| 目录树 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-directories --pretty` |
-| 知识列表 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge --type ALL --page-size 50 --page 1 --pretty` |
-| 按关键词查知识 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge --keyword "关键词" --page-size 50 --pretty` |
-| 单条知识 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-knowledge --id <knowledge_id> --type {QA,LEARN_SELF,FILE,WEBSITE,PRODUCT} --pretty` |
-| 知识标签定义 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge-tags --pretty` |
+| 目录树 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" directory list --pretty` |
+| 知识列表 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge list --type ALL --page-size 50 --page 1 --pretty` |
+| 按关键词查知识 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge list --keyword "关键词" --page-size 50 --pretty` |
+| 单条知识 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge get --id <knowledge_id> --type {QA,LEARN_SELF,FILE,WEBSITE,PRODUCT} --pretty` |
+| 知识标签定义 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge tags --pretty` |
 | 隔离关键词 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-isolation-keywords --page-size 50 --page 1 --pretty` |
 | 单条知识已绑定的隔离关键词 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-knowledge-isolation-keywords --id <knowledge_id> --type {QA,LEARN_SELF,FILE,WEBSITE,PRODUCT} --pretty` |
 | 回复模板 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-templates --page-size 50 --pretty` |
