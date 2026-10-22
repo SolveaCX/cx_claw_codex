@@ -32,4 +32,12 @@ describe("publish workflow", () => {
     expect(release).toBeGreaterThan(npm);
     expect(marketplace).toBeGreaterThan(release);
   });
+
+  test("waits for the npm package to become publicly readable", () => {
+    const polling = workflow.indexOf('npm view "@shulex/cxclawctl@${VERSION}" version');
+    const release = workflow.indexOf("name: Create or update GitHub Release");
+    expect(polling).toBeGreaterThan(0);
+    expect(workflow).toContain("still unavailable from the public registry");
+    expect(release).toBeGreaterThan(polling);
+  });
 });

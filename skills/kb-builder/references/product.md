@@ -12,7 +12,7 @@
 常用可选字段包括 `describe`、`image`、`price`、`compareAtPrice`、`currency`、`skuList`、`directoryId`、`metadata`、`specialTagMap`、`published`和 `isVisible`。CLI 默认补齐手工创建来源、已发布和已显示；如果用户要求其他状态，在计划中显式写出。
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api create-product-knowledge --data-file /workspace/state/kb-builder/product_create.json --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-product-knowledge --data-file /workspace/state/kb-builder/product_create.json --pretty
 ```
 
 ## 更新
@@ -22,7 +22,7 @@ npx --yes @shulex/cxclawctl@latest api create-product-knowledge --data-file /wor
 只将要改的字段写入 `/workspace/state/kb-builder/product_update.json`，展示字段级 diff 并等待确认，然后执行：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api update-product-knowledge --id 3057823 --data-file /workspace/state/kb-builder/product_update.json --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-product-knowledge --id 3057823 --data-file /workspace/state/kb-builder/product_update.json --pretty
 ```
 
 如果现有产品缺少后端更新所必需的标题、描述、产品地址、图片、来源、发布状态或可见性，CLI 会拒绝提交并列出缺失字段；先让用户补齐，不自行编造。更新后用 `get-knowledge --type PRODUCT` 重新读取核对。
@@ -43,7 +43,7 @@ npx --yes @shulex/cxclawctl@latest api update-product-knowledge --id 3057823 --d
 执行批量更新：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api batch-update-products --data-file /workspace/state/kb-builder/batch_products_update.json --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api batch-update-products --data-file /workspace/state/kb-builder/batch_products_update.json --pretty
 ```
 
 - 每条记录支持 `id`（或 `kuProductId`）、`mainPush`（主推）、`enable`（或 `published`）。

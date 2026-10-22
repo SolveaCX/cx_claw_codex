@@ -36,7 +36,7 @@ TRANSFER_TO_HUMAN 表达的是客服会话接管。一旦执行，当前 chatflo
 TEMPLATE 转人工先查模板：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-templates --keyword "handoff" --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-templates --keyword "handoff" --pretty
 ```
 
 ## 限制

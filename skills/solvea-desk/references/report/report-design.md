@@ -175,7 +175,7 @@ The renderer outputs this structure:
 Use the renderer:
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/report/render_report.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/report/render_report.py \
   --task-id "<task_id>" \
   --report-slug "assignee_group_weekly"
 ```

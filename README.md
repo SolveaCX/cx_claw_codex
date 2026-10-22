@@ -64,6 +64,8 @@ npx --yes @shulex/cxclawctl@latest setup \
 
 可用通道为 `stable`、`canary` 和 `dev`。内部日常使用请选择 `stable`。
 
+安装后的 Skills 不直接调用 npm `latest`。插件内的 `plugin-cli.mjs` 会读取插件清单版本，并调用完全相同版本的 `@shulex/cxclawctl`，避免新 CLI 与旧 Skills 混用。README 中的 `@latest` 命令只用于首次安装、人工诊断和更新入口。
+
 ## 选择环境和租户
 
 测试环境使用 `--env test`，生产环境使用 `--env prod`。环境由每次租户选择明确指定，不从租户名称推断。
@@ -89,6 +91,7 @@ npx --yes @shulex/cxclawctl@latest tenant clear
 ```bash
 # 查看版本和能力清单
 npx --yes @shulex/cxclawctl@latest version
+npx --yes @shulex/cxclawctl@latest version --json
 npx --yes @shulex/cxclawctl@latest capabilities
 
 # 调用只读业务命令
@@ -129,7 +132,7 @@ printf '%s' "$CONFIRMATION_TOKEN" | npx --yes @shulex/cxclawctl@latest api updat
 
 ## 更新
 
-CLI 使用 `npx --yes @shulex/cxclawctl@latest` 运行，每次启动都会使用 npm 上的最新稳定版本。Skills 由 Codex Git Marketplace 更新：
+自动更新以 Git Marketplace 中的插件版本为准。更新任务先刷新当前配置的 `stable`、`canary` 或 `dev` Marketplace，再重新安装已启用的 CXClaw 插件；新版插件中的 `plugin-cli.mjs` 随后调用同版本 npm CLI：
 
 ```bash
 npx --yes @shulex/cxclawctl@latest update
@@ -141,7 +144,9 @@ npx --yes @shulex/cxclawctl@latest update
 npx --yes @shulex/cxclawctl@latest update --install-scheduler
 ```
 
-更新完成后，新建 Codex 会话或重启 Codex，让新版 Skills 生效。
+更新任务使用安装时解析出的 Node.js 和 npm 绝对路径，避免 macOS LaunchAgent 等后台环境找不到 `npx`。更新后还会确认对应 npm CLI 版本已经公开可下载；检查失败时命令报错，不把不完整更新报告为成功。
+
+更新完成后，新建 Codex 会话或重启 Codex，让新版 Skills 生效。已经运行中的会话继续使用启动时加载的旧版 Skills。
 
 ## 安全边界
 
@@ -221,9 +226,12 @@ cxclaw-codex-plugin.zip
 ```text
 .agents/plugins/marketplace.json  Git Marketplace 清单
 .codex-plugin/plugin.json         Codex 插件清单
+plugin-cli.mjs                    将插件固定到同版本 npm CLI
 bin/cxclawctl.mjs                 npm CLI 入口
 src/                              TypeScript CLI 实现
-skills/                           CXClaw Skills 和 Python 业务脚本
+skills/                           Marketplace Skills 和 Python 业务脚本源码
 capabilities.lock.json            Skills 与业务 command 能力映射
 scripts/                          能力校验和发布打包脚本
 ```
+
+npm 包只包含 CLI、Python 业务脚本、脚本所需静态资源和能力清单；`SKILL.md` 与普通 reference 文档只通过 Git Marketplace 分发，不在 npm 中重复打包。

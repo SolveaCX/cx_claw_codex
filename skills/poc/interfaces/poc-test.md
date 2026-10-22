@@ -7,15 +7,15 @@ POC 专属测试能力：为 POC 业务 agent 设计并执行测试，生成 POC
 ## Commands
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/poc/scripts/inspect_chatflow.py --agent-id <id> [--agent-id <id>] --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/poc/scripts/inspect_chatflow.py --agent-id <id> [--agent-id <id>] --pretty
 
-npx --yes @shulex/cxclawctl@latest script skills/poc/scripts/poc_test.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/poc/scripts/poc_test.py \
   --test-file /workspace/outputs/poc/poc_test_cases_<ts>.json \
   --max-turns 3 \
   --output /workspace/outputs/poc/results_<ts>.json \
   --report
 
-npx --yes @shulex/cxclawctl@latest script skills/poc/scripts/gen_poc_manual.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/poc/scripts/gen_poc_manual.py \
   --results /workspace/outputs/poc/results_<ts>.json \
   --output /workspace/outputs/poc/poc_test_manual_<ts>.html \
   --title "Shulex POC 测试手册 - <brand>" \

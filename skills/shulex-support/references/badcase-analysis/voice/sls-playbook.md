@@ -1,11 +1,11 @@
 # 语音链路 SLS 查询 Playbook
 
-所有 SLS 查询都通过本机 `npx --yes @shulex/cxclawctl@latest sls query` 使用 `shulex-cloud` 下发的短期只读 STS 直连阿里云，不经过业务服务查询代理。
+所有 SLS 查询都通过本机 `node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query` 使用 `shulex-cloud` 下发的短期只读 STS 直连阿里云，不经过业务服务查询代理。
 
 ## 基础模板
 
 ```bash
-npx --yes @shulex/cxclawctl@latest sls query \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query \
   --from <epoch-seconds> \
   --to <epoch-seconds> \
   --query 'rest:"<keyword>"' \

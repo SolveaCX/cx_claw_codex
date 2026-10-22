@@ -7,7 +7,7 @@
 始终结合用户的问题描述读取会话记录。先定位用户认为有问题的目标轮次、实际结果和预期结果，再查看影响该问题的字段及必要的前置轮次。不要脱离问题描述扫描所有字段，也不要从单个字段直接跳到根因。
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api get-transcript --chat-id <chatId> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-transcript --chat-id <chatId> --pretty
 ```
 
 CLI 默认请求 `isCompare=true`，因此每条消息通常同时返回保存的 `context` 和根据当前资源生成的 `contextComparison`。

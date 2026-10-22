@@ -85,28 +85,28 @@ llm_call_with_fallbacks
 
 ```bash
 # 按 armsTrace 查算法服务目标接口
-npx --yes @shulex/cxclawctl@latest sls query \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"request_start" OR rest:"request_end" OR rest:"ERROR")' \
   --line 20
 
 # 按 chatId / request_id 兜底
-npx --yes @shulex/cxclawctl@latest sls query \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query \
   --from <begin> \
   --to <end> \
   --query '(rest:"<chatId>" OR rest:"<request_id>") AND (rest:"request_start" OR rest:"request_end" OR rest:"ERROR")' \
   --line 20
 
 # HTTP 耗时
-npx --yes @shulex/cxclawctl@latest sls query \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND rest:"http_cost_time"' \
   --line 20
 
 # LLM fallback
-npx --yes @shulex/cxclawctl@latest sls query \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND rest:"llm_call_with_fallbacks"' \

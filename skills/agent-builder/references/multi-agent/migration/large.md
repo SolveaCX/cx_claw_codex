@@ -74,7 +74,7 @@ control topology，也不能自动生成目标图边；后者才是结构化结�
 先执行 inspect：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py inspect \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py inspect \
   --input /workspace/state/agent-builder/multi-agent/read_<old_agent_id>_raw.json \
   --out-dir /workspace/state/agent-builder/multi-agent
 ```
@@ -135,7 +135,7 @@ jq -c --argjson wanted '["24655", "24992", "26918"]' '
 一次领取或恢复一个并发 wave：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py prepare-batches \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py prepare-batches \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.ai.json \
   --chunks-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/chunks.json \
   --progress-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/progress.json \
@@ -157,7 +157,7 @@ npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-age
 并发 worker 全部写完 plan 后，由协调器合并；worker 禁止直接调用 `update-batch-progress`：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py merge-batch-plans \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py merge-batch-plans \
   --base-plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.template.json \
   --manifest-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/batches/worker_manifest.json \
   --progress-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/progress.json \
@@ -430,7 +430,7 @@ analyzer 检查 coverage 和计划结构：
 确认。若用户只要求迁移方案，则最终确认后只保留 plan/source 产物，不写入环境。
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py validate-migration-plan \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py validate-migration-plan \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.full.json \
   --pretty
@@ -460,14 +460,14 @@ npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-age
 写完 source 后、compile 前先执行迁移专用对账：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py audit-migration-source \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py audit-migration-source \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.full.json \
   --source-file /workspace/state/agent-builder/chatflow/<task>_source.json \
   --out-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/source_audit.json \
   --pretty
 
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py validate-prompt-block-rendering \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py validate-prompt-block-rendering \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.full.json \
   --source-file /workspace/state/agent-builder/chatflow/<task>_source.json \
@@ -485,7 +485,7 @@ CHAT_FLOW 文档 compile / validate，以检查 `displayPrompt`、runtime `promp
 交接，或 source 可能被人工编辑时，才建议记录交接快照：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py emit-handoff \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py emit-handoff \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.full.json \
   --source-file /workspace/state/agent-builder/chatflow/<task>_source.json \
@@ -499,7 +499,7 @@ npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-age
 发生上述交接时，由接手方在 CHAT_FLOW `compile` 前显式验证 handoff：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py verify-handoff \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py verify-handoff \
   --handoff-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_handoff.json \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.full.json \

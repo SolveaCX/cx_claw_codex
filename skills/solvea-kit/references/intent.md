@@ -21,21 +21,21 @@ CHAT_FLOW 内的 INTENT 节点直接在节点配置里定义意图（填 name + 
 ## CLI
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-intents --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-intents --pretty
 
-npx --yes @shulex/cxclawctl@latest api get-intent --id <intent_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-intent --id <intent_id> --pretty
 
-npx --yes @shulex/cxclawctl@latest api create-intent \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-intent \
   --data '{"name":"退款","description":"用户要求退款","type":"Other","status":"ENABLED","category":"E_COMMERCE"}'
 
 # 更新意图描述（PUT body 字段是 description，name 必传）
-npx --yes @shulex/cxclawctl@latest api update-intent --id <intent_id> \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-intent --id <intent_id> \
   --data-file /workspace/state/solvea-kit/intent_update.json
 
 # 短描述可直接使用 --data；长描述先写入 JSON 文件，再通过 --data-file 提交
 
-npx --yes @shulex/cxclawctl@latest api toggle-intent --id <intent_id> --disable
-npx --yes @shulex/cxclawctl@latest api toggle-intent --id <intent_id> --enable
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api toggle-intent --id <intent_id> --disable
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api toggle-intent --id <intent_id> --enable
 ```
 
 ## update-intent 字段说明（GET / PUT 字段命名不一致，必看）

@@ -5,10 +5,10 @@ Delivery 专属分类入口。入口和状态归属 Delivery skill；通用意�
 ## Commands
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/classify.py --xlsx <xlsx> --messages-col <col> [--title-col <col>]
-npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/classify.py --no-excel
-npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/gen_report.py --brand <brand>
-npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/gen_excel.py --brand <brand>
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/classify.py --xlsx <xlsx> --messages-col <col> [--title-col <col>]
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/classify.py --no-excel
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/gen_report.py --brand <brand>
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/gen_excel.py --brand <brand>
 ```
 
 ## Inputs

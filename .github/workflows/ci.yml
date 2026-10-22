@@ -25,6 +25,8 @@ jobs:
       - run: bun run typecheck
       - run: bun test
       - run: bun run build
+      - run: python -m pip install -r requirements-cli.txt
+      - run: bun run test:package
       - run: bun run check:capabilities
       - run: bun run check:release
       - run: bun run package:agent-plugin

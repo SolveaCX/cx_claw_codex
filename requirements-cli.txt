@@ -1,2 +1,9 @@
 httpx==0.28.1
-boto3==1.40.58
+boto3==1.42.94
+openpyxl==3.1.5
+beautifulsoup4==4.14.3
+openai==2.32.0
+pandas==3.0.2
+markdownify==1.2.2
+markdown==3.10.2
+jinja2==3.1.6

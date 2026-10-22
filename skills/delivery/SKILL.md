@@ -7,6 +7,8 @@ requires:
 
 # Delivery
 
+执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
+
 签约后正式交付编排 skill。职责是串联意图创建、知识库搭建和回归测试，不复制其他 skill 的内部职责。
 
 ## 边界原则
@@ -32,13 +34,13 @@ requires:
 每次开始处理 Delivery 前，先运行：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/plan.py --init
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/plan.py --init
 ```
 
 阶段完成后用 `plan.py` 更新顶层状态，例如：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/plan.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/plan.py \
   --status agents_created \
   --set intent.created_log_path=/workspace/outputs/delivery/created_<ts>.json
 ```
@@ -46,7 +48,7 @@ npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/plan.py \
 需要汇总当前交付物时运行：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/render_summary.py
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/render_summary.py
 ```
 
 ```json

@@ -16,27 +16,27 @@
 统一使用 `/workspace/state/agent-builder/` 保存跨轮配置：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-plugins --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-plugins --pretty
 
-npx --yes @shulex/cxclawctl@latest api get-plugin --id <tool_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-plugin --id <tool_id> --pretty
 
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/tools/validate_tool_config.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/tools/validate_tool_config.py \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 
-npx --yes @shulex/cxclawctl@latest api create-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 
-npx --yes @shulex/cxclawctl@latest api update-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 
-npx --yes @shulex/cxclawctl@latest api replace-mock-data \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api replace-mock-data \
   --name <mock_type> \
   --data-file /workspace/state/agent-builder/mock_records.json --pretty
 
-npx --yes @shulex/cxclawctl@latest api query-mock-data \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api query-mock-data \
   --name <mock_type> --pretty
 
-npx --yes @shulex/cxclawctl@latest api run-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api run-plugin \
   --data-file /workspace/state/agent-builder/run_tool_config.json --pretty
 ```
 

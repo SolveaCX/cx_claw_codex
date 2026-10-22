@@ -46,13 +46,13 @@ M2 只处理进入策略匹配之前的问题：
 ### 2. 读取当前配置
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-intents --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-intents --pretty
 ```
 
 先按 ID / 名称找到当轮实际意图和用户预期意图；需要确认单个意图完整信息时再执行：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api get-intent --id <intent_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-intent --id <intent_id> --pretty
 ```
 
 逐项比较：

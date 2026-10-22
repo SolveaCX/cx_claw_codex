@@ -15,11 +15,11 @@
 | 根据真实响应构建输出 | POST | `/api_v2/gpt/ap/{projectId}/build/plugin` |
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-plugins --pretty
-npx --yes @shulex/cxclawctl@latest api get-plugin --id <tool_id> --pretty
-npx --yes @shulex/cxclawctl@latest api create-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-plugins --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-plugin --id <tool_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
-npx --yes @shulex/cxclawctl@latest api update-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 ```
 
@@ -257,7 +257,7 @@ npx --yes @shulex/cxclawctl@latest api update-plugin \
 ## 静态验证与写入
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/tools/validate_tool_config.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/tools/validate_tool_config.py \
   --data-file /workspace/state/agent-builder/tool_lookup_order.json \
   --pretty
 ```
@@ -267,7 +267,7 @@ npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/tools/val
 创建完成后：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api get-plugin --id <tool_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-plugin --id <tool_id> --pretty
 ```
 
 以回查结果确认名称、URL、方法、参数树和 `actionStatuses` 已按预期保存。
@@ -304,7 +304,7 @@ npx --yes @shulex/cxclawctl@latest api get-plugin --id <tool_id> --pretty
 ```
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api run-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api run-plugin \
   --data-file /workspace/state/agent-builder/run_tool_config.json \
   --pretty
 ```

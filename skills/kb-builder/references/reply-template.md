@@ -20,7 +20,7 @@
 所有命令都走：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api <command> [args]
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api <command> [args]
 ```
 
 ### `list-templates`
@@ -37,7 +37,7 @@ npx --yes @shulex/cxclawctl@latest api <command> [args]
 | `--pretty` | 否 | 格式化输出，排查时建议加 |
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-templates \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-templates \
   --keyword "广告" --page-size 20 --pretty
 ```
 
@@ -56,7 +56,7 @@ npx --yes @shulex/cxclawctl@latest api list-templates \
 | `--pretty` | 否 | 格式化输出 |
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api create-template \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-template \
   --name "广告关闭" \
   --content "您好，您可以在APP右下角“我的”里关闭广告。" \
   --status ENABLED \
@@ -93,10 +93,10 @@ npx --yes @shulex/cxclawctl@latest api create-template \
 
 ```bash
 # 下架
-npx --yes @shulex/cxclawctl@latest api update-template --id 12008 --status DISABLED
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-template --id 12008 --status DISABLED
 
 # 改名 + 内容
-npx --yes @shulex/cxclawctl@latest api update-template \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-template \
   --id 12008 --name "转人工" --content "<p>这是转人工的模版文案</p>" --pretty
 ```
 
@@ -117,7 +117,7 @@ npx --yes @shulex/cxclawctl@latest api update-template \
 | `--data-file` | 否 | JSON 文件路径 |
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api delete-templates --ids 123 124 125 --confirm-delete
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api delete-templates --ids 123 124 125 --confirm-delete
 ```
 
 ## 批量导入脚本
@@ -125,7 +125,7 @@ npx --yes @shulex/cxclawctl@latest api delete-templates --ids 123 124 125 --conf
 脚本路径：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/import_templates.py [args]
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_templates.py [args]
 ```
 
 ### Excel / CSV 列
@@ -167,7 +167,7 @@ npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/import_templ
 2. 先 dry-run：
 
    ```bash
-   npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/import_templates.py \
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_templates.py \
      --xlsx /mounted/chat-files/user/templates.xlsx \
      --dry-run
    ```
@@ -175,7 +175,7 @@ npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/import_templ
    表头不标准时显式传列名：
 
    ```bash
-   npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/import_templates.py \
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_templates.py \
      --xlsx /mounted/chat-files/user/templates.xlsx \
      --name-col "Topic" \
      --content-col "Message" \
@@ -189,7 +189,7 @@ npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/import_templ
    用户要求跳过重复模板名时，可以用脚本参数生成最终 plan：
 
    ```bash
-   npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/import_templates.py \
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_templates.py \
      --xlsx /mounted/chat-files/user/templates.xlsx \
      --name-col "快捷词" \
      --content-col "回复内容" \
@@ -209,7 +209,7 @@ npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/import_templ
 4. 用户明确回复“确认 / 上传吧 / 没问题”后，用已确认的 plan 正式导入：
 
    ```bash
-   npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/import_templates.py \
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_templates.py \
      --plan-file /workspace/outputs/kb-builder/template_import_plan_<ts>.json
    ```
 

@@ -301,7 +301,7 @@ Brand Knowledge Base
 调用 `scripts/create_dirs.py`：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/create_dirs.py
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/create_dirs.py
 ```
 
 脚本行为：
@@ -312,7 +312,7 @@ npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/create_dirs.
 验证：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-directories --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-directories --pretty
 ```
 
 ---
@@ -324,13 +324,13 @@ npx --yes @shulex/cxclawctl@latest api list-directories --pretty
 
 ```bash
 # 查现有目录拿 parent-id
-npx --yes @shulex/cxclawctl@latest api list-directories --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-directories --pretty
 
 # 默认标准模板：在 Product Introduction 下建新品类（parent-id 是 Product Introduction 的 id）
-npx --yes @shulex/cxclawctl@latest api create-folder --name "Diagnostic Scanners" --parent-id 32188 --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-folder --name "Diagnostic Scanners" --parent-id 32188 --pretty
 
 # 在新品类下建型号（parent-id 是上一步返回的 id）
-npx --yes @shulex/cxclawctl@latest api create-folder --name "AV-D600" --parent-id <new_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-folder --name "AV-D600" --parent-id <new_id> --pretty
 ```
 
 使用默认标准模板且实在归不进去（罕见）→ 归入 `["Pending Assignment"]`。使用用户/SOP schema 时，按其兜底目录规则处理；没有兜底规则时先向用户确认，不自行添加默认兜底目录。
@@ -343,13 +343,13 @@ npx --yes @shulex/cxclawctl@latest api create-folder --name "AV-D600" --parent-i
 
 ```bash
 # 重命名
-npx --yes @shulex/cxclawctl@latest api update-directory --id 32188 --name "New name" --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-directory --id 32188 --name "New name" --pretty
 
 # 移动到另一目录下；移到根层使用 --parent-id 0
-npx --yes @shulex/cxclawctl@latest api move-directory --id 32188 --parent-id 32000 --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api move-directory --id 32188 --parent-id 32000 --pretty
 
 # 递归删除（收到强确认后才能带上 --confirm-delete）
-npx --yes @shulex/cxclawctl@latest api delete-directory --id 32188 --confirm-delete --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api delete-directory --id 32188 --confirm-delete --pretty
 ```
 
 移动时默认检查移动后的整棵子树不超过三级，也不允许移到自身或自身子目录下。仅用户明确要求其他层级时使用 `--max-depth`。

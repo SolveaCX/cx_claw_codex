@@ -34,7 +34,7 @@ state 文件用于跨轮继续、并发 worker 交换和审计，不得要求用
 用 analyzer 生成映射图：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py emit-mapping-mermaid \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py emit-mapping-mermaid \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --out-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/sop_mapping.mmd
 ```

@@ -67,7 +67,7 @@ REPLY 发送的是用户可见内容。需要知识检索回答时用 `RAG_REPLY
 使用模板前先查模板库：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-templates --keyword "platform" --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-templates --keyword "platform" --pretty
 ```
 
 模板查询底层走 `/project/{projectId}/templates/filter`。

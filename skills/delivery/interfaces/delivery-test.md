@@ -8,13 +8,13 @@ Delivery 专属回归能力：正式交付前按上传用例或历史抽样执�
 
 ```bash
 # 历史抽样
-npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/sample_history_cases.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/sample_history_cases.py \
   --total 100 \
   --intents "Order Issues" \
   --output /workspace/outputs/delivery/cases_<ts>.json
 
 # 批量回归
-npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/batch_test.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/batch_test.py \
   --input /workspace/outputs/delivery/cases_<ts>.json \
   --output /workspace/outputs/delivery/results_<ts>.json \
   --touch-point LIVE_CHAT \

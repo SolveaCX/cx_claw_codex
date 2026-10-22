@@ -86,14 +86,14 @@ TOOL 成功后写入的节点输出形态是：
 ## Resource Dependencies
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-plugins --pretty
-npx --yes @shulex/cxclawctl@latest api list-ai-fields --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-plugins --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-ai-fields --pretty
 ```
 
 `--bind-tool-params` 只是辅助，不是业务决策来源：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/chatflow/chatflow_builder.py compile ... --bind-tool-params
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py compile ... --bind-tool-params
 ```
 
 实际行为：

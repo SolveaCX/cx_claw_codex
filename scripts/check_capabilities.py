@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
 LOCK = ROOT / "capabilities.lock.json"
-CLI = "npx --yes @shulex/cxclawctl@latest"
+CLI = 'node "<PLUGIN_ROOT>/plugin-cli.mjs"'
 GROUPS = [
     "agent-analytics",
     "agent-builder",
@@ -94,6 +94,10 @@ def validate() -> None:
     found = [item for item in forbidden if item in text]
     if found:
         raise SystemExit(f"forbidden legacy entrypoints remain: {', '.join(found)}")
+    if "@shulex/cxclawctl@latest" in text:
+        raise SystemExit("skills must call plugin-cli.mjs instead of npm latest")
+    if CLI not in text:
+        raise SystemExit("skills do not reference the version-pinned plugin launcher")
     expected = manifest()
     if not LOCK.is_file() or json.loads(LOCK.read_text()) != expected:
         raise SystemExit("capabilities.lock.json is stale; run scripts/check_capabilities.py --write")

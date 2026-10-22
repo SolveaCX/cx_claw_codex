@@ -5,8 +5,8 @@ SINGLE_AGENT 通过 `usedPlugins` 绑定可调用工具。对外叫“工具”�
 ## 查询工具
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-plugins --pretty
-npx --yes @shulex/cxclawctl@latest api get-plugin --id <tool_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-plugins --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-plugin --id <tool_id> --pretty
 ```
 
 `list-plugins` 只看精简列表；确认 requestParam / responseParam / actionStatuses 时使用 `get-plugin` 查看完整定义。
@@ -30,7 +30,7 @@ SINGLE_AGENT 通常使用工具 id 数组：
 `run_tool_config.json` 必须是包含 `externalHttpCallConfig` 和 `externalHttpCallRequestBody` 的 envelope，完整结构见 `../tools/http-tool.md`：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api run-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api run-plugin \
   --data-file /workspace/state/agent-builder/run_tool_config.json \
   --pretty
 ```

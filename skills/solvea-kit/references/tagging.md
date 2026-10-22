@@ -22,16 +22,16 @@
 ### 标签组
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-label-groups --pretty
-npx --yes @shulex/cxclawctl@latest api list-label-groups --name "Default" --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-label-groups --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-label-groups --name "Default" --pretty
 
-npx --yes @shulex/cxclawctl@latest api create-label-group \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-label-group \
   --name "售后问题" --pretty
 
-npx --yes @shulex/cxclawctl@latest api update-label-group --id <group_id> \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-label-group --id <group_id> \
   --data-file /workspace/state/solvea-kit/label_group_update.json --pretty
 
-npx --yes @shulex/cxclawctl@latest api delete-label-group --id <group_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api delete-label-group --id <group_id> --pretty
 ```
 
 `update-label-group` 的 data-file 示例：
@@ -48,23 +48,23 @@ npx --yes @shulex/cxclawctl@latest api delete-label-group --id <group_id> --pret
 ### 标签节点
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api get-label-tree \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-label-tree \
   --tree-id <tree_id> --pretty
 
-npx --yes @shulex/cxclawctl@latest api get-label-tree \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-label-tree \
   --tree-id <tree_id> --name "退款" --pretty
 
-npx --yes @shulex/cxclawctl@latest api get-label-detail-tree \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-label-detail-tree \
   --tree-id <tree_id> --node-ids <node_id> --pretty
 
-npx --yes @shulex/cxclawctl@latest api create-label-node \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-label-node \
   --tree-id <tree_id> --name "退货退款" --content "用户咨询退货、退款、取消订单等售后问题" --pretty
 
-npx --yes @shulex/cxclawctl@latest api update-label-node \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-label-node \
   --tree-id <tree_id> --id <node_id> \
   --data-file /workspace/state/solvea-kit/label_node_update.json --pretty
 
-npx --yes @shulex/cxclawctl@latest api delete-label-node \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api delete-label-node \
   --tree-id <tree_id> --id <node_id> --pretty
 ```
 
@@ -116,7 +116,7 @@ npx --yes @shulex/cxclawctl@latest api delete-label-node \
 ```
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/solvea-kit/scripts/generate_label_import_file.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-kit/scripts/generate_label_import_file.py \
   --init \
   --input /workspace/state/solvea-kit/labels.json \
   --output /workspace/state/solvea-kit/labels_init.xlsx --pretty
@@ -144,7 +144,7 @@ npx --yes @shulex/cxclawctl@latest script skills/solvea-kit/scripts/generate_lab
 ```
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/solvea-kit/scripts/generate_label_import_file.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-kit/scripts/generate_label_import_file.py \
   --input /workspace/state/solvea-kit/labels.json \
   --output /workspace/state/solvea-kit/labels_update.xlsx --pretty
 ```
@@ -154,7 +154,7 @@ npx --yes @shulex/cxclawctl@latest script skills/solvea-kit/scripts/generate_lab
 空标签组初始化：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api upload-labels \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api upload-labels \
   --tree-id <tree_id> \
   --file /workspace/state/solvea-kit/labels_init.xlsx \
   --init --pretty
@@ -163,7 +163,7 @@ npx --yes @shulex/cxclawctl@latest api upload-labels \
 已有标签更新：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api upload-labels \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api upload-labels \
   --tree-id <tree_id> \
   --file /workspace/state/solvea-kit/labels_update.xlsx --pretty
 ```
@@ -173,7 +173,7 @@ npx --yes @shulex/cxclawctl@latest api upload-labels \
 一般不需要让用户下载模板。只有在核对线上模板变化、排查导入失败，或需要人工离线编辑时才下载。普通场景直接用上面的生成脚本。
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api download-label-template \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api download-label-template \
   --template-type update \
   --output /workspace/state/solvea-kit/label_template.xlsx --pretty
 ```
@@ -181,7 +181,7 @@ npx --yes @shulex/cxclawctl@latest api download-label-template \
 更新已有标签时，优先先导出现有标签，在导出的 xlsx 上修改：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api download-labels \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api download-labels \
   --tree-id <tree_id> \
   --output /workspace/state/solvea-kit/current_labels.xlsx --pretty
 ```
