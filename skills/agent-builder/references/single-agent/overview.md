@@ -5,7 +5,7 @@ SINGLE_AGENT 适合目标单一、分支少、一个 prompt 能说清职责的�
 ## 创建
 
 ```bash
-npx --yes cxclaw@latest api create-agent \
+npx --yes @shulex/cxclawctl@latest api create-agent \
   --data-file /workspace/state/agent-builder/single_agent_payload.json \
   --pretty
 ```
@@ -28,8 +28,8 @@ npx --yes cxclaw@latest api create-agent \
 更新前先查完整对象：
 
 ```bash
-npx --yes cxclaw@latest api get-agent --id <agent_id> --pretty
-npx --yes cxclaw@latest api update-agent \
+npx --yes @shulex/cxclawctl@latest api get-agent --id <agent_id> --pretty
+npx --yes @shulex/cxclawctl@latest api update-agent \
   --data-file /workspace/state/agent-builder/update_agent_<agent_id>.json \
   --pretty
 ```

@@ -183,7 +183,7 @@ executeAgent[<chatId>]: call ai agent stream, currentLoopCount={}, call fail, re
 ## Config 层
 
 ```bash
-npx --yes cxclaw@latest api get-agent --id <agentId> --pretty
+npx --yes @shulex/cxclawctl@latest api get-agent --id <agentId> --pretty
 ```
 
 检查点：

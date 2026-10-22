@@ -20,7 +20,7 @@
 先读取完整目录树：
 
 ```bash
-npx --yes cxclaw@latest api list-directories --pretty
+npx --yes @shulex/cxclawctl@latest api list-directories --pretty
 ```
 
 `list-directories` 对应前端接口：
@@ -48,7 +48,7 @@ GET /api_v2/qam/project/{projectId}/directories?keyword=&kuPublished=
 查询知识：
 
 ```bash
-npx --yes cxclaw@latest api list-knowledge \
+npx --yes @shulex/cxclawctl@latest api list-knowledge \
   --type ALL \
   --page-size 1000 \
   --page 1 \
@@ -58,7 +58,7 @@ npx --yes cxclaw@latest api list-knowledge \
 指定目录查询：
 
 ```bash
-npx --yes cxclaw@latest api list-knowledge \
+npx --yes @shulex/cxclawctl@latest api list-knowledge \
   --type ALL \
   --directory-id 105809 \
   --page-size 1000 \
@@ -95,7 +95,7 @@ POST /api_v2/qam/project/{projectId}/getKnowledge
 只有用户明确说了“全部 / 全量 / 所有 / 整个知识库 / 当前知识库全部 / all / everything”时，才直接执行全量导出：
 
 ```bash
-npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py --all
+npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/export_knowledge.py --all
 ```
 
 ### 指定目录导出
@@ -103,7 +103,7 @@ npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py --a
 用户指定一个目录时：
 
 ```bash
-npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py --directory-id 105809
+npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/export_knowledge.py --directory-id 105809
 ```
 
 默认会包含该目录及其所有子孙目录。
@@ -111,13 +111,13 @@ npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py --d
 只导出目录自身、不包含子目录时：
 
 ```bash
-npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py --directory-id 105809 --no-children
+npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/export_knowledge.py --directory-id 105809 --no-children
 ```
 
 ### 多目录导出
 
 ```bash
-npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py \
+npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/export_knowledge.py \
   --directory-id 105809 \
   --directory-id 82764
 ```
@@ -127,7 +127,7 @@ npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py \
 ### keyword 过滤
 
 ```bash
-npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py \
+npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/export_knowledge.py \
   --directory-id 105809 \
   --keyword battery
 ```
@@ -135,7 +135,7 @@ npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py \
 ### 指定知识类型
 
 ```bash
-npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py --all --type QA
+npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/export_knowledge.py --all --type QA
 ```
 
 `--type` 默认为 `ALL`，可按接口支持传 `QA / FILE / WEBSITE / PRODUCT / LEARN_SELF / ALL`。
@@ -161,7 +161,7 @@ npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py --a
 只有用户已经明确“全部 / 全量 / 所有 / 整个知识库 / 当前知识库全部 / all / everything”时，不需要再问，直接运行：
 
 ```bash
-npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py --all
+npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/export_knowledge.py --all
 ```
 
 反例：用户只说“导出知识库”或“导出知识”，必须先列目录并询问范围，不能直接按全量处理。
@@ -173,7 +173,7 @@ npx --yes cxclaw@latest script skills/kb-builder/scripts/export_knowledge.py --a
 脚本内部不会遍历所有目录。它直接不传 `directoryId`，按页拉全量知识：
 
 ```bash
-npx --yes cxclaw@latest api list-knowledge --type ALL --page-size 1000 --page 1 --pretty
+npx --yes @shulex/cxclawctl@latest api list-knowledge --type ALL --page-size 1000 --page 1 --pretty
 ```
 
 第一页读取 `total`，继续翻页直到拉完。
@@ -183,7 +183,7 @@ npx --yes cxclaw@latest api list-knowledge --type ALL --page-size 1000 --page 1 
 脚本内部会先从目录树展开该目录的所有子孙目录 id，包含父目录自身。然后按目录逐个分页拉取：
 
 ```bash
-npx --yes cxclaw@latest api list-knowledge \
+npx --yes @shulex/cxclawctl@latest api list-knowledge \
   --type ALL \
   --directory-id <dir_id> \
   --page-size 1000 \

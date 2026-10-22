@@ -31,7 +31,7 @@
 下钻时必须复用 Report 的时间范围、时区对应的毫秒边界，以及适用的 Bot、渠道、Agent、意图条件。前端未选择渠道时不要追加 `--touch-point`，表示全部渠道。
 
 ```bash
-npx --yes cxclaw@latest api list-transcripts \
+npx --yes @shulex/cxclawctl@latest api list-transcripts \
   --begin-ts "$BEGIN_MS" \
   --end-ts "$END_MS" \
   --page 1 \
@@ -42,7 +42,7 @@ npx --yes cxclaw@latest api list-transcripts \
 筛选 LiveChat 已转人工 Agent 会话记录：
 
 ```bash
-npx --yes cxclaw@latest api list-transcripts \
+npx --yes @shulex/cxclawctl@latest api list-transcripts \
   --begin-ts "$BEGIN_MS" \
   --end-ts "$END_MS" \
   --touch-point LIVE_CHAT \
@@ -78,7 +78,7 @@ npx --yes cxclaw@latest api list-transcripts \
 `list-transcripts` 只返回摘要。需要查看消息内容、AgentAction、转人工上下文或具体异常时，再调用：
 
 ```bash
-npx --yes cxclaw@latest api get-transcript \
+npx --yes @shulex/cxclawctl@latest api get-transcript \
   --chat-id <chatId> \
   --pretty
 ```
@@ -98,13 +98,13 @@ npx --yes cxclaw@latest api get-transcript \
 只有确实需要大量明细文件时才使用：
 
 ```bash
-npx --yes cxclaw@latest api export-transcripts \
+npx --yes @shulex/cxclawctl@latest api export-transcripts \
   --begin-ts "$BEGIN_MS" \
   --end-ts "$END_MS" \
   --time-offset 8 \
   --pretty
 
-npx --yes cxclaw@latest api get-export-tasks --pretty
+npx --yes @shulex/cxclawctl@latest api get-export-tasks --pretty
 ```
 
 轮询到任务 `status=SUCCESS` 后再使用返回的文件地址。

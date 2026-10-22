@@ -140,12 +140,12 @@ jobs:
             exit 1
           fi
 
-          if npm view "cxclaw@${VERSION}" version >/dev/null 2>&1; then
-            echo "cxclaw@${VERSION} is already published; skipping npm publish"
+          if npm view "@shulex/cxclawctl@${VERSION}" version >/dev/null 2>&1; then
+            echo "@shulex/cxclawctl@${VERSION} is already published; skipping npm publish"
           else
             npm publish --access public --tag "$DIST_TAG"
           fi
-          npm dist-tag add "cxclaw@${VERSION}" "$DIST_TAG"
+          npm dist-tag add "@shulex/cxclawctl@${VERSION}" "$DIST_TAG"
 
       - name: Create or update GitHub Release
         env:

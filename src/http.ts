@@ -8,7 +8,7 @@ export function unwrap<T>(value: unknown): T {
 export async function request<T>(session: Session, path: string, init: RequestInit = {}, tenant = false): Promise<T> {
   const headers = new Headers(init.headers); headers.set("content-type", "application/json"); headers.set("x-cxclaw-client-version", VERSION);
   if (session.accessToken) headers.set("authorization", `Bearer ${session.accessToken}`);
-  if (tenant) { if (!session.tenant?.context) throw new Error("no tenant selected; run npx cxclaw tenant use"); headers.set("x-cxclaw-tenant-context", session.tenant.context); }
+  if (tenant) { if (!session.tenant?.context) throw new Error("no tenant selected; run npx --yes @shulex/cxclawctl@latest tenant use"); headers.set("x-cxclaw-tenant-context", session.tenant.context); }
   let last: unknown;
   for (let attempt=0; attempt<3; attempt++) {
     try {

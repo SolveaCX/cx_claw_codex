@@ -31,7 +31,7 @@ auto | crawl4ai | tavily
 首版脚本化 pipeline 目标入口：
 
 ```bash
-npx --yes cxclaw@latest script skills/kb-builder/scripts/crawl_site.py \
+npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/crawl_site.py \
   --url <source_url> \
   --mode auto \
   --provider auto \
@@ -39,19 +39,19 @@ npx --yes cxclaw@latest script skills/kb-builder/scripts/crawl_site.py \
   --max-pages 100 \
   --output /workspace/outputs/kb-builder/crawl_result_<ts>.json
 
-npx --yes cxclaw@latest script skills/kb-builder/scripts/build_directory_plan.py \
+npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/build_directory_plan.py \
   --crawl-result /workspace/outputs/kb-builder/crawl_result_<ts>.json \
   --output /workspace/outputs/kb-builder/directory_plan_<ts>.json
 
 # 展示 directory_plan_<ts>.json，等待用户明确确认后写入 confirmed_tree
-npx --yes cxclaw@latest script skills/kb-builder/scripts/build_directory_plan.py \
+npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/build_directory_plan.py \
   --crawl-result /workspace/outputs/kb-builder/crawl_result_<ts>.json \
   --output /workspace/outputs/kb-builder/directory_plan_<ts>.json \
   --write-confirmed-tree
 
-npx --yes cxclaw@latest script skills/kb-builder/scripts/create_dirs.py
+npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/create_dirs.py
 
-npx --yes cxclaw@latest script skills/kb-builder/scripts/extract_web_qa.py \
+npx --yes @shulex/cxclawctl@latest script skills/kb-builder/scripts/extract_web_qa.py \
   --crawl-result /workspace/outputs/kb-builder/crawl_result_<ts>.json \
   --output-dir /workspace/tmp/kb-builder/qa_parts
 ```

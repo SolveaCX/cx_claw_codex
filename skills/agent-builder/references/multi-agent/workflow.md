@@ -15,7 +15,7 @@ MULTI_AGENT 是 legacy 形态，不支持新建，因为路由和工具动作分
 1. 如果用户只给 agent_id，先取完整对象：
 
 ```bash
-npx --yes cxclaw@latest api get-agent --id <agent_id> --pretty
+npx --yes @shulex/cxclawctl@latest api get-agent --id <agent_id> --pretty
 ```
 
 2. 将完整对象保存到：
@@ -27,7 +27,7 @@ npx --yes cxclaw@latest api get-agent --id <agent_id> --pretty
 3. 按 `graph-spec.md` 读取旧图字段。如果 graph 很大或 `displayPrompt` 含大量 HTML，必须先跑 analyzer：
 
 ```bash
-npx --yes cxclaw@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py inspect \
+npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py inspect \
   --input /workspace/state/agent-builder/multi-agent/read_<agent_id>_raw.json \
   --out-dir /workspace/state/agent-builder/multi-agent \
   --pretty

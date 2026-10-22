@@ -24,7 +24,7 @@ M10 只处理已经进入 CHAT_FLOW 之后的问题：
 从会话记录的 `strategyAction`、`context.ext` 或已知测试结果确认 `agentId`，然后执行：
 
 ```bash
-npx --yes cxclaw@latest script skills/agent-builder/scripts/chatflow/chatflow_builder.py inspect --agent-id <agentId> --pretty
+npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/chatflow/chatflow_builder.py inspect --agent-id <agentId> --pretty
 ```
 
 只要本轮确认进入 CHAT_FLOW，报告前必须读取当前生效的 ChatFlow 图配置。读取图配置的目的不是只做节点/边校验，而是看到全局业务流程，理解失败节点的上游来源、下游去向、变量和工具结果如何传递，必要时给出准确可行的配置建议。
@@ -36,7 +36,7 @@ npx --yes cxclaw@latest script skills/agent-builder/scripts/chatflow/chatflow_bu
 需要补充 Agent 类型、版本等元信息时，可执行：
 
 ```bash
-npx --yes cxclaw@latest api get-agent --id <agentId> --pretty
+npx --yes @shulex/cxclawctl@latest api get-agent --id <agentId> --pretty
 ```
 
 关注点：
@@ -168,7 +168,7 @@ JSON graph
 ### graph 入口、加载、执行
 
 ```bash
-npx --yes cxclaw@latest sls query \
+npx --yes @shulex/cxclawctl@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"get_or_load_graph_def" OR rest:"graph_execution_start" OR rest:"graph_execution_finished" OR rest:"graph_execution_error")' \
@@ -178,7 +178,7 @@ npx --yes cxclaw@latest sls query \
 ### 通用节点更新、节点输入、节点错误
 
 ```bash
-npx --yes cxclaw@latest sls query \
+npx --yes @shulex/cxclawctl@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"node_update" OR rest:"node_input_build_failed" OR rest:"node error" OR rest:"Unhandled node error" OR rest:"node_cancelled")' \
@@ -188,7 +188,7 @@ npx --yes cxclaw@latest sls query \
 ### 节点进入、条件、意图
 
 ```bash
-npx --yes cxclaw@latest sls query \
+npx --yes @shulex/cxclawctl@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"node_enter" OR rest:"evaluate_condition" OR rest:"case_matched" OR rest:"no_case_matched" OR rest:"intent classification" OR rest:"load_intent_list")' \
@@ -198,7 +198,7 @@ npx --yes cxclaw@latest sls query \
 ### RAG / KU 节点
 
 ```bash
-npx --yes cxclaw@latest sls query \
+npx --yes @shulex/cxclawctl@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"rag_reply query_from_selector" OR rest:"rag_summary" OR rest:"rag_reply retrieve" OR rest:"retrieve_query" OR rest:"kb_reply retrieve")' \
@@ -208,7 +208,7 @@ npx --yes cxclaw@latest sls query \
 ### 工具、Agent 工具、变量
 
 ```bash
-npx --yes cxclaw@latest sls query \
+npx --yes @shulex/cxclawctl@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"tool_node args" OR rest:"tool_node result" OR rest:"tool_node routing" OR rest:"agent_tool_node" OR rest:"tool_executed" OR rest:"selected variable not found" OR rest:"variable extract" OR rest:"variable_assignment" OR rest:"variable_process")' \
@@ -218,7 +218,7 @@ npx --yes cxclaw@latest sls query \
 ### 代码、子图、人审、等待
 
 ```bash
-npx --yes cxclaw@latest sls query \
+npx --yes @shulex/cxclawctl@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"code_node" OR rest:"sub_graph" OR rest:"human_review" OR rest:"_user_input" OR rest:"output_handle" OR rest:"enter finish node")' \
@@ -228,7 +228,7 @@ npx --yes cxclaw@latest sls query \
 ### fallback / ERROR
 
 ```bash
-npx --yes cxclaw@latest sls query \
+npx --yes @shulex/cxclawctl@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'armsTrace:"<armsTrace>" AND (rest:"llm_call_with_fallbacks" OR severity:"ERROR")' \
@@ -238,7 +238,7 @@ npx --yes cxclaw@latest sls query \
 如果 `armsTrace` 不可用，用 `chatId`、graphId / runId、接口路径、节点名和时间窗组合查询：
 
 ```bash
-npx --yes cxclaw@latest sls query \
+npx --yes @shulex/cxclawctl@latest sls query \
   --from <begin> \
   --to <end> \
   --query 'rest:"<chatId>" AND (rest:"graph_execution" OR rest:"node_update" OR rest:"node_enter" OR rest:"tool_node")' \

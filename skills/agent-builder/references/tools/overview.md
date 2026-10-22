@@ -5,19 +5,19 @@
 ## 常用命令
 
 ```bash
-npx --yes cxclaw@latest api list-plugins --pretty
-npx --yes cxclaw@latest api get-plugin --id <tool_id> --pretty
-npx --yes cxclaw@latest script skills/agent-builder/scripts/tools/validate_tool_config.py \
+npx --yes @shulex/cxclawctl@latest api list-plugins --pretty
+npx --yes @shulex/cxclawctl@latest api get-plugin --id <tool_id> --pretty
+npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/tools/validate_tool_config.py \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
-npx --yes cxclaw@latest api create-plugin \
+npx --yes @shulex/cxclawctl@latest api create-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
-npx --yes cxclaw@latest api update-plugin \
+npx --yes @shulex/cxclawctl@latest api update-plugin \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
-npx --yes cxclaw@latest api run-plugin \
+npx --yes @shulex/cxclawctl@latest api run-plugin \
   --data-file /workspace/state/agent-builder/run_tool_config.json --pretty
-npx --yes cxclaw@latest api replace-mock-data \
+npx --yes @shulex/cxclawctl@latest api replace-mock-data \
   --name <mock_type> --data-file /workspace/state/agent-builder/mock_records.json --pretty
-npx --yes cxclaw@latest api query-mock-data \
+npx --yes @shulex/cxclawctl@latest api query-mock-data \
   --name <mock_type> --pretty
 ```
 

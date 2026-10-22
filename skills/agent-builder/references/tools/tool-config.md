@@ -32,7 +32,7 @@ CHAT_FLOW 有两种用法：
 ## 查看详情
 
 ```bash
-npx --yes cxclaw@latest api get-plugin --id <tool_id> --pretty
+npx --yes @shulex/cxclawctl@latest api get-plugin --id <tool_id> --pretty
 ```
 
 重点看：

@@ -118,7 +118,7 @@ CHAT_FLOW 草稿按当前用户隔离，版本号为 `-userId`。保存草稿不
 工具完成后，使用返回的新测试 `chatId` 获取一次完整会话记录：
 
 ```bash
-npx --yes cxclaw@latest api get-transcript \
+npx --yes @shulex/cxclawctl@latest api get-transcript \
   --chat-id <newTestChatId> \
   --pretty
 ```

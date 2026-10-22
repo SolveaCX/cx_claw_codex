@@ -5,14 +5,14 @@ Delivery 专属能力：创建正式交付意图，优先复制固定广场 agen
 ## Commands
 
 ```bash
-npx --yes cxclaw@latest script skills/delivery/scripts/create_agents.py --mode delivery
+npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/create_agents.py --mode delivery
 
 # Delivery 恢复阶段：预置 agent 不可用，用户确认从零新建或使用替代 agent 后，绑定业务策略
-npx --yes cxclaw@latest script skills/delivery/scripts/create_agents.py --mode delivery \
+npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/create_agents.py --mode delivery \
   --custom-agent-map /workspace/state/delivery/custom_agent_map.json
 
 # 创建后禁用多余 SYSTEM 意图
-npx --yes cxclaw@latest script skills/delivery/scripts/create_agents.py --disable-system
+npx --yes @shulex/cxclawctl@latest script skills/delivery/scripts/create_agents.py --disable-system
 ```
 
 `custom_agent_map.json` 使用 Delivery intent 名作为 key：
