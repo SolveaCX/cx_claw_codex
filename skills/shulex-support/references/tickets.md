@@ -7,14 +7,14 @@
 工单创建、列表查询、详情查询、追加消息，继续通过本 skill 的 CLI 调用 GPT support API：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/shulex-support/scripts/support.py <command> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/shulex-support/scripts/support.py <command> --pretty
 ```
 
 可用命令：
 
 ```bash
 # 创建工单（基本）
-npx --yes @shulex/cxclawctl@latest script skills/shulex-support/scripts/support.py create-ticket \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/shulex-support/scripts/support.py create-ticket \
   --content "<问题描述>" \
   --brand "<brand，可选>" \
   --issue-type "<工单类型 code，见下方问题分类表>" \
@@ -24,7 +24,7 @@ npx --yes @shulex/cxclawctl@latest script skills/shulex-support/scripts/support.
   --pretty
 
 # 创建工单（带附件，可重复 --attachment）
-npx --yes @shulex/cxclawctl@latest script skills/shulex-support/scripts/support.py create-ticket \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/shulex-support/scripts/support.py create-ticket \
   --content "<问题描述>" \
   --issue-type "<工单类型 code>" \
   --attachment "<沙箱内文件路径>" \
@@ -32,18 +32,18 @@ npx --yes @shulex/cxclawctl@latest script skills/shulex-support/scripts/support.
   --pretty
 
 # 分页查询工单列表
-npx --yes @shulex/cxclawctl@latest script skills/shulex-support/scripts/support.py list-tickets \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/shulex-support/scripts/support.py list-tickets \
   --page 1 \
   --page-size 20 \
   --pretty
 
 # 查询工单详情和消息
-npx --yes @shulex/cxclawctl@latest script skills/shulex-support/scripts/support.py get-ticket \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/shulex-support/scripts/support.py get-ticket \
   --ticket-number "<工单号>" \
   --pretty
 
 # 追加客户消息
-npx --yes @shulex/cxclawctl@latest script skills/shulex-support/scripts/support.py append-message \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/shulex-support/scripts/support.py append-message \
   --ticket-number "<工单号>" \
   --content "<用户补充描述>" \
   --pretty

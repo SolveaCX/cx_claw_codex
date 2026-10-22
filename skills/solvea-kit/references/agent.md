@@ -38,9 +38,9 @@ CHAT_FLOW 图构建、修改、校验和发布由 `chatflow` skill 维护，本�
 ### CLI
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-agents --pretty
-npx --yes @shulex/cxclawctl@latest api get-agent --id <agent_id> --pretty
-npx --yes @shulex/cxclawctl@latest api create-agent \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-agents --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-agent --id <agent_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-agent \
   --data '{"name":"FAQ_Bot","type":"SINGLE_AGENT","prompt":"...","displayPrompt":"..."}' --pretty
 ```
 
@@ -125,14 +125,14 @@ npx --yes @shulex/cxclawctl@latest api create-agent \
 ### CLI
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-voice-agents --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-voice-agents --pretty
 
 # 创建：payload 存成 json 文件，避免 shell 转义出问题（多语言 prompt 尤其推荐）
-npx --yes @shulex/cxclawctl@latest api create-agent \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-agent \
   --data-file /workspace/tmp/voice_agent_payload.json --pretty
 
-npx --yes @shulex/cxclawctl@latest api list-voice-transcripts --pretty
-npx --yes @shulex/cxclawctl@latest api get-voice-transcript \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-voice-transcripts --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-voice-transcript \
   --history-id 019d4dac-aa36-744d-8c5d-d54bc3f7e528 --pretty
 ```
 

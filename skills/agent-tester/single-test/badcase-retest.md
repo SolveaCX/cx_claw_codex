@@ -7,7 +7,7 @@
 执行：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api get-transcript \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-transcript \
   --chat-id <historicalChatId> \
   --pretty
 ```
@@ -62,7 +62,7 @@ npx --yes @shulex/cxclawctl@latest api get-transcript \
 工具完成后，获取结果中的新 ChatId，再执行一次：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api get-transcript \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-transcript \
   --chat-id <newTestChatId> \
   --pretty
 ```

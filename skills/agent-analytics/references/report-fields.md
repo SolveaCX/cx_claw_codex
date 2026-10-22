@@ -115,7 +115,7 @@ Report 通用请求与 analysis-service `FilterRequest` 对齐：
 ## 示例
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api report-message \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api report-message \
   --begin-ts "$BEGIN_MS" \
   --end-ts "$END_MS" \
   --time-offset 8 \

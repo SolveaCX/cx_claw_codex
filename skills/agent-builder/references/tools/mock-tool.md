@@ -47,7 +47,7 @@ MockData 的 `mock_type` 必须包含工具 ID，所以创建顺序和普通 HTT
 ```
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api create-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-plugin \
   --data-file /workspace/state/agent-builder/mock_placeholder.json \
   --pretty
 ```
@@ -96,7 +96,7 @@ npx --yes @shulex/cxclawctl@latest api create-plugin \
 确认写操作后执行：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api replace-mock-data \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api replace-mock-data \
   --name logistics_mock_<tool_id> \
   --data-file /workspace/state/agent-builder/logistics_mock_records.json \
   --pretty
@@ -232,11 +232,11 @@ npx --yes @shulex/cxclawctl@latest api replace-mock-data \
 用实际 `<tool_id>`、host 和安全注入后的本地 state 文件做静态验证，再更新：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/tools/validate_tool_config.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/tools/validate_tool_config.py \
   --data-file /workspace/state/agent-builder/tool_lookup_logistics_mock.json \
   --pretty
 
-npx --yes @shulex/cxclawctl@latest api update-plugin \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-plugin \
   --data-file /workspace/state/agent-builder/tool_lookup_logistics_mock.json \
   --pretty
 ```
@@ -266,10 +266,10 @@ MockData 搜索接口只保留请求 JSON 中的顶层 primitive/wrapper 值和 
 ## 回查与调试边界
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api query-mock-data \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api query-mock-data \
   --name logistics_mock_<tool_id> --pretty
 
-npx --yes @shulex/cxclawctl@latest api get-plugin --id <tool_id> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-plugin --id <tool_id> --pretty
 ```
 
 回查时确认：数据条数和嵌套类型正确；工具仍是 `EXTERNAL_HTTP_CALL`；`meta.category=EXCEL`；`fileName`、URL 中的 `mock_type` 与 ID 一致；方法为 POST；Header 为 `X-Token`。

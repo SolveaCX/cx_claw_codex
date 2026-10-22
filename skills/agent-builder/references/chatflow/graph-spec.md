@@ -179,10 +179,10 @@ source JSON 不写 `WAIT` 节点，也不要手动创建 `USER_INPUT` / `AGENT_T
 节点依赖外部资源时，先查询再写 id：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-templates --keyword "platform" --pretty
-npx --yes @shulex/cxclawctl@latest api list-plugins --pretty
-npx --yes @shulex/cxclawctl@latest api list-ai-fields --pretty
-npx --yes @shulex/cxclawctl@latest api list-agents --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-templates --keyword "platform" --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-plugins --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-ai-fields --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-agents --pretty
 ```
 
 资源查询口径：
@@ -209,32 +209,32 @@ npx --yes @shulex/cxclawctl@latest api list-agents --pretty
 ## CLI
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/chatflow/chatflow_builder.py --help --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py --help --pretty
 
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/chatflow/chatflow_builder.py compile \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py compile \
   --source-file /workspace/state/agent-builder/chatflow/chatflow_source.json \
   --graph-file /workspace/state/agent-builder/chatflow/chatflow_graph.json \
   --pretty
 
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/chatflow/chatflow_builder.py validate \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py validate \
   --graph-file /workspace/state/agent-builder/chatflow/chatflow_graph.json \
   --pretty
 
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/chatflow/chatflow_builder.py inspect \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py inspect \
   --agent-name Example_Chatflow \
   --pretty
 
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/chatflow/chatflow_builder.py deploy \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py deploy \
   --agent-name Example_Chatflow \
   --graph-file /workspace/state/agent-builder/chatflow/chatflow_graph.json \
   --pretty
 
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/chatflow/chatflow_builder.py update \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py update \
   --agent-id 2496 \
   --graph-file /workspace/state/agent-builder/chatflow/patch_2496_graph.json \
   --pretty
 
-npx --yes @shulex/cxclawctl@latest script skills/agent-builder/scripts/chatflow/chatflow_builder.py publish \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py publish \
   --agent-id 2496 \
   --graph-file /workspace/state/agent-builder/chatflow/patch_2496_graph.json \
   --pretty

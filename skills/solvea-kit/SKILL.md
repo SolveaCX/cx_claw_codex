@@ -5,6 +5,8 @@ description: Shulex 路由与运营配置工具包。用于意图、策略、变
 
 # Solvea Kit
 
+执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
+
 Solvea Kit 保留路由与运营相关配置：意图、策略、变量系统、AI 质检和标签树。Agent、工具、CHAT_FLOW、测试、知识库和分析类需求按下方分流。
 
 ## Solvea API CLI
@@ -12,9 +14,9 @@ Solvea Kit 保留路由与运营相关配置：意图、策略、变量系统、
 所有查询与写入操作，均使用 `/skill-lib/solvea-api/solvea_api.py`：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api <command> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api <command> --pretty
 # 例如：
-npx --yes @shulex/cxclawctl@latest api list-agents --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-agents --pretty
 ```
 
 ## 能力分流

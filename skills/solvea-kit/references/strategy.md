@@ -40,17 +40,17 @@ Strategy（策略）定义了：当某个条件（意图、触点、实体等）
 ## CLI
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-entities --pretty
-npx --yes @shulex/cxclawctl@latest api list-strategies --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-entities --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-strategies --pretty
 
-npx --yes @shulex/cxclawctl@latest api create-strategy \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-strategy \
   --data '{"name":"退款路由","trigger":"MESSAGE","condition":{...},"action":{"type":"AGENT","agentId":2270}}'
 
-npx --yes @shulex/cxclawctl@latest api update-strategy --id <strategy_id> \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-strategy --id <strategy_id> \
   --data-file /workspace/state/solvea-kit/update_strategy.json
 
-npx --yes @shulex/cxclawctl@latest api toggle-strategy --id <strategy_id> --enable
-npx --yes @shulex/cxclawctl@latest api toggle-strategy --id <strategy_id> --disable
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api toggle-strategy --id <strategy_id> --enable
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api toggle-strategy --id <strategy_id> --disable
 ```
 
 ## 原则

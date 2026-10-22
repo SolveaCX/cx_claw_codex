@@ -7,6 +7,8 @@ requires:
 
 # Shulex KB Builder
 
+执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
+
 本 skill 提供知识库的原子管理能力、场景 reference 路由和通用执行规范。
 
 详细格式、字段、确认步骤和异常处理都以对应 reference 为准；只在命中具体场景时读取相关 reference。
@@ -40,14 +42,14 @@ requires:
 
 | 查询内容 | 固定命令 |
 |---|---|
-| 目录树 | `npx --yes @shulex/cxclawctl@latest api list-directories --pretty` |
-| 知识列表 | `npx --yes @shulex/cxclawctl@latest api list-knowledge --type ALL --page-size 50 --page 1 --pretty` |
-| 按关键词查知识 | `npx --yes @shulex/cxclawctl@latest api list-knowledge --keyword "关键词" --page-size 50 --pretty` |
-| 单条知识 | `npx --yes @shulex/cxclawctl@latest api get-knowledge --id <knowledge_id> --type {QA,LEARN_SELF,FILE,WEBSITE,PRODUCT} --pretty` |
-| 知识标签定义 | `npx --yes @shulex/cxclawctl@latest api list-knowledge-tags --pretty` |
-| 隔离关键词 | `npx --yes @shulex/cxclawctl@latest api list-isolation-keywords --page-size 50 --page 1 --pretty` |
-| 单条知识已绑定的隔离关键词 | `npx --yes @shulex/cxclawctl@latest api get-knowledge-isolation-keywords --id <knowledge_id> --type {QA,LEARN_SELF,FILE,WEBSITE,PRODUCT} --pretty` |
-| 回复模板 | `npx --yes @shulex/cxclawctl@latest api list-templates --page-size 50 --pretty` |
+| 目录树 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-directories --pretty` |
+| 知识列表 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge --type ALL --page-size 50 --page 1 --pretty` |
+| 按关键词查知识 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge --keyword "关键词" --page-size 50 --pretty` |
+| 单条知识 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-knowledge --id <knowledge_id> --type {QA,LEARN_SELF,FILE,WEBSITE,PRODUCT} --pretty` |
+| 知识标签定义 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-knowledge-tags --pretty` |
+| 隔离关键词 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-isolation-keywords --page-size 50 --page 1 --pretty` |
+| 单条知识已绑定的隔离关键词 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-knowledge-isolation-keywords --id <knowledge_id> --type {QA,LEARN_SELF,FILE,WEBSITE,PRODUCT} --pretty` |
+| 回复模板 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-templates --page-size 50 --pretty` |
 
 `list-knowledge` 分页时先看返回的 `total`，再按需增加 `--page`；接口最大 `--page-size` 为 1000，不要用不断增大页大小的方式探测总量。
 

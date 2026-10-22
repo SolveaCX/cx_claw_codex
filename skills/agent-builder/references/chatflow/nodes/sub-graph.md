@@ -32,7 +32,7 @@
 先查可用 agent：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-agents --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-agents --pretty
 ```
 
 ## 限制

@@ -42,7 +42,7 @@ VARIABLE_PROCESS 不向用户发送消息，也不等待用户输入；它处理
 赋值到变量系统字段前查：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest api list-ai-fields --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-ai-fields --pretty
 ```
 
 ## 限制

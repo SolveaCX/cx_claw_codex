@@ -105,7 +105,7 @@ Shulex Desk 有两种不能混用的数据源：
 新建 task 时必须通过 fetch 脚本拉取数据源；复用 task 时不要重新 fetch。报表分析快照按时间范围调用：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/report/fetch_sources.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/report/fetch_sources.py \
   --start "2026-06-01T00:00:00+08:00" \
   --end "2026-06-01T00:00:00+08:00" \
   --timezone Asia/Shanghai \
@@ -117,7 +117,7 @@ npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/report/fetc
 查询当前用户权限与指定工单视图内的原始工单明细：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/tickets/fetch_tickets.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/fetch_tickets.py \
   --view-id 1 \
   --page-size 100 \
   --max-pages 120 \
@@ -139,7 +139,7 @@ npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/tickets/fet
 例如，按当前负责人 ID 和 eBay 渠道查询：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/tickets/fetch_tickets.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/fetch_tickets.py \
   --view-id 1 \
   --filters-json '{"channelList":["ebay"],"agentIdList":[474501]}' \
   --page-size 100 \
@@ -239,7 +239,7 @@ def section(title, columns, rows, chart=None, description="", note=""):
 - 生成或更新报表时调用：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/report/render_report.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/report/render_report.py \
   --task-id "<task_id>" \
   --report-slug "<semantic_slug>"
 ```
@@ -247,7 +247,7 @@ npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/report/rend
 - 校验命令：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/report/render_report.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/report/render_report.py \
   --task-id "<task_id>" \
   --report-slug "<semantic_slug>" \
   --validate-only

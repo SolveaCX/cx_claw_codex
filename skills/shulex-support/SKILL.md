@@ -8,6 +8,8 @@ requires:
 
 # Shulex Support
 
+执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
+
 处理 Shulex 产品咨询、Agent 会话诊断和售后工单。先判断用户属于哪一种场景，只进入对应流程；不要先把三套材料全部读完。
 
 ## 入口优先级
