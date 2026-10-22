@@ -28,10 +28,10 @@
 脚本内部使用 case JSON 生成第 1 行说明、第 2 行表头的系统兼容 xlsx：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-tester/scripts/batch_test_sheet.py create-sheet \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-tester create-sheet \
   --mode chatflow --cases-file /workspace/outputs/agent-tester/chatflow_cases.json
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-tester/scripts/batch_test_sheet.py create-sheet \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-tester create-sheet \
   --mode agent --cases-file /workspace/outputs/agent-tester/agent_cases.json
 ```
 
@@ -64,23 +64,23 @@ Chatflow 表头是 `case_name, chat_id, metadata_1, question_1, ai_answer_1, ...
 默认不指定 `specified_agent_id` 或 `specified_flow_version`，让任务从最外层意图识别和系统策略路由开始执行。只有用户明确要求锁定某个 Chatflow Agent（例如验证该 Agent 的草稿或已发布版本）时，才先用 `get-chatflow-graph --agent-id <agentId>` 取得实际 version，并同时传入 Agent 和版本；不要只传其中一个。历史预览或调试面板打开时，画布不允许提交。
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-tester/scripts/batch_test_sheet.py submit \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-tester submit \
   --mode chatflow --file <generated.xlsx> --bot-id <botId>
 
 # 只有明确指定 Chatflow Agent / 版本时追加：
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-tester/scripts/batch_test_sheet.py submit \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-tester submit \
   --mode chatflow --file <generated.xlsx> --bot-id <botId> \
   --agent-id <agentId> --flow-version <currentVersion>
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-tester/scripts/batch_test_sheet.py submit \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-tester submit \
   --mode agent --file <generated.xlsx> --bot-id <botId>
 ```
 
 脚本获取临时 S3 凭证并上传 xlsx。默认 Chatflow 请求不带路由 metadata；仅在指定模式下才携带 `specified_agent_id` 和 `specified_flow_version`。提交接口只返回 `success`，不返回 taskId；随后按类型查询下载中心，选本次时间相符的最新任务：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-tester/scripts/batch_test_sheet.py get-tasks --mode chatflow
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-tester/scripts/batch_test_sheet.py get-tasks --mode agent
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-tester get-tasks --mode chatflow
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-tester get-tasks --mode agent
 ```
 
 `WAIT_TAG` 是等待中，`TAGGING` 是执行中，`SUCCESS` 完成且 `file` 可下载，`FAIL` 是失败；`successCount / totalCount` 为当前进度。除非用户明确要求，不要阻塞式轮询。

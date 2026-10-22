@@ -11,7 +11,7 @@
 - 每个 sheet 输出一段 `## SheetName` + 列名表头 + 数据行
 - 直接看到列名、行数（看返回的 `lines X-Y of N`）、前几行内容样例
 - 同一份 xlsx 同轮内缓存到 `workspace/tmp/parsed/`，重复读不会重新解析
-- 单 cell 超过 500 字符会被截断（middleware 层 `_MAX_LINE_CHARS`），看格式 / 列名足够；长对话原文走 `extract_ticket_qa.py` 全量提炼时再处理
+- 单 cell 超过 500 字符会被截断（middleware 层 `_MAX_LINE_CHARS`），看格式 / 列名足够；长对话原文走 `kb-builder extract-ticket-qa` 全量提炼时再处理
 
 ```
 read_file(file_path="/mounted/chat-files/user/tickets.xlsx", limit=20)
@@ -54,7 +54,7 @@ File: tickets.xlsx (lines 1-20 of 532)
 ## 步骤三：dry-run 确认提取逻辑
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/extract_ticket_qa.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder extract-ticket-qa \
   --xlsx /mounted/chat-files/user/tickets.xlsx --brand "{品牌名称}" \
   --messages-col conversations --title-col subject \
   --page 1 --page-size 100 --batch-size 5 --workers 3 --dry-run
@@ -74,7 +74,7 @@ dry-run 必须检查：
 
 ```bash
 # 全表分页提取：每页 100 行，页内每 5 条对话一次模型调用，并发 3 个 batch
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/batch_extract_ticket_qa.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder batch-extract-ticket-qa \
   --xlsx /mounted/chat-files/user/tickets.xlsx --brand "{品牌名称}" \
   --messages-col conversations --title-col subject \
   --page-size 100 --batch-size 5 --workers 3 --resume
@@ -91,7 +91,7 @@ wrapper 行为：
 必要时也可以只跑单页 worker（调试或补页）：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/extract_ticket_qa.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder extract-ticket-qa \
   --xlsx /mounted/chat-files/user/tickets.xlsx --brand "{品牌名称}" \
   --messages-col conversations --title-col subject \
   --page 2 --page-size 100 --batch-size 5 --workers 3
@@ -106,7 +106,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/extract_tic
 - merged 输出文件路径
 - 3-5 条样例 QA
 
-用户确认后，再按 upload.md 进入 `import_qa.py --dry-run`。dry-run 通过后，用户再次确认才正式上传。
+用户确认后，再按 upload.md 进入 `kb-builder import-qa --dry-run`。dry-run 通过后，用户再次确认才正式上传。
 
 ## 工单来源特有过滤规则
 
@@ -152,7 +152,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/extract_tic
 cp /workspace/outputs/kb-builder/ticket_qa_merged_<ts>.json /workspace/tmp/kb-builder/qa_parts/qa_tickets_<brand>.json
 ```
 
-然后由 `import_qa.py --from-dir /workspace/tmp/kb-builder/qa_parts/` 与其他来源一起合并上传。
+然后由 `kb-builder import-qa --from-dir /workspace/tmp/kb-builder/qa_parts/` 与其他来源一起合并上传。
 
 详见 `/skills/kb-builder/references/upload.md`。
 
@@ -160,7 +160,7 @@ cp /workspace/outputs/kb-builder/ticket_qa_merged_<ts>.json /workspace/tmp/kb-bu
 
 | 错误 | 正确做法 |
 |------|----------|
-| 直接把工单原文粘贴进知识库 | 必须经过 `extract_ticket_qa.py` 提炼 |
+| 直接把工单原文粘贴进知识库 | 必须经过 `kb-builder extract-ticket-qa` 提炼 |
 | 工单里有物理破损场景也提炼了 | 物理破损整条工单直接忽略 |
 | 无关工单（发票 / 物流 / 订单）也提炼 | 整条工单跳过 |
 | 同一产品问题多种表达各自成条 | 合并到同一条 QA 的 Question 里 |

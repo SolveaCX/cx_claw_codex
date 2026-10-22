@@ -44,4 +44,4 @@
 
 - 兜底 graph 的节点结构不对调用方暴露。
 - 当前是否通过 reference 或脚本创建不对调用方保证。
-- 后续可将实现替换为 `create_fallback_chatflow.py --template simple_reply|guided`，调用方 interface 不变。
+- 后续仍通过 `agent-builder chatflow deploy` 创建兜底 Chatflow，调用方 interface 不变。

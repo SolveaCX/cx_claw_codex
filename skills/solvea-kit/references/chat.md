@@ -30,7 +30,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" chat send --message "你好" --pretty
 node "<PLUGIN_ROOT>/plugin-cli.mjs" chat send --message "继续问" --chat-id <上轮chatId> --pretty
 ```
 
-### Python 示例
+### CLI 示例
 
 ```python
 from client import SolveaClient
@@ -85,7 +85,7 @@ CHAT_FLOW Agent 不能用 `metadata.specified_agent_id`（或老版 `specified_a
 # Delivery 回归：先读 /skills/delivery/interfaces/delivery-test.md
 
 # 校验 chatflow 图结构（chatflow 能力在 agent-builder skill 下）
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/validate_graph.py --data-file graph.json
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder validate --data-file graph.json
 ```
 
 ### 测试用例格式（JSON Schema）

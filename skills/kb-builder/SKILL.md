@@ -17,14 +17,14 @@ requires:
 
 | 用户意图 | 读取的 interface / reference | 主要执行入口 |
 |---|---|---|
-| 网页建知识库、探查网站、设计目录 | [`interfaces/web-kb.md`](interfaces/web-kb.md)、[`references/directory.md`](references/directory.md) | `crawl_site.py`、`build_directory_plan.py`、`create_dirs.py` |
-| 网页/Word/PDF 保留原文 | 本文件“来源模式” | `import_source_documents.py` |
-| 网页/文件/工单整理成问答 | [`qa-quality.md`](references/qa-quality.md)、[`qa-from-web.md`](references/qa-from-web.md)、[`qa-from-help-center.md`](references/qa-from-help-center.md)、[`qa-from-pdf.md`](references/qa-from-pdf.md)、[`qa-from-tickets.md`](references/qa-from-tickets.md) | `extract_web_qa.py`、`batch_extract_ticket_qa.py`、`import_qa.py` |
-| 上传已有 QA 计划 | [`references/upload.md`](references/upload.md) | `import_qa.py` |
-| 回复模板库导入 | [`references/reply-template.md`](references/reply-template.md) | `import_templates.py` |
+| 网页建知识库、探查网站、设计目录 | [`interfaces/web-kb.md`](interfaces/web-kb.md)、[`references/directory.md`](references/directory.md) | `kb-builder crawl`、`kb-builder directory-plan`、`kb-builder create-directories` |
+| 网页/Word/PDF 保留原文 | 本文件“来源模式” | `kb-builder import-source-documents` |
+| 网页/文件/工单整理成问答 | [`qa-quality.md`](references/qa-quality.md)、[`qa-from-web.md`](references/qa-from-web.md)、[`qa-from-help-center.md`](references/qa-from-help-center.md)、[`qa-from-pdf.md`](references/qa-from-pdf.md)、[`qa-from-tickets.md`](references/qa-from-tickets.md) | `kb-builder extract-web-qa`、`kb-builder batch-extract-ticket-qa`、`kb-builder import-qa` |
+| 上传已有 QA 计划 | [`references/upload.md`](references/upload.md) | `kb-builder import-qa` |
+| 回复模板库导入 | [`references/reply-template.md`](references/reply-template.md) | `kb-builder import-templates` |
 | 查看、更新、移动、删除或改变知识状态 | [`references/knowledge.md`](references/knowledge.md) | 按 reference 提供的固定入口 |
 | 创建或更新产品知识 | [`references/product.md`](references/product.md) | `create-product-knowledge`、`update-product-knowledge` |
-| 导出知识 | [`references/export.md`](references/export.md) | `export_knowledge.py` |
+| 导出知识 | [`references/export.md`](references/export.md) | `kb-builder export-knowledge` |
 | 知识库目录管理 | [`references/directory.md`](references/directory.md) | 按 reference 提供的操作入口 |
 | 标签管理 | [`references/tags.md`](references/tags.md) | 按 reference 提供的操作入口 |
 | 隔离关键词及绑定 | [`references/isolation-keywords.md`](references/isolation-keywords.md)、[`references/tag-isolation-migration.md`](references/tag-isolation-migration.md) | 按 reference 提供的操作入口 |
@@ -34,7 +34,7 @@ requires:
 - 网页可保存为“网页”，也可整理成“问答”；Word/PDF 可保存为“文档”，也可整理成“问答”。
 - 用户只提供网址或文件时，默认准备保留原文，但提交前询问：直接保存原始资料，还是整理成问答？用户已明确要求 FAQ/问答时不重复确认。
 - 保留原文计划格式：`{"source": "URL 或本地文件路径", "dir_path": ["一级", "二级", "三级"]}`。多条记录组成 JSON 数组；Word/PDF 先通过 `read_file` 物化。
-- 先运行 `import_source_documents.py --plan-file <plan>` 预览，用户明确确认后再加 `--execute`。脚本对本次计划内 URL 去重；历史重复由后端处理，执行结果保留后端响应。
+- 先运行 `kb-builder import-source-documents --plan-file <plan>` 预览，用户明确确认后再加 `--execute`。脚本对本次计划内 URL 去重；历史重复由后端处理，执行结果保留后端响应。
 
 ## 基础查询入口
 
@@ -62,9 +62,9 @@ requires:
 | 更新问答 / AI自学习 / 文档 / 网页 | `update-knowledge` / `batch-update-knowledge` / `update-document-content` | [`knowledge.md`](references/knowledge.md) |
 | 创建或更新产品知识 | `create-product-knowledge` / `update-product-knowledge` / `batch-update-products` | [`product.md`](references/product.md) |
 | 删除、移动、发布/下架、显示/隐藏各类知识 | `operate-knowledge` | [`knowledge.md`](references/knowledge.md) |
-| 创建、重命名、移动或删除目录 | `create-folder` / `create_dirs.py` / `update-directory` / `move-directory` / `delete-directory` | [`directory.md`](references/directory.md) |
-| 导入问答 | `import_qa.py` | [`upload.md`](references/upload.md) |
-| 导入文档或网页 | `import_source_documents.py` | 本文件“来源模式” |
+| 创建、重命名、移动或删除目录 | `create-folder` / `kb-builder create-directories` / `update-directory` / `move-directory` / `delete-directory` | [`directory.md`](references/directory.md) |
+| 导入问答 | `kb-builder import-qa` | [`upload.md`](references/upload.md) |
+| 导入文档或网页 | `kb-builder import-source-documents` | 本文件“来源模式” |
 | 修改知识标签 | `edit-knowledge-tags` | [`tags.md`](references/tags.md) |
 | 创建、修改、删除或绑定隔离关键词 | `create-isolation-keyword` / `update-isolation-keyword` / `delete-isolation-keyword` / `batch-update-isolation-keyword-bindings` | [`isolation-keywords.md`](references/isolation-keywords.md) |
 | 创建、修改或删除回复模板 | `create-template` / `update-template` / `delete-templates` | [`reply-template.md`](references/reply-template.md) |

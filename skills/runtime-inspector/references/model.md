@@ -20,10 +20,10 @@ Error invoking tool 'write_file' with kwargs {'file_path': '...'} with error:
 
 ### 触发方式
 
-`model_inspect.py --scenario truncation` 让 LLM 主动构造一个**会消耗大量输出 token 的 write_file 调用**：
+`runtime model --scenario truncation` 让 LLM 主动构造一个**会消耗大量输出 token 的 write_file 调用**：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/model_inspect.py --scenario truncation
+node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime model --scenario truncation
 ```
 
 脚本只是**给 agent 一个引导文本**——告诉 agent 用 write_file 写一个长 markdown 内容到 `/workspace/tmp/runtime-inspector/truncation_test.md`，要求 ≥6000 字英文 lorem ipsum 段落。

@@ -154,7 +154,7 @@ audit；只有结构化 SYSTEM 能力或明确可执行 prompt 调用缺失时�
 ## Analyzer 产物
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py inspect \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration inspect \
   --input /workspace/state/agent-builder/multi-agent/read_<agent_id>_raw.json \
   --out-dir /workspace/state/agent-builder/multi-agent \
   --pretty
@@ -222,7 +222,7 @@ PE 还带 `prompt_review`、`prompt_quality` / `prompt_evidence.encoding_quality
 并发生成/恢复 batch context（每批默认 4 个 chunk、12 条 action edge、20000 evidence 字符）：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py prepare-batches \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration prepare-batches \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.ai.json \
   --chunks-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/chunks.json \
   --progress-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/progress.json \
@@ -237,7 +237,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-ag
 生成 migration plan 后，先用脚本检查流程骨架、节点决策和 coverage：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py validate-migration-plan \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration validate-migration-plan \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.full.json \
   --pretty

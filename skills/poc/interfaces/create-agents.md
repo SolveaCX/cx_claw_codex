@@ -8,13 +8,13 @@ POC 专属能力：创建全部意图，优先克隆 3 个预置业务 agent，�
 
 ```bash
 # POC 业务阶段：建全部意图 + 优先克隆 3 个业务 agent + 3 条业务策略
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/poc/scripts/create_agents.py --mode poc
+node "<PLUGIN_ROOT>/plugin-cli.mjs" poc create-agents --mode poc
 
 # POC 兜底阶段：fallback chatflow agent 创建完成后，绑定所有 pending intents
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/poc/scripts/create_agents.py --mode poc --poc-fallback-agent-id <agent_id>
+node "<PLUGIN_ROOT>/plugin-cli.mjs" poc create-agents --mode poc --poc-fallback-agent-id <agent_id>
 
 # POC 恢复阶段：预置 agent 不可用，用户确认从零新建或使用替代 agent 后，绑定业务策略
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/poc/scripts/create_agents.py --mode poc \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" poc create-agents --mode poc \
   --custom-agent-map /workspace/state/poc/custom_agent_map.json
 ```
 
@@ -32,7 +32,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/poc/scripts/create_agents.py -
 
 1. 通过 `/skills/poc/interfaces/classify.md` 完成分类。
 2. 展示分类结果，等用户确认。
-3. 执行 `/skills/poc/scripts/create_agents.py --mode poc`。
+3. 执行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" poc create-agents --mode poc`。
 4. 读取 `/workspace/state/poc/progress.json` 的 `created_log_path`。
 5. 读取 created log，展示意图、agent、strategy 和 `fallback_pending`。
 6. 如果 created log 或 state 出现 `preset_agent_errors` / `status=preset_agent_missing`，不要说“只能等开发修复”，也不要直接崩溃；应向用户说明缺失的预置 agent，并请用户选择：
@@ -41,7 +41,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/poc/scripts/create_agents.py -
    用户确认后再调用 `agent-builder` 创建新 agent，或按用户给定替代 agent 继续绑定策略。
 7. 如果用户选择从零新建或使用替代 agent，把已确认的 agent id 写入 `custom_agent_map.json`，执行 `--custom-agent-map` 绑定业务策略。
 8. 调用 `/skills/agent-builder/interfaces/fallback-chatflow.md` 创建兜底 CHAT_FLOW agent。
-9. 拿到 `agent_id` 后执行 `/skills/poc/scripts/create_agents.py --mode poc --poc-fallback-agent-id <agent_id>`。
+9. 拿到 `agent_id` 后执行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" poc create-agents --mode poc --poc-fallback-agent-id <agent_id>`。
 10. 展示 fallback strategy 结果，等用户确认是否进入 KB 或测试阶段。
 
 ## POC Guarantees

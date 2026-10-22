@@ -74,7 +74,7 @@ control topology，也不能自动生成目标图边；后者才是结构化结�
 先执行 inspect：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py inspect \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration inspect \
   --input /workspace/state/agent-builder/multi-agent/read_<old_agent_id>_raw.json \
   --out-dir /workspace/state/agent-builder/multi-agent
 ```
@@ -101,7 +101,7 @@ AI 不直接读取完整 raw JSON。`index.ai.json` 只用于理解拓扑、角�
 检索这些 JSON 产物时，不要反复用内置 `grep` / `read_file` 搜索同一个大文件。跨多个工具 id、old agent id、
 action status、template id 或变量 selector 的核对，必须优先用一次 `execute` 批处理。JSON 的结构摘要、筛选、
 字段投影和统计优先使用 `jq` 生成紧凑输出，不得把完整 JSON 回传模型；复杂跨文件关联、复杂转换或生成逻辑
-才使用短 Python 脚本。例如，读取指定工具的摘要：
+才使用 `agent-builder migration` 的本地转换命令。例如，读取指定工具的摘要：
 
 ```bash
 jq -c --argjson wanted '["24655", "24992", "26918"]' '
@@ -135,7 +135,7 @@ jq -c --argjson wanted '["24655", "24992", "26918"]' '
 一次领取或恢复一个并发 wave：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py prepare-batches \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration prepare-batches \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.ai.json \
   --chunks-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/chunks.json \
   --progress-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/progress.json \
@@ -157,7 +157,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-ag
 并发 worker 全部写完 plan 后，由协调器合并；worker 禁止直接调用 `update-batch-progress`：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py merge-batch-plans \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration merge-batch-plans \
   --base-plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.template.json \
   --manifest-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/batches/worker_manifest.json \
   --progress-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/progress.json \
@@ -430,7 +430,7 @@ analyzer 检查 coverage 和计划结构：
 确认。若用户只要求迁移方案，则最终确认后只保留 plan/source 产物，不写入环境。
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py validate-migration-plan \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration validate-migration-plan \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.full.json \
   --pretty
@@ -460,14 +460,14 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-ag
 写完 source 后、compile 前先执行迁移专用对账：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py audit-migration-source \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration audit-migration-source \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.full.json \
   --source-file /workspace/state/agent-builder/chatflow/<task>_source.json \
   --out-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/source_audit.json \
   --pretty
 
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py validate-prompt-block-rendering \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration validate-prompt-block-rendering \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.full.json \
   --source-file /workspace/state/agent-builder/chatflow/<task>_source.json \
@@ -485,7 +485,7 @@ CHAT_FLOW 文档 compile / validate，以检查 `displayPrompt`、runtime `promp
 交接，或 source 可能被人工编辑时，才建议记录交接快照：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py emit-handoff \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration emit-handoff \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.full.json \
   --source-file /workspace/state/agent-builder/chatflow/<task>_source.json \
@@ -499,7 +499,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-ag
 发生上述交接时，由接手方在 CHAT_FLOW `compile` 前显式验证 handoff：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py verify-handoff \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration verify-handoff \
   --handoff-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_handoff.json \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --index-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/index.full.json \
@@ -509,7 +509,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-ag
 
 文件未变化即验证通过，即使快照记录了既有 validation finding；任一内容变化才返回
 `STALE_MIGRATION_PLAN` 并列出变化的 artifact。此时重新检查变化、按需执行 audit / prompt rendering 并生成
-新 handoff。handoff 完全属于 MULTI_AGENT 迁移侧，通用 `chatflow_builder.py compile` 不读取 migration
+新 handoff。handoff 完全属于 MULTI_AGENT 迁移侧，通用 `agent-builder chatflow compile` 不读取 migration
 plan，也不承担 legacy 规则。
 按已确认的全局 plan 分片实现，避免重新把完整旧图或完整目标图塞回同一个 agent run。若目标图阶段发现
 缺少业务信息，回到本文件补充 evidence、coverage 或用户确认；不要自行猜测。

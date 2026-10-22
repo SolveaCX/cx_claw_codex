@@ -44,7 +44,7 @@
 
 提取的 QA **不要**自己合并成 qa_plan，**也不要**一次 write_file 写完整数组。
 每批 ≤ 4 KB 写到 `/workspace/tmp/kb-builder/qa_parts/qa_help_<topic>.json`（如 `qa_help_setup.json` / `qa_help_troubleshooting.json`），
-最后由 `import_qa.py --from-dir /workspace/tmp/kb-builder/qa_parts/` 自动合并 + 上传。
+最后由 `kb-builder import-qa --from-dir /workspace/tmp/kb-builder/qa_parts/` 自动合并 + 上传。
 
 详见 `/skills/kb-builder/references/upload.md`。
 

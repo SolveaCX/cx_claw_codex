@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { authenticated, login, logout } from "./auth.js";
 import { flag, option, positionals } from "./args.js";
-import { runApi, runPython } from "./business.js";
+import { runApi } from "./business.js";
 import { isResourceCommand, resourceHelp, runResourceCommand } from "./commands/resources.js";
 import { diagnose } from "./doctor.js";
 import { query as slsQuery } from "./sls.js";
@@ -9,11 +9,20 @@ import { loadSession, saveSession } from "./store.js";
 import { publicTenant, search, useTenant } from "./tenant.js";
 import { installMarketplace, installScheduler, update } from "./update.js";
 import { SERVER_API_VERSION, TOOL_SCHEMA_VERSION, VERSION } from "./version.js";
+import { runRuntime } from "./workflows/runtime.js";
+import { runSolveaKitWorkflow } from "./workflows/solvea-kit.js";
+import { runSupport } from "./workflows/support.js";
+import { runAgentBuilder } from "./workflows/agent-builder.js";
+import { runAgentTester } from "./workflows/tester.js";
+import { runDelivery, runPoc } from "./workflows/delivery.js";
+import { runKbBuilder } from "./workflows/kb-builder.js";
+import { runDesk } from "./workflows/desk.js";
 
 const print = (value: unknown) => console.log(JSON.stringify(value, null, 2));
 const usage = () => [
   "cxclawctl <resource> <action> [options]",
-  "cxclawctl auth|tenant|sls|doctor|update|setup|version",
+  "cxclawctl auth|tenant|sls|runtime|doctor|update|setup|version",
+  "cxclawctl agent-builder|agent-tester|delivery|poc|kb-builder|solvea-desk <action>",
   resourceHelp(),
   "Example: cxclawctl intent create --data-file intent.json",
 ].join("\n\n");
@@ -61,8 +70,16 @@ async function main(args = process.argv.slice(2)) {
   if (command === "auth") return runAuth(action, rest);
   if (command === "login" || command === "logout") return runAuth(command, args.slice(1));
   if (command === "tenant" || command === "context") return runTenant(action, rest);
+  if (command === "runtime") return print(await runRuntime(action, rest));
+  if (command === "workflow") return print(await runSolveaKitWorkflow(action, rest));
+  if (command === "support") return print(await runSupport(await authenticated(), action, rest));
+  if (command === "agent-builder") return print(await runAgentBuilder(["validate", "compile", "merge-source", "validate-tool", "migration", "replay"].includes(action ?? "") ? undefined : await authenticated(), action, rest));
+  if (command === "agent-tester") return print(await runAgentTester(action === "create-sheet" ? undefined : await authenticated(), action, rest));
+  if (command === "delivery") return print(await runDelivery(["classify", "plan", "report", "render", "render-report", "excel", "gen-excel", "render-summary"].includes(action ?? "") ? undefined : await authenticated(), action, rest));
+  if (command === "poc") return print(await runPoc(["classify", "plan", "report", "render", "render-report", "excel", "gen-excel", "manual", "render-summary"].includes(action ?? "") ? undefined : await authenticated(), action, rest));
+  if (command === "kb-builder") return print(await runKbBuilder(["crawl", "directory-plan", "extract-web-qa", "extract-ticket-qa", "batch-extract-ticket-qa"].includes(action ?? "") ? undefined : await authenticated(), action, rest));
+  if (command === "solvea-desk") return print(await runDesk(await authenticated(), action, rest));
   if (command === "api") { if (!action) throw new Error("api command is required"); await runApi(await authenticated(), action, rest); return; }
-  if (command === "script") { if (!action) throw new Error("script path is required"); process.exitCode = await runPython(action, rest); return; }
   if (command === "sls" && action === "query") {
     return print(await slsQuery(await authenticated(), {
       from: Number(option(rest, "--from", true)), to: Number(option(rest, "--to", true)),

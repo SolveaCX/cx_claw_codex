@@ -7,7 +7,7 @@
 ## 工作流：分批写 tmp，脚本自动合并
 
 **核心思路**：agent 把每批 QA 写到 `/workspace/tmp/kb-builder/qa_parts/` 的多个小文件，
-`import_qa.py --from-dir` 自动按文件名排序合并、写一份带时间戳的成品到 outputs，再做 dry-run / 上传。
+`kb-builder import-qa --from-dir` 自动按文件名排序合并、写一份带时间戳的成品到 outputs，再做 dry-run / 上传。
 
 ### 为什么这样做
 
@@ -66,7 +66,7 @@
 5. **合并 + dry-run**（脚本会把合并结果写到 `/workspace/outputs/kb-builder/qa_plan_{ts}.json` 留档）：
 
    ```bash
-   node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_qa.py --from-dir /workspace/tmp/kb-builder/qa_parts/ --dry-run
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-qa --from-dir /workspace/tmp/kb-builder/qa_parts/ --dry-run
    ```
 
 6. **向用户汇报数量**，等待明确确认：
@@ -87,13 +87,13 @@
 7. **正式上传**：
 
    ```bash
-   node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_qa.py --from-dir /workspace/tmp/kb-builder/qa_parts/
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-qa --from-dir /workspace/tmp/kb-builder/qa_parts/
    ```
 
    或者用 dry-run 阶段已落盘的 qa_plan 文件（避免重新合并）：
 
    ```bash
-   node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_qa.py --qa-file /workspace/outputs/kb-builder/qa_plan_<ts>.json
+   node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-qa --qa-file /workspace/outputs/kb-builder/qa_plan_<ts>.json
    ```
 
 ## 上传后验证
@@ -111,15 +111,15 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" directory list --pretty
 直接传文件路径，不走 tmp：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_qa.py --qa-file /path/to/qa_plan.json --dry-run
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/import_qa.py --qa-file /path/to/qa_plan.json
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-qa --qa-file /path/to/qa_plan.json --dry-run
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-qa --qa-file /path/to/qa_plan.json
 ```
 
 ## 常见错误
 
 | 错误 | 正确做法 |
 |------|----------|
-| 一次 `write_file` 写整份 qa_plan | 分批写到 `/workspace/tmp/kb-builder/qa_parts/`，由 `import_qa.py --from-dir` 合并 |
+| 一次 `write_file` 写整份 qa_plan | 分批写到 `/workspace/tmp/kb-builder/qa_parts/`，由 `kb-builder import-qa --from-dir` 合并 |
 | 用占位 sentinel + 多次 `edit_file` 追加 | 已废弃。`edit_file` 的 `new_string` 同样受 max_tokens 限制，会被截 |
 | 单批塞太多导致截断 | 每批 ≤ 4 KB；长 answer 每批 2~3 条；截断信号出现立刻减半重试 |
 | 直接上传不先 dry-run | 必须先 dry-run 并向用户汇报数量 |

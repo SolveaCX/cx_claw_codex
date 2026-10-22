@@ -93,7 +93,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api delete-label-node \
 
 1. 先 `list-label-groups` / `get-label-tree` 确认目标标签组是否为空、现有节点是什么。
 2. 根据用户描述整理标签层级、描述、样例，写入 `/workspace/state/solvea-kit/labels.json`。
-3. 用 `/skills/solvea-kit/scripts/generate_label_import_file.py` 生成 xlsx。
+3. 用 `workflow label-import` 生成 xlsx。
 4. 给用户展示将导入的层级摘要，确认后执行 `upload-labels`。
 
 ### 生成导入文件
@@ -116,7 +116,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api delete-label-node \
 ```
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-kit/scripts/generate_label_import_file.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" workflow label-import \
   --init \
   --input /workspace/state/solvea-kit/labels.json \
   --output /workspace/state/solvea-kit/labels_init.xlsx --pretty
@@ -144,7 +144,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-kit/scripts/generate_la
 ```
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-kit/scripts/generate_label_import_file.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" workflow label-import \
   --input /workspace/state/solvea-kit/labels.json \
   --output /workspace/state/solvea-kit/labels_update.xlsx --pretty
 ```

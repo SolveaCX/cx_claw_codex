@@ -1,14 +1,14 @@
 # Delivery Intent Classification
 
-Delivery 专属分类入口。入口和状态归属 Delivery skill；通用意图分类实现调用 `solvea-kit/scripts/intent_classify.py`，状态写入 `/workspace/state/delivery/progress.json`。
+Delivery 专属分类入口。入口和状态归属 Delivery skill；分类实现调用 `delivery classify`，状态写入 `/workspace/state/delivery/progress.json`。
 
 ## Commands
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/classify.py --xlsx <xlsx> --messages-col <col> [--title-col <col>]
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/classify.py --no-excel
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/gen_report.py --brand <brand>
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/gen_excel.py --brand <brand>
+node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery classify --xlsx <xlsx> --messages-col <col> [--title-col <col>]
+node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery classify --no-excel
+node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery report --brand <brand>
+node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery excel --brand <brand>
 ```
 
 ## Inputs

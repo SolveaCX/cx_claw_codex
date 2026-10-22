@@ -30,21 +30,21 @@ frontend 请求同时命中 `markdown`、`process`、`subagent` 中两个及以�
 
 | domain | scenario | 触发关键词 | 入口 | 详细文档 |
 |---|---|---|---|---|
-| sandbox | env | 环境变量、注入、安全 | `sandbox_inspect.py --scenario env` | `references/sandbox.md` |
-| sandbox | fs | 目录、读写权限、挂载 | `sandbox_inspect.py --scenario fs` | `references/sandbox.md` |
-| sandbox | execute | bash 执行、CWD、相对路径 | `sandbox_inspect.py --scenario execute` | `references/sandbox.md` |
-| sandbox | paths | 虚拟路径、bash/Python 互通 | `sandbox_inspect.py --scenario paths` | `references/sandbox.md` |
-| sandbox | deps | 依赖库可用性 | `sandbox_inspect.py --scenario deps` | `references/sandbox.md` |
-| sandbox | persistence | 跨轮持久化（两轮测试） | `prepare.py` + `process.py` + `verify_persistence.py` | `references/sandbox.md` |
-| sandbox | claude_proxy | 沙箱内 Claude proxy 连通 | `test_claude_proxy.py` | `references/sandbox.md` |
-| sandbox | all | 沙箱全量（env+fs+execute+paths+deps） | `sandbox_inspect.py` | `references/sandbox.md` |
-| model | truncation | LLM 输出 max_tokens 截断诊断 | `model_inspect.py --scenario truncation` | `references/model.md` |
+| sandbox | env | 环境变量、注入、安全 | `runtime sandbox --scenario env` | `references/sandbox.md` |
+| sandbox | fs | 目录、读写权限、挂载 | `runtime sandbox --scenario fs` | `references/sandbox.md` |
+| sandbox | execute | bash 执行、CWD、相对路径 | `runtime sandbox --scenario execute` | `references/sandbox.md` |
+| sandbox | paths | 虚拟路径、目录互通 | `runtime sandbox --scenario paths` | `references/sandbox.md` |
+| sandbox | deps | 运行时依赖可用性 | `runtime sandbox --scenario deps` | `references/sandbox.md` |
+| sandbox | persistence | 跨轮持久化（两轮测试） | `runtime prepare` + `runtime process` + `runtime verify` | `references/sandbox.md` |
+| sandbox | claude_proxy | 沙箱内 Claude proxy 连通 | `runtime sandbox --scenario claude_proxy` | `references/sandbox.md` |
+| sandbox | all | 沙箱全量（env+fs+execute+paths+deps） | `runtime sandbox` | `references/sandbox.md` |
+| model | truncation | LLM 输出 max_tokens 截断诊断 | `runtime model --scenario truncation` | `references/model.md` |
 | frontend | markdown | Markdown、标题、列表、表格、引用、代码块、链接 | Agent 按 reference 直接输出格式矩阵 | `references/frontend-rendering.md` |
 | frontend | process | 工具块、连续工具、分组、运行、完成、失败、计时、折叠 | Agent 按 reference 调用真实工具 | `references/frontend-rendering.md` |
 | frontend | subagent | Subagent、task、嵌套执行过程、内部消息 | Agent 按 reference 调用 `task` | `references/frontend-rendering.md` |
 | frontend | all | 前端渲染、全量消息格式、完整验收 | 依次执行 markdown + process + subagent | `references/frontend-rendering.md` |
 
-涉及脚本的场景均用绝对虚拟路径调用：`node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/runtime-inspector/scripts/<name>.py [args]`
+所有场景均通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs" runtime <action> [args]` 调用，不再依赖 Python 脚本。
 
 ## 详细执行步骤
 

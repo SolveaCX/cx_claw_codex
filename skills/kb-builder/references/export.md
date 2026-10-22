@@ -1,6 +1,6 @@
 # 知识导出
 
-把 Shulex 知识库导出成带目录路径的 Excel。核心原则：优先调用 `scripts/export_knowledge.py` 完成目录读取、分页拉取、目录 join 和 Excel 写入；不要让模型临时手写分页脚本或 Excel 生成逻辑。
+把 Shulex 知识库导出成带目录路径的 Excel。核心原则：优先调用 `node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder export-knowledge` 完成目录读取、分页拉取、目录 join 和 Excel 写入；不要让模型临时手写脚本或 Excel 生成逻辑。
 
 脚本内部会读取 `list-directories` 的完整目录树，并用每条知识的 `directoryId` 精确 join 目录路径。禁止用 question 前缀、关键词、型号名等方式猜目录。
 
@@ -95,7 +95,7 @@ POST /api_v2/qam/project/{projectId}/getKnowledge
 只有用户明确说了“全部 / 全量 / 所有 / 整个知识库 / 当前知识库全部 / all / everything”时，才直接执行全量导出：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_knowledge.py --all
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder export-knowledge --all
 ```
 
 ### 指定目录导出
@@ -103,7 +103,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_know
 用户指定一个目录时：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_knowledge.py --directory-id 105809
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder export-knowledge --directory-id 105809
 ```
 
 默认会包含该目录及其所有子孙目录。
@@ -111,13 +111,13 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_know
 只导出目录自身、不包含子目录时：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_knowledge.py --directory-id 105809 --no-children
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder export-knowledge --directory-id 105809 --no-children
 ```
 
 ### 多目录导出
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_knowledge.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder export-knowledge \
   --directory-id 105809 \
   --directory-id 82764
 ```
@@ -127,7 +127,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_know
 ### keyword 过滤
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_knowledge.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder export-knowledge \
   --directory-id 105809 \
   --keyword battery
 ```
@@ -135,7 +135,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_know
 ### 指定知识类型
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_knowledge.py --all --type QA
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder export-knowledge --all --type QA
 ```
 
 `--type` 默认为 `ALL`，可按接口支持传 `QA / FILE / WEBSITE / PRODUCT / LEARN_SELF / ALL`。
@@ -161,7 +161,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_know
 只有用户已经明确“全部 / 全量 / 所有 / 整个知识库 / 当前知识库全部 / all / everything”时，不需要再问，直接运行：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/export_knowledge.py --all
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder export-knowledge --all
 ```
 
 反例：用户只说“导出知识库”或“导出知识”，必须先列目录并询问范围，不能直接按全量处理。

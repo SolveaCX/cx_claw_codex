@@ -298,10 +298,10 @@ Brand Knowledge Base
 
 ## §4 批量创建目录
 
-调用 `scripts/create_dirs.py`：
+调用 `node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder create-directories`：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/kb-builder/scripts/create_dirs.py
+node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder create-directories
 ```
 
 脚本行为：

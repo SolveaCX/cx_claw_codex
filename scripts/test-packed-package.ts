@@ -26,14 +26,7 @@ try {
   if (existsSync(join(packageRoot, "skills", "solvea-kit", "SKILL.md"))) {
     throw new Error("npm package must not contain Skill documentation");
   }
-  for (const path of [
-    "skills/__lib__/solvea-api/solvea_api.py",
-    "skills/poc/scripts/plan.py",
-    "skills/poc/assets/poc_test_template.html",
-    "skills/solvea-desk/references/report/report-template.html",
-  ]) {
-    if (!existsSync(join(packageRoot, path))) throw new Error(`missing runtime file: ${path}`);
-  }
+  if (!existsSync(join(packageRoot, "dist", "cli.js"))) throw new Error("missing compiled CLI");
 
   const bin =
     process.platform === "win32"

@@ -257,7 +257,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" tool update \
 ## 静态验证与写入
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/tools/validate_tool_config.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder validate-tool \
   --data-file /workspace/state/agent-builder/tool_lookup_order.json \
   --pretty
 ```

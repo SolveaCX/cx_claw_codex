@@ -34,7 +34,7 @@ prompt，也不是按 old agent 数量建同样数量的节点，而是还原并
 长图先执行：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py inspect \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration inspect \
   --input /workspace/state/agent-builder/multi-agent/read_<old_agent_id>_raw.json \
   --out-dir /workspace/state/agent-builder/multi-agent
 ```
@@ -167,7 +167,7 @@ source 阶段。
 生成 Mermaid 并直接贴给用户确认：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py emit-mapping-mermaid \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration emit-mapping-mermaid \
   --plan-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/migration_plan.json \
   --out-file /workspace/state/agent-builder/multi-agent/migrate_<id>_<name>/sop_mapping.mmd
 ```
@@ -191,7 +191,7 @@ coverage 完整、SOP → 节点映射 Mermaid 和必要的用户决定确认后
 
 目标图阶段才决定 source 字段、资源绑定、边、编译、校验和部署。迁移计划是该阶段的语义输入；目标图
 实现或校验发现缺少业务信息时，回到本文件补 evidence / coverage / 用户确认，而不是在目标图中猜测。
-source 完成后、compile 前先运行 `legacy_graph_analyzer.py audit-migration-source --plan-file ...
+source 完成后、compile 前先运行 `agent-builder migration audit-migration-source --plan-file ...
 --index-file ... --source-file ... --out-file ... --pretty`，再运行
 `validate-prompt-block-rendering --plan-file ... --index-file ... --source-file ... --pretty`。前者会阻断损坏
 source 结构、真实不存在的边端点，以及显式 `rendered_to` / `source_nodes` 指向不存在节点；节点类别、

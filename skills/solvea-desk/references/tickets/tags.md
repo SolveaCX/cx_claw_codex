@@ -3,7 +3,7 @@
 本模块操作 Shulex Desk / Tars 工单标签，不是 `/api_v2/gpt/label/project/...` 下的 GPT 标签树。所有命令使用受控脚本：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/ticket_tags.py <subcommand>
+node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk tags <subcommand>
 ```
 
 ## 查询
@@ -11,13 +11,13 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/ti
 完整标签树：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/ticket_tags.py list-tags
+node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk tags list-tags
 ```
 
 查询单个工单的人工标签和 AI 标签：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/ticket_tags.py get-ticket-tags \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk tags get-ticket-tags \
   --ticket-number "<对外工单号>"
 ```
 
@@ -30,14 +30,14 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/ti
 ```
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/ticket_tags.py batch-get-ticket-tags \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk tags batch-get-ticket-tags \
   --ticket-ids-file /workspace/state/solvea-desk/ticket_ids.json
 ```
 
 按节点名称搜索标签路径：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/ticket_tags.py search-tags \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk tags search-tags \
   --name "物流延迟"
 ```
 
@@ -57,7 +57,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/ti
 
 必须依次执行：
 
-1. 使用 `fetch_tickets.py` 或准确工单号确认目标工单。
+1. 使用 `solvea-desk fetch-tickets` 或准确工单号确认目标工单。
 2. 使用 `get-ticket-tags` 读取当前 `userTags` 和 `aiTags`。
 3. 使用 `list-tags` 或 `search-tags` 获得标签 ID 和名称。
 4. 不带 `--confirm` 运行写命令，取得包含 `before` 和 `requested` 的预览；此时脚本只读取，不发送 POST。
@@ -67,12 +67,12 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/ti
 绑定：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/ticket_tags.py bind-tags \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk tags bind-tags \
   --ticket-number "<对外工单号>" \
   --tags-file /workspace/state/solvea-desk/tags.json
 
 # 用户明确确认后
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/solvea-desk/scripts/tickets/ticket_tags.py bind-tags \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk tags bind-tags \
   --ticket-number "<对外工单号>" \
   --tags-file /workspace/state/solvea-desk/tags.json \
   --confirm

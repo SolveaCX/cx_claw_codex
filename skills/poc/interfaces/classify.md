@@ -1,14 +1,14 @@
 # POC Intent Classification
 
-POC 专属分类入口。入口和状态归属 POC skill；通用意图分类实现调用 `solvea-kit/scripts/intent_classify.py`，状态写入 `/workspace/state/poc/progress.json`。
+POC 专属分类入口。入口和状态归属 POC skill；分类实现调用 `poc classify`，状态写入 `/workspace/state/poc/progress.json`。
 
 ## Commands
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/poc/scripts/classify.py --xlsx <xlsx> --messages-col <col> [--title-col <col>]
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/poc/scripts/classify.py --no-excel
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/poc/scripts/gen_report.py --brand <brand>
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/poc/scripts/gen_excel.py --brand <brand>
+node "<PLUGIN_ROOT>/plugin-cli.mjs" poc classify --xlsx <xlsx> --messages-col <col> [--title-col <col>]
+node "<PLUGIN_ROOT>/plugin-cli.mjs" poc classify --no-excel
+node "<PLUGIN_ROOT>/plugin-cli.mjs" poc report --brand <brand>
+node "<PLUGIN_ROOT>/plugin-cli.mjs" poc excel --brand <brand>
 ```
 
 ## Inputs

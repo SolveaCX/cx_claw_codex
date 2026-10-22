@@ -30,8 +30,8 @@ agent-tester/
 │   └── badcase-retest.md        # 历史 ChatId 复测
 ├── batch-test/
 │   └── overview.md              # 系统批测工作流
-└── scripts/
-    └── batch_test_sheet.py      # 生成 xlsx、上传、提交、查询下载中心
+└── CLI commands: `agent-tester create-sheet`, `agent-tester submit`, `agent-tester get-tasks`
+    └── agent-tester      # 生成 xlsx、上传、提交、查询下载中心
 ```
 
 批测必须提交系统下载中心任务，不要调用或复用 POC / Delivery 的本地并发脚本、状态、cases 协议或报告模板。

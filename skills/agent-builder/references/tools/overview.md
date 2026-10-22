@@ -7,7 +7,7 @@
 ```bash
 node "<PLUGIN_ROOT>/plugin-cli.mjs" tool list --pretty
 node "<PLUGIN_ROOT>/plugin-cli.mjs" tool get --id <tool_id> --pretty
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/tools/validate_tool_config.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder validate-tool \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
 node "<PLUGIN_ROOT>/plugin-cli.mjs" tool create \
   --data-file /workspace/state/agent-builder/tool_<name>.json --pretty
@@ -29,7 +29,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api query-mock-data \
 
 1. `list-plugins --pretty` 查重。
 2. 将配置写入 `/workspace/state/agent-builder/tool_<name>.json`；跨轮配置不能写 `/workspace/tmp/`。
-3. 运行 `validate_tool_config.py` 做静态验证。它不只检查 JSON 语法，还检查参数树、状态映射的精确字段路径、类型和关系。
+3. 运行 `agent-builder validate-tool` 做静态验证。它不只检查 JSON 语法，还检查参数树、状态映射的精确字段路径、类型和关系。
 4. 展示和配置摘要，请用户确认。
 5. 执行 `create-plugin --data-file ...`。
 6. 从创建结果取得 ID，再执行 `get-plugin --id <tool_id> --pretty`，确认服务端保存后的完整定义与预期一致。

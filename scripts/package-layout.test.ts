@@ -15,9 +15,8 @@ function files(root: string): string[] {
 describe("release package layout", () => {
   test("keeps documentation in the plugin and runtime code in npm", () => {
     expect(pkg.files).not.toContain("skills");
-    expect(pkg.files).toContain("skills/**/scripts/**");
-    expect(pkg.files).toContain("skills/__lib__/**");
-    expect(pkg.files).toContain("skills/**/assets/**");
+    expect(pkg.files).not.toContain("skills/**/scripts/**");
+    expect(pkg.files).not.toContain("skills/__lib__/**");
   });
 
   test("pins CLI execution to the plugin manifest version", () => {
@@ -53,21 +52,8 @@ describe("release package layout", () => {
     expect(pluginList).toBeGreaterThan(pluginInstall);
   });
 
-  test("locks the direct Python runtime dependencies", () => {
-    const requirements = readFileSync("requirements-cli.txt", "utf8");
-    for (const name of [
-      "httpx",
-      "boto3",
-      "openpyxl",
-      "beautifulsoup4",
-      "openai",
-      "pandas",
-      "markdownify",
-      "markdown",
-      "jinja2",
-    ]) {
-      expect(requirements).toMatch(new RegExp(`^${name}==`, "m"));
-    }
+  test("does not package a Python runtime", () => {
+    expect(pkg.files.some(path => path.includes("python") || path.includes("requirements"))).toBe(false);
   });
 
   test("keeps the native TypeScript API boundary separate from the legacy fallback", () => {
@@ -76,5 +62,6 @@ describe("release package layout", () => {
     expect(business).toContain("runSolveaCommand");
     expect(commands).toContain("TypeScript command not migrated yet");
     expect(commands).not.toContain("spawn(");
+    expect(business).not.toContain("runPython");
   });
 });

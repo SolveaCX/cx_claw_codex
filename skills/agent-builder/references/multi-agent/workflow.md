@@ -27,7 +27,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent get --id <agent_id> --pretty
 3. 按 `graph-spec.md` 读取旧图字段。如果 graph 很大或 `displayPrompt` 含大量 HTML，必须先跑 analyzer：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/multi-agent/legacy_graph_analyzer.py inspect \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder migration inspect \
   --input /workspace/state/agent-builder/multi-agent/read_<agent_id>_raw.json \
   --out-dir /workspace/state/agent-builder/multi-agent \
   --pretty

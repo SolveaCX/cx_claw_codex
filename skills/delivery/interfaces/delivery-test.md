@@ -8,13 +8,13 @@ Delivery 专属回归能力：正式交付前按上传用例或历史抽样执�
 
 ```bash
 # 历史抽样
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/sample_history_cases.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery sample-history \
   --total 100 \
   --intents "Order Issues" \
   --output /workspace/outputs/delivery/cases_<ts>.json
 
 # 批量回归
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/batch_test.py \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" delivery batch-test \
   --input /workspace/outputs/delivery/cases_<ts>.json \
   --output /workspace/outputs/delivery/results_<ts>.json \
   --touch-point LIVE_CHAT \
@@ -33,7 +33,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/delivery/scripts/batch_test.py
 
 1. 确认数据来源：用户上传，或按意图从历史会话抽样。
 2. 确认 touch-point。
-3. 执行 `batch_test.py`。
+3. 执行 `delivery batch-test`。
 4. 如中断，基于 partial 续跑未完成 case。
 5. 读取结果并展示核心 KPI。
 6. 更新 `/workspace/state/delivery/progress.json`。

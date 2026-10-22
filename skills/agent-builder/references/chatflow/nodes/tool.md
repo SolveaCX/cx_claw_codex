@@ -93,7 +93,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-ai-fields --pretty
 `--bind-tool-params` 只是辅助，不是业务决策来源：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" script skills/agent-builder/scripts/chatflow/chatflow_builder.py compile ... --bind-tool-params
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow compile ... --bind-tool-params
 ```
 
 实际行为：
