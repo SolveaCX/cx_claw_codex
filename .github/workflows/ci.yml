@@ -62,6 +62,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          gh release create "v${VERSION}" dist/cxclaw-agent-plugin.zip dist/cxclaw-agent-plugin.json dist/cxclaw-agent-plugin.sha256 dist/cxclaw-codex-plugin.zip --title "CXClaw ${VERSION}" --generate-notes
+          if gh release view "v${VERSION}" >/dev/null 2>&1; then
+            gh release upload "v${VERSION}" dist/cxclaw-agent-plugin.zip dist/cxclaw-agent-plugin.json dist/cxclaw-agent-plugin.sha256 dist/cxclaw-codex-plugin.zip --clobber
+          else
+            gh release create "v${VERSION}" dist/cxclaw-agent-plugin.zip dist/cxclaw-agent-plugin.json dist/cxclaw-agent-plugin.sha256 dist/cxclaw-codex-plugin.zip --title "CXClaw ${VERSION}" --generate-notes
+          fi
           if [[ "$VERSION" == *-canary.* ]]; then channel=canary; elif [[ "$VERSION" == *-dev.* ]]; then channel=dev; else channel=stable; fi
           git push origin "HEAD:refs/heads/marketplace/${channel}" --force
