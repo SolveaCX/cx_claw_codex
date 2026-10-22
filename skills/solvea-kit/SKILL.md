@@ -12,9 +12,9 @@ Solvea Kit 保留路由与运营相关配置：意图、策略、变量系统、
 所有查询与写入操作，均使用 `/skill-lib/solvea-api/solvea_api.py`：
 
 ```bash
-npx --yes cxclaw@latest api <command> --pretty
+npx --yes @shulex/cxclawctl@latest api <command> --pretty
 # 例如：
-npx --yes cxclaw@latest api list-agents --pretty
+npx --yes @shulex/cxclawctl@latest api list-agents --pretty
 ```
 
 ## 能力分流

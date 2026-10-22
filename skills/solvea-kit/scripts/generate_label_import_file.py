@@ -4,7 +4,7 @@
 This is a solvea-kit workflow helper, not a backend API wrapper. The generated
 xlsx is meant to be passed to:
 
-    npx --yes cxclaw@latest api upload-labels --tree-id <id> --file <xlsx>
+    npx --yes @shulex/cxclawctl@latest api upload-labels --tree-id <id> --file <xlsx>
 """
 
 import os

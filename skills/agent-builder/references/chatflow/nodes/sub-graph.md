@@ -32,7 +32,7 @@
 先查可用 agent：
 
 ```bash
-npx --yes cxclaw@latest api list-agents --pretty
+npx --yes @shulex/cxclawctl@latest api list-agents --pretty
 ```
 
 ## 限制

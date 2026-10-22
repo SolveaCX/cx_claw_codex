@@ -4,15 +4,15 @@
 
 | 平台 | 用途 | 命令 | 使用时机 |
 |------|------|------|----------|
-| 业务平台 | 会话列表 | `npx --yes cxclaw@latest api list-voice-transcripts` | 按时间、状态缩小范围 |
-| 业务平台 | 会话详情 | `npx --yes cxclaw@latest api get-voice-transcript --history-id <historyId>` | 查看 transcript 和已落库平台字段 |
-| SLS | provider 日志 | `npx --yes cxclaw@latest sls query ...` | 按 callId/callSid 补齐原始错误 |
+| 业务平台 | 会话列表 | `npx --yes @shulex/cxclawctl@latest api list-voice-transcripts` | 按时间、状态缩小范围 |
+| 业务平台 | 会话详情 | `npx --yes @shulex/cxclawctl@latest api get-voice-transcript --history-id <historyId>` | 查看 transcript 和已落库平台字段 |
+| SLS | provider 日志 | `npx --yes @shulex/cxclawctl@latest sls query ...` | 按 callId/callSid 补齐原始错误 |
 
 ## 调用示例
 
 ```bash
-npx --yes cxclaw@latest api list-voice-transcripts --begin-ts <ms> --end-ts <ms> --pretty
-npx --yes cxclaw@latest api get-voice-transcript --history-id <historyId> --pretty
+npx --yes @shulex/cxclawctl@latest api list-voice-transcripts --begin-ts <ms> --end-ts <ms> --pretty
+npx --yes @shulex/cxclawctl@latest api get-voice-transcript --history-id <historyId> --pretty
 ```
 
 ## 错误处理

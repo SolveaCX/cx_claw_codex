@@ -44,20 +44,20 @@ codex plugin add cxclaw@cxclaw
 然后登录公司提供的授权服务：
 
 ```bash
-npx --yes cxclaw@latest auth login --server <shulex-cloud 授权地址>
+npx --yes @shulex/cxclawctl@latest auth login --server <shulex-cloud 授权地址>
 ```
 
 CLI 会打开钉钉授权页。授权完成后，检查登录状态和本地版本：
 
 ```bash
-npx --yes cxclaw@latest auth status
-npx --yes cxclaw@latest doctor
+npx --yes @shulex/cxclawctl@latest auth status
+npx --yes @shulex/cxclawctl@latest doctor
 ```
 
 也可以用一条命令完成插件安装、登录和自动更新任务注册：
 
 ```bash
-npx --yes cxclaw@latest setup \
+npx --yes @shulex/cxclawctl@latest setup \
   --server <shulex-cloud 授权地址> \
   --channel stable
 ```
@@ -70,16 +70,16 @@ npx --yes cxclaw@latest setup \
 
 ```bash
 # 搜索测试环境租户
-npx --yes cxclaw@latest tenant search "租户名称" --env test
+npx --yes @shulex/cxclawctl@latest tenant search "租户名称" --env test
 
 # 选择测试环境租户
-npx --yes cxclaw@latest tenant use <accountId> \
+npx --yes @shulex/cxclawctl@latest tenant use <accountId> \
   --env test \
   --purpose "badcase 排查"
 
 # 查看或清除当前租户
-npx --yes cxclaw@latest tenant current
-npx --yes cxclaw@latest tenant clear
+npx --yes @shulex/cxclawctl@latest tenant current
+npx --yes @shulex/cxclawctl@latest tenant clear
 ```
 
 切换到生产环境时，重新执行 `tenant search` 和 `tenant use`，并把 `--env` 改为 `prod`。
@@ -88,25 +88,25 @@ npx --yes cxclaw@latest tenant clear
 
 ```bash
 # 查看版本和能力清单
-npx --yes cxclaw@latest version
-npx --yes cxclaw@latest capabilities
+npx --yes @shulex/cxclawctl@latest version
+npx --yes @shulex/cxclawctl@latest capabilities
 
 # 调用只读业务命令
-npx --yes cxclaw@latest api get-agent --id 456 --pretty
+npx --yes @shulex/cxclawctl@latest api get-agent --id 456 --pretty
 
 # 执行插件内 Python 脚本
-npx --yes cxclaw@latest script skills/poc/scripts/plan.py --init
+npx --yes @shulex/cxclawctl@latest script skills/poc/scripts/plan.py --init
 
 # 直接从本机查询 SLS；from/to 使用 Unix 秒级时间戳
-npx --yes cxclaw@latest sls query \
+npx --yes @shulex/cxclawctl@latest sls query \
   --from <开始时间> \
   --to <结束时间> \
   --query '<查询语句>' \
   --line 50
 
 # 刷新登录或退出
-npx --yes cxclaw@latest auth refresh
-npx --yes cxclaw@latest auth logout
+npx --yes @shulex/cxclawctl@latest auth refresh
+npx --yes @shulex/cxclawctl@latest auth logout
 ```
 
 ### 写操作
@@ -114,12 +114,12 @@ npx --yes cxclaw@latest auth logout
 写操作必须先预览，再由用户明确确认。确认凭证通过 stdin 传入，不能写进命令参数、文件或日志。
 
 ```bash
-npx --yes cxclaw@latest api update-agent \
+npx --yes @shulex/cxclawctl@latest api update-agent \
   --data-file update.json \
   --phase preview \
   --pretty
 
-printf '%s' "$CONFIRMATION_TOKEN" | npx --yes cxclaw@latest api update-agent \
+printf '%s' "$CONFIRMATION_TOKEN" | npx --yes @shulex/cxclawctl@latest api update-agent \
   --data-file update.json \
   --phase commit \
   --confirmation-token-stdin \
@@ -129,16 +129,16 @@ printf '%s' "$CONFIRMATION_TOKEN" | npx --yes cxclaw@latest api update-agent \
 
 ## 更新
 
-CLI 使用 `npx --yes cxclaw@latest` 运行，每次启动都会使用 npm 上的最新稳定版本。Skills 由 Codex Git Marketplace 更新：
+CLI 使用 `npx --yes @shulex/cxclawctl@latest` 运行，每次启动都会使用 npm 上的最新稳定版本。Skills 由 Codex Git Marketplace 更新：
 
 ```bash
-npx --yes cxclaw@latest update
+npx --yes @shulex/cxclawctl@latest update
 ```
 
 注册每 6 小时执行一次的系统更新任务：
 
 ```bash
-npx --yes cxclaw@latest update --install-scheduler
+npx --yes @shulex/cxclawctl@latest update --install-scheduler
 ```
 
 更新完成后，新建 Codex 会话或重启 Codex，让新版 Skills 生效。
@@ -168,7 +168,7 @@ bun run check:release
 
 ```bash
 bun run dev -- version
-node bin/cxclaw.mjs version
+node bin/cxclawctl.mjs version
 ```
 
 修改 Skills 或业务 command 后，重新生成并校验能力清单：
@@ -221,7 +221,7 @@ cxclaw-codex-plugin.zip
 ```text
 .agents/plugins/marketplace.json  Git Marketplace 清单
 .codex-plugin/plugin.json         Codex 插件清单
-bin/cxclaw.mjs                    npm CLI 入口
+bin/cxclawctl.mjs                 npm CLI 入口
 src/                              TypeScript CLI 实现
 skills/                           CXClaw Skills 和 Python 业务脚本
 capabilities.lock.json            Skills 与业务 command 能力映射

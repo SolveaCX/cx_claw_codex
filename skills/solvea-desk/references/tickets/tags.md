@@ -3,7 +3,7 @@
 本模块操作 Shulex Desk / Tars 工单标签，不是 `/api_v2/gpt/label/project/...` 下的 GPT 标签树。所有命令使用受控脚本：
 
 ```bash
-npx --yes cxclaw@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py <subcommand>
+npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py <subcommand>
 ```
 
 ## 查询
@@ -11,13 +11,13 @@ npx --yes cxclaw@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py
 完整标签树：
 
 ```bash
-npx --yes cxclaw@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py list-tags
+npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py list-tags
 ```
 
 查询单个工单的人工标签和 AI 标签：
 
 ```bash
-npx --yes cxclaw@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py get-ticket-tags \
+npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py get-ticket-tags \
   --ticket-number "<对外工单号>"
 ```
 
@@ -30,14 +30,14 @@ npx --yes cxclaw@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py
 ```
 
 ```bash
-npx --yes cxclaw@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py batch-get-ticket-tags \
+npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py batch-get-ticket-tags \
   --ticket-ids-file /workspace/state/solvea-desk/ticket_ids.json
 ```
 
 按节点名称搜索标签路径：
 
 ```bash
-npx --yes cxclaw@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py search-tags \
+npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py search-tags \
   --name "物流延迟"
 ```
 
@@ -67,12 +67,12 @@ npx --yes cxclaw@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py
 绑定：
 
 ```bash
-npx --yes cxclaw@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py bind-tags \
+npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py bind-tags \
   --ticket-number "<对外工单号>" \
   --tags-file /workspace/state/solvea-desk/tags.json
 
 # 用户明确确认后
-npx --yes cxclaw@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py bind-tags \
+npx --yes @shulex/cxclawctl@latest script skills/solvea-desk/scripts/tickets/ticket_tags.py bind-tags \
   --ticket-number "<对外工单号>" \
   --tags-file /workspace/state/solvea-desk/tags.json \
   --confirm

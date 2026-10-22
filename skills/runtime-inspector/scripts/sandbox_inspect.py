@@ -121,9 +121,9 @@ def check_env() -> None:
     print("CXClaw — 本地 CLI")
     cli_path = shutil.which("npx")
     if cli_path:
-        _ok("npx --yes cxclaw@latest", cli_path)
+        _ok("npx --yes @shulex/cxclawctl@latest", cli_path)
     else:
-        _fail("npx --yes cxclaw@latest", "未找到 Node.js/npm；业务命令和 SLS 直查不可用")
+        _fail("npx --yes @shulex/cxclawctl@latest", "未找到 Node.js/npm；业务命令和 SLS 直查不可用")
 
     print()
     print("ENV — 安全校验（敏感变量不应泄露）")

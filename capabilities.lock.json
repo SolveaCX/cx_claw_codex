@@ -158,739 +158,739 @@
     }
   ],
   "localCommands": [
-    "npx --yes cxclaw@latest auth status",
-    "npx --yes cxclaw@latest tenant current",
-    "npx --yes cxclaw@latest tenant search",
-    "npx --yes cxclaw@latest tenant use",
-    "npx --yes cxclaw@latest sls query",
-    "npx --yes cxclaw@latest api",
-    "npx --yes cxclaw@latest commands",
-    "npx --yes cxclaw@latest capabilities"
+    "npx --yes @shulex/cxclawctl@latest auth status",
+    "npx --yes @shulex/cxclawctl@latest tenant current",
+    "npx --yes @shulex/cxclawctl@latest tenant search",
+    "npx --yes @shulex/cxclawctl@latest tenant use",
+    "npx --yes @shulex/cxclawctl@latest sls query",
+    "npx --yes @shulex/cxclawctl@latest api",
+    "npx --yes @shulex/cxclawctl@latest commands",
+    "npx --yes @shulex/cxclawctl@latest capabilities"
   ],
   "solveaApiCommands": [
     {
       "name": "batch-update-isolation-keyword-bindings",
-      "command": "npx --yes cxclaw@latest api batch-update-isolation-keyword-bindings",
+      "command": "npx --yes @shulex/cxclawctl@latest api batch-update-isolation-keyword-bindings",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "batch-update-knowledge",
-      "command": "npx --yes cxclaw@latest api batch-update-knowledge",
+      "command": "npx --yes @shulex/cxclawctl@latest api batch-update-knowledge",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "batch-update-products",
-      "command": "npx --yes cxclaw@latest api batch-update-products",
+      "command": "npx --yes @shulex/cxclawctl@latest api batch-update-products",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "chat",
-      "command": "npx --yes cxclaw@latest api chat",
+      "command": "npx --yes @shulex/cxclawctl@latest api chat",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "chat-async",
-      "command": "npx --yes cxclaw@latest api chat-async",
+      "command": "npx --yes @shulex/cxclawctl@latest api chat-async",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "chat-report-*",
-      "command": "npx --yes cxclaw@latest api chat-report-*",
+      "command": "npx --yes @shulex/cxclawctl@latest api chat-report-*",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "chat-stream",
-      "command": "npx --yes cxclaw@latest api chat-stream",
+      "command": "npx --yes @shulex/cxclawctl@latest api chat-stream",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-agent",
-      "command": "npx --yes cxclaw@latest api create-agent",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-agent",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-custom-quality-rule",
-      "command": "npx --yes cxclaw@latest api create-custom-quality-rule",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-custom-quality-rule",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-folder",
-      "command": "npx --yes cxclaw@latest api create-folder",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-folder",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-intent",
-      "command": "npx --yes cxclaw@latest api create-intent",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-intent",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-isolation-keyword",
-      "command": "npx --yes cxclaw@latest api create-isolation-keyword",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-isolation-keyword",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-label-group",
-      "command": "npx --yes cxclaw@latest api create-label-group",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-label-group",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-label-node",
-      "command": "npx --yes cxclaw@latest api create-label-node",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-label-node",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-managed-ai-field",
-      "command": "npx --yes cxclaw@latest api create-managed-ai-field",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-managed-ai-field",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-plugin",
-      "command": "npx --yes cxclaw@latest api create-plugin",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-plugin",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-product-knowledge",
-      "command": "npx --yes cxclaw@latest api create-product-knowledge",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-product-knowledge",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-quality-alert-rule",
-      "command": "npx --yes cxclaw@latest api create-quality-alert-rule",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-quality-alert-rule",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-strategy",
-      "command": "npx --yes cxclaw@latest api create-strategy",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-strategy",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "create-template",
-      "command": "npx --yes cxclaw@latest api create-template",
+      "command": "npx --yes @shulex/cxclawctl@latest api create-template",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-custom-quality-rule",
-      "command": "npx --yes cxclaw@latest api delete-custom-quality-rule",
+      "command": "npx --yes @shulex/cxclawctl@latest api delete-custom-quality-rule",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-directory",
-      "command": "npx --yes cxclaw@latest api delete-directory",
+      "command": "npx --yes @shulex/cxclawctl@latest api delete-directory",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-isolation-keyword",
-      "command": "npx --yes cxclaw@latest api delete-isolation-keyword",
+      "command": "npx --yes @shulex/cxclawctl@latest api delete-isolation-keyword",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-label-group",
-      "command": "npx --yes cxclaw@latest api delete-label-group",
+      "command": "npx --yes @shulex/cxclawctl@latest api delete-label-group",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-label-node",
-      "command": "npx --yes cxclaw@latest api delete-label-node",
+      "command": "npx --yes @shulex/cxclawctl@latest api delete-label-node",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-managed-ai-field",
-      "command": "npx --yes cxclaw@latest api delete-managed-ai-field",
+      "command": "npx --yes @shulex/cxclawctl@latest api delete-managed-ai-field",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-plugin",
-      "command": "npx --yes cxclaw@latest api delete-plugin",
+      "command": "npx --yes @shulex/cxclawctl@latest api delete-plugin",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-quality-alert-rule",
-      "command": "npx --yes cxclaw@latest api delete-quality-alert-rule",
+      "command": "npx --yes @shulex/cxclawctl@latest api delete-quality-alert-rule",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "delete-templates",
-      "command": "npx --yes cxclaw@latest api delete-templates",
+      "command": "npx --yes @shulex/cxclawctl@latest api delete-templates",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "download-label-template",
-      "command": "npx --yes cxclaw@latest api download-label-template",
+      "command": "npx --yes @shulex/cxclawctl@latest api download-label-template",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "download-labels",
-      "command": "npx --yes cxclaw@latest api download-labels",
+      "command": "npx --yes @shulex/cxclawctl@latest api download-labels",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "edit-knowledge-tags",
-      "command": "npx --yes cxclaw@latest api edit-knowledge-tags",
+      "command": "npx --yes @shulex/cxclawctl@latest api edit-knowledge-tags",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "export-transcripts",
-      "command": "npx --yes cxclaw@latest api export-transcripts",
+      "command": "npx --yes @shulex/cxclawctl@latest api export-transcripts",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-agent",
-      "command": "npx --yes cxclaw@latest api get-agent",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-agent",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-ai-field-guide",
-      "command": "npx --yes cxclaw@latest api get-ai-field-guide",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-ai-field-guide",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-async-result",
-      "command": "npx --yes cxclaw@latest api get-async-result",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-async-result",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-batch-test-tasks",
-      "command": "npx --yes cxclaw@latest api get-batch-test-tasks",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-batch-test-tasks",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-chat-context",
-      "command": "npx --yes cxclaw@latest api get-chat-context",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-chat-context",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-chatflow-graph",
-      "command": "npx --yes cxclaw@latest api get-chatflow-graph",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-chatflow-graph",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-conversations-by-intent",
-      "command": "npx --yes cxclaw@latest api get-conversations-by-intent",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-conversations-by-intent",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-custom-quality-rule",
-      "command": "npx --yes cxclaw@latest api get-custom-quality-rule",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-custom-quality-rule",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-export-tasks",
-      "command": "npx --yes cxclaw@latest api get-export-tasks",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-export-tasks",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-intent",
-      "command": "npx --yes cxclaw@latest api get-intent",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-intent",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-knowledge",
-      "command": "npx --yes cxclaw@latest api get-knowledge",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-knowledge",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-knowledge-isolation-keywords",
-      "command": "npx --yes cxclaw@latest api get-knowledge-isolation-keywords",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-knowledge-isolation-keywords",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-label-detail-tree",
-      "command": "npx --yes cxclaw@latest api get-label-detail-tree",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-label-detail-tree",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-label-tree",
-      "command": "npx --yes cxclaw@latest api get-label-tree",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-label-tree",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-managed-ai-field",
-      "command": "npx --yes cxclaw@latest api get-managed-ai-field",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-managed-ai-field",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-plugin",
-      "command": "npx --yes cxclaw@latest api get-plugin",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-plugin",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-project",
-      "command": "npx --yes cxclaw@latest api get-project",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-project",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-quality-alert-message",
-      "command": "npx --yes cxclaw@latest api get-quality-alert-message",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-quality-alert-message",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-quality-alert-rule",
-      "command": "npx --yes cxclaw@latest api get-quality-alert-rule",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-quality-alert-rule",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-quality-rule",
-      "command": "npx --yes cxclaw@latest api get-quality-rule",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-quality-rule",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-quality-status",
-      "command": "npx --yes cxclaw@latest api get-quality-status",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-quality-status",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-transcript",
-      "command": "npx --yes cxclaw@latest api get-transcript",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-transcript",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "get-voice-transcript",
-      "command": "npx --yes cxclaw@latest api get-voice-transcript",
+      "command": "npx --yes @shulex/cxclawctl@latest api get-voice-transcript",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "initialize-ai-fields",
-      "command": "npx --yes cxclaw@latest api initialize-ai-fields",
+      "command": "npx --yes @shulex/cxclawctl@latest api initialize-ai-fields",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-agent-ai-fields",
-      "command": "npx --yes cxclaw@latest api list-agent-ai-fields",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-agent-ai-fields",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-agents",
-      "command": "npx --yes cxclaw@latest api list-agents",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-agents",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-ai-fields",
-      "command": "npx --yes cxclaw@latest api list-ai-fields",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-ai-fields",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-directories",
-      "command": "npx --yes cxclaw@latest api list-directories",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-directories",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-entities",
-      "command": "npx --yes cxclaw@latest api list-entities",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-entities",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-intents",
-      "command": "npx --yes cxclaw@latest api list-intents",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-intents",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-isolation-keywords",
-      "command": "npx --yes cxclaw@latest api list-isolation-keywords",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-isolation-keywords",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-knowledge",
-      "command": "npx --yes cxclaw@latest api list-knowledge",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-knowledge",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-knowledge-tags",
-      "command": "npx --yes cxclaw@latest api list-knowledge-tags",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-knowledge-tags",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-label-groups",
-      "command": "npx --yes cxclaw@latest api list-label-groups",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-label-groups",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-managed-ai-fields",
-      "command": "npx --yes cxclaw@latest api list-managed-ai-fields",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-managed-ai-fields",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-plugins",
-      "command": "npx --yes cxclaw@latest api list-plugins",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-plugins",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-quality-alert-messages",
-      "command": "npx --yes cxclaw@latest api list-quality-alert-messages",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-quality-alert-messages",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-quality-alert-rules",
-      "command": "npx --yes cxclaw@latest api list-quality-alert-rules",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-quality-alert-rules",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-quality-rules",
-      "command": "npx --yes cxclaw@latest api list-quality-rules",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-quality-rules",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-strategies",
-      "command": "npx --yes cxclaw@latest api list-strategies",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-strategies",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-templates",
-      "command": "npx --yes cxclaw@latest api list-templates",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-templates",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-transcripts",
-      "command": "npx --yes cxclaw@latest api list-transcripts",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-transcripts",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-voice-agents",
-      "command": "npx --yes cxclaw@latest api list-voice-agents",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-voice-agents",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "list-voice-transcripts",
-      "command": "npx --yes cxclaw@latest api list-voice-transcripts",
+      "command": "npx --yes @shulex/cxclawctl@latest api list-voice-transcripts",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "move-directory",
-      "command": "npx --yes cxclaw@latest api move-directory",
+      "command": "npx --yes @shulex/cxclawctl@latest api move-directory",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "operate-knowledge",
-      "command": "npx --yes cxclaw@latest api operate-knowledge",
+      "command": "npx --yes @shulex/cxclawctl@latest api operate-knowledge",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "query-mock-data",
-      "command": "npx --yes cxclaw@latest api query-mock-data",
+      "command": "npx --yes @shulex/cxclawctl@latest api query-mock-data",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "replace-mock-data",
-      "command": "npx --yes cxclaw@latest api replace-mock-data",
+      "command": "npx --yes @shulex/cxclawctl@latest api replace-mock-data",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-agent",
-      "command": "npx --yes cxclaw@latest api report-agent",
+      "command": "npx --yes @shulex/cxclawctl@latest api report-agent",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-escalation",
-      "command": "npx --yes cxclaw@latest api report-escalation",
+      "command": "npx --yes @shulex/cxclawctl@latest api report-escalation",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-inspection",
-      "command": "npx --yes cxclaw@latest api report-inspection",
+      "command": "npx --yes @shulex/cxclawctl@latest api report-inspection",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-intent",
-      "command": "npx --yes cxclaw@latest api report-intent",
+      "command": "npx --yes @shulex/cxclawctl@latest api report-intent",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-knowledge",
-      "command": "npx --yes cxclaw@latest api report-knowledge",
+      "command": "npx --yes @shulex/cxclawctl@latest api report-knowledge",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-livechat",
-      "command": "npx --yes cxclaw@latest api report-livechat",
+      "command": "npx --yes @shulex/cxclawctl@latest api report-livechat",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-livechat-table",
-      "command": "npx --yes cxclaw@latest api report-livechat-table",
+      "command": "npx --yes @shulex/cxclawctl@latest api report-livechat-table",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-message",
-      "command": "npx --yes cxclaw@latest api report-message",
+      "command": "npx --yes @shulex/cxclawctl@latest api report-message",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-satisfaction",
-      "command": "npx --yes cxclaw@latest api report-satisfaction",
+      "command": "npx --yes @shulex/cxclawctl@latest api report-satisfaction",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-satisfaction-list",
-      "command": "npx --yes cxclaw@latest api report-satisfaction-list",
+      "command": "npx --yes @shulex/cxclawctl@latest api report-satisfaction-list",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-self-learning",
-      "command": "npx --yes cxclaw@latest api report-self-learning",
+      "command": "npx --yes @shulex/cxclawctl@latest api report-self-learning",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "report-transcript",
-      "command": "npx --yes cxclaw@latest api report-transcript",
+      "command": "npx --yes @shulex/cxclawctl@latest api report-transcript",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "resolve-transcript-chat-id",
-      "command": "npx --yes cxclaw@latest api resolve-transcript-chat-id",
+      "command": "npx --yes @shulex/cxclawctl@latest api resolve-transcript-chat-id",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "run-plugin",
-      "command": "npx --yes cxclaw@latest api run-plugin",
+      "command": "npx --yes @shulex/cxclawctl@latest api run-plugin",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "set-quality-status",
-      "command": "npx --yes cxclaw@latest api set-quality-status",
+      "command": "npx --yes @shulex/cxclawctl@latest api set-quality-status",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "submit-batch-test",
-      "command": "npx --yes cxclaw@latest api submit-batch-test",
+      "command": "npx --yes @shulex/cxclawctl@latest api submit-batch-test",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "toggle-intent",
-      "command": "npx --yes cxclaw@latest api toggle-intent",
+      "command": "npx --yes @shulex/cxclawctl@latest api toggle-intent",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "toggle-managed-ai-field",
-      "command": "npx --yes cxclaw@latest api toggle-managed-ai-field",
+      "command": "npx --yes @shulex/cxclawctl@latest api toggle-managed-ai-field",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "toggle-strategy",
-      "command": "npx --yes cxclaw@latest api toggle-strategy",
+      "command": "npx --yes @shulex/cxclawctl@latest api toggle-strategy",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-agent",
-      "command": "npx --yes cxclaw@latest api update-agent",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-agent",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-chatflow",
-      "command": "npx --yes cxclaw@latest api update-chatflow",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-chatflow",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-custom-quality-rule",
-      "command": "npx --yes cxclaw@latest api update-custom-quality-rule",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-custom-quality-rule",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-directory",
-      "command": "npx --yes cxclaw@latest api update-directory",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-directory",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-document-content",
-      "command": "npx --yes cxclaw@latest api update-document-content",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-document-content",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-intent",
-      "command": "npx --yes cxclaw@latest api update-intent",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-intent",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-isolation-keyword",
-      "command": "npx --yes cxclaw@latest api update-isolation-keyword",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-isolation-keyword",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-knowledge",
-      "command": "npx --yes cxclaw@latest api update-knowledge",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-knowledge",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-label-group",
-      "command": "npx --yes cxclaw@latest api update-label-group",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-label-group",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-label-node",
-      "command": "npx --yes cxclaw@latest api update-label-node",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-label-node",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-managed-ai-field",
-      "command": "npx --yes cxclaw@latest api update-managed-ai-field",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-managed-ai-field",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-plugin",
-      "command": "npx --yes cxclaw@latest api update-plugin",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-plugin",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-product-knowledge",
-      "command": "npx --yes cxclaw@latest api update-product-knowledge",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-product-knowledge",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-quality-alert-rule",
-      "command": "npx --yes cxclaw@latest api update-quality-alert-rule",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-quality-alert-rule",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-quality-rule",
-      "command": "npx --yes cxclaw@latest api update-quality-rule",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-quality-rule",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-strategy",
-      "command": "npx --yes cxclaw@latest api update-strategy",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-strategy",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "update-template",
-      "command": "npx --yes cxclaw@latest api update-template",
+      "command": "npx --yes @shulex/cxclawctl@latest api update-template",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "upload-batch-test-file",
-      "command": "npx --yes cxclaw@latest api upload-batch-test-file",
+      "command": "npx --yes @shulex/cxclawctl@latest api upload-batch-test-file",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "upload-labels",
-      "command": "npx --yes cxclaw@latest api upload-labels",
+      "command": "npx --yes @shulex/cxclawctl@latest api upload-labels",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "upload-qa",
-      "command": "npx --yes cxclaw@latest api upload-qa",
+      "command": "npx --yes @shulex/cxclawctl@latest api upload-qa",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
       "name": "upload-web",
-      "command": "npx --yes cxclaw@latest api upload-web",
+      "command": "npx --yes @shulex/cxclawctl@latest api upload-web",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     }

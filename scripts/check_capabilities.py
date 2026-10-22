@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
 LOCK = ROOT / "capabilities.lock.json"
-CLI = "npx --yes cxclaw@latest"
+CLI = "npx --yes @shulex/cxclawctl@latest"
 GROUPS = [
     "agent-analytics",
     "agent-builder",

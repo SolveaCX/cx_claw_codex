@@ -19,6 +19,11 @@ describe("publish workflow", () => {
     expect(workflow).toContain('echo "::error::NPM_TOKEN is not configured"\n            exit 1');
   });
 
+  test("publishes the Shulex scoped CLI package", () => {
+    expect(workflow).toContain('npm view "@shulex/cxclawctl@${VERSION}"');
+    expect(workflow).toContain('npm dist-tag add "@shulex/cxclawctl@${VERSION}"');
+  });
+
   test("advances Marketplace only after npm and GitHub Release", () => {
     const npm = workflow.indexOf("name: Publish npm package");
     const release = workflow.indexOf("name: Create or update GitHub Release");

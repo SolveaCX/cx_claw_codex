@@ -12,4 +12,4 @@ export async function useTenant(session:Session,accountId:number,env:string,purp
   await saveSession(session);return publicTenant(session.tenant);
 }
 export function publicTenant(t?:Tenant){return t?{accountId:t.accountId,accountCode:t.accountCode,accountName:t.accountName,environment:t.environment,purpose:t.purpose,expiresAt:t.expiresAt,configured:Boolean(t.businessToken&&t.businessUrl)}:{configured:false}}
-export async function ensureTenant(session:Session){if(!session.tenant?.accountId)throw new Error("no tenant selected; run npx cxclaw tenant use");if(Date.now()/1000+30>=session.tenant.expiresAt)await useTenant(session,session.tenant.accountId,session.tenant.environment,session.tenant.purpose);return session.tenant}
+export async function ensureTenant(session:Session){if(!session.tenant?.accountId)throw new Error("no tenant selected; run npx --yes @shulex/cxclawctl@latest tenant use");if(Date.now()/1000+30>=session.tenant.expiresAt)await useTenant(session,session.tenant.accountId,session.tenant.environment,session.tenant.purpose);return session.tenant}
