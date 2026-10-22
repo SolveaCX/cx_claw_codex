@@ -56,10 +56,12 @@ jobs:
           LDFLAGS="-s -w -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.PluginVersion=$VERSION -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.CLIVersion=$VERSION -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.UpdatePublicKeyBase64=${{ vars.CXCLAW_UPDATE_PUBLIC_KEY_BASE64 }}"
           go build -trimpath -ldflags "$LDFLAGS" -o "dist/package/bin/cxclawctl${{ matrix.suffix }}" ./cmd/cxclawctl
           go build -trimpath -ldflags "$LDFLAGS" -o "dist/package/bin/cxclaw-launcher${{ matrix.suffix }}" ./cmd/cxclaw-launcher
-          BOOTSTRAP_LDFLAGS="-s -w -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.PluginVersion=bootstrap -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.CLIVersion=$VERSION -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.UpdatePublicKeyBase64=${{ vars.CXCLAW_UPDATE_PUBLIC_KEY_BASE64 }}"
+          # 首次安装没有已安装版本，bootstrap 用 0.0.0 作为合法的基线版本，
+          # 不能把字符串 bootstrap 传给服务端的 SemVer 比较器。
+          BOOTSTRAP_LDFLAGS="-s -w -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.PluginVersion=0.0.0 -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.CLIVersion=$VERSION -X github.com/SolveaCX/cx_claw_codex/internal/buildinfo.UpdatePublicKeyBase64=${{ vars.CXCLAW_UPDATE_PUBLIC_KEY_BASE64 }}"
           go build -trimpath -ldflags "$BOOTSTRAP_LDFLAGS" -o "dist/cxclaw-bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}" ./cmd/cxclaw-bootstrap
           python -m pip install --disable-pip-version-check --no-compile --target dist/package/python -r requirements-cli.txt
-          cp -R plugin.json capabilities.lock.json README.md requirements-cli.txt skills dist/package/
+          cp -R plugin.json capabilities.lock.json README.md requirements-cli.txt skills .codex-plugin dist/package/
           cd dist/package && zip -qr "../cxclaw-${VERSION}-${{ matrix.goos }}-${{ matrix.goarch }}.zip" .
       - uses: actions/upload-artifact@v4
         with:

@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"runtime"
@@ -73,7 +74,27 @@ func run(ctx context.Context, args []string) error {
 	if err := registerMarketplace(marketRoot, root); err != nil {
 		return err
 	}
+	launcher := filepath.Join(root, "bin", launcherName())
+	if err := installScheduler(ctx, launcher, root); err != nil {
+		return fmt.Errorf("install automatic update task: %w", err)
+	}
 	fmt.Printf("CXClaw %s 已下载并注册到个人插件市场。请重启 Codex，并在插件目录确认 CXClaw 已启用。\n", version)
+	return nil
+}
+
+func launcherName() string {
+	if runtime.GOOS == "windows" {
+		return "cxclaw-launcher.exe"
+	}
+	return "cxclaw-launcher"
+}
+
+func installScheduler(ctx context.Context, launcher, root string) error {
+	command := exec.CommandContext(ctx, launcher, "update", "--install-scheduler")
+	command.Env = append(os.Environ(), "CXCLAW_PLUGIN_ROOT="+root)
+	if output, err := command.CombinedOutput(); err != nil {
+		return fmt.Errorf("%w: %s", err, strings.TrimSpace(string(output)))
+	}
 	return nil
 }
 
