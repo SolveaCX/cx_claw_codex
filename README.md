@@ -33,13 +33,13 @@ codex plugin marketplace add SolveaCX/cx_claw_codex --ref marketplace/stable
 codex plugin add cxclaw@cxclaw
 ```
 
-然后登录公司提供的授权服务：
+然后完成钉钉登录：
 
 ```bash
-npx --yes @shulex/cxclawctl@latest auth login --server <shulex-cloud 授权地址>
+npx --yes @shulex/cxclawctl@latest auth login
 ```
 
-CLI 会打开钉钉授权页。授权完成后，检查登录状态和本地版本：
+CLI 固定连接生产授权服务 `https://ai.solvea.cx/api_v2/ticket`，不接受用户指定服务地址或登录环境。CLI 会打开钉钉授权页；一次登录即可访问获准的测试和生产租户。授权完成后，检查登录状态和本地版本：
 
 ```bash
 npx --yes @shulex/cxclawctl@latest auth status
@@ -50,7 +50,6 @@ npx --yes @shulex/cxclawctl@latest doctor
 
 ```bash
 npx --yes @shulex/cxclawctl@latest setup \
-  --server <shulex-cloud 授权地址> \
   --channel stable
 ```
 

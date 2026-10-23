@@ -5,8 +5,8 @@ import type { DeviceStart, Session, TokenResponse } from "./types.js";
 import { VERSION } from "./version.js";
 
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
-export async function login(serverUrl:string, channel:Session["channel"]):Promise<Session>{
-  const session:Session={serverUrl:serverUrl.replace(/\/$/,""),channel,accessToken:"",refreshToken:"",accessExpiry:0,employeeId:"",email:""};
+export async function login(channel:Session["channel"]):Promise<Session>{
+  const session:Session={channel,accessToken:"",refreshToken:"",accessExpiry:0,employeeId:"",email:""};
   const start=await post<DeviceStart>(session,"/auth/device/start",{clientVersion:VERSION});
   console.error(`请在浏览器打开以下地址完成钉钉授权：\n${start.verificationUriComplete}\n设备码：${start.userCode}`);
   await open(start.verificationUriComplete).catch(()=>undefined);

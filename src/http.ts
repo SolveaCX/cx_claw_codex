@@ -1,4 +1,5 @@
 import type { Session } from "./types.js";
+import { AUTH_SERVER_URL } from "./config.js";
 import { VERSION } from "./version.js";
 
 export function unwrap<T>(value: unknown): T {
@@ -12,7 +13,7 @@ export async function request<T>(session: Session, path: string, init: RequestIn
   let last: unknown;
   for (let attempt=0; attempt<3; attempt++) {
     try {
-      const response = await fetch(`${session.serverUrl.replace(/\/$/,"")}${path}`, {...init, headers, signal: AbortSignal.timeout(30_000)});
+      const response = await fetch(`${AUTH_SERVER_URL}${path}`, {...init, headers, signal: AbortSignal.timeout(30_000)});
       const text = await response.text(); const value = text ? JSON.parse(text) : undefined;
       if (!response.ok) throw new Error(`server returned ${response.status}: ${text}`);
       return unwrap<T>(value);

@@ -4,7 +4,7 @@ export interface Tenant {
   slsUrl?: string; expiresAt: number;
 }
 export interface Session {
-  serverUrl: string; accessToken: string; refreshToken: string; accessExpiry: number;
+  accessToken: string; refreshToken: string; accessExpiry: number;
   employeeId: string; email: string; channel: "stable" | "canary" | "dev"; tenant?: Tenant;
 }
 export interface DeviceStart { deviceCode: string; userCode: string; verificationUriComplete: string; expiresIn: number; interval: number }
