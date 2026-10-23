@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { authenticated, login, logout } from "./auth.js";
+import { authenticated, login, logout, publicAuthStatus } from "./auth.js";
 import { flag, option, positionals } from "./args.js";
 import { runApi } from "./business.js";
 import { isResourceCommand, resourceHelp, runResourceCommand } from "./commands/resources.js";
@@ -30,16 +30,17 @@ const usage = () => [
 async function runAuth(action: string | undefined, args: string[]) {
   if (action === "login") {
     if (flag(args, "--server") || flag(args, "--env")) throw new Error("auth login 固定使用生产授权服务，不支持 --server 或 --env");
-    return print(await login((option(args, "--channel") ?? "stable") as "stable" | "canary" | "dev"));
+    const session = await login((option(args, "--channel") ?? "stable") as "stable" | "canary" | "dev");
+    return print(publicAuthStatus(session));
   }
   if (action === "logout") { await logout(); return print({ ok: true, loggedOut: true }); }
   if (action === "status") {
     try {
       const session = await loadSession();
-      return print({ ok: true, loggedIn: true, email: session.email, channel: session.channel, accessExpiresAt: session.accessExpiry });
+      return print(publicAuthStatus(session));
     } catch { return print({ ok: true, loggedIn: false }); }
   }
-  if (action === "refresh") { const session = await authenticated(); return print({ ok: true, accessExpiresAt: session.accessExpiry }); }
+  if (action === "refresh") { return print(publicAuthStatus(await authenticated())); }
   throw new Error("auth action must be login, logout, status, or refresh");
 }
 
