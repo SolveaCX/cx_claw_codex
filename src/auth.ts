@@ -5,6 +5,9 @@ import type { DeviceStart, Session, TokenResponse } from "./types.js";
 import { VERSION } from "./version.js";
 
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
+export function publicAuthStatus(session: Session) {
+  return { ok: true, loggedIn: true, email: session.email, channel: session.channel, accessExpiresAt: session.accessExpiry };
+}
 export async function login(channel:Session["channel"]):Promise<Session>{
   const session:Session={channel,accessToken:"",refreshToken:"",accessExpiry:0,employeeId:"",email:""};
   const start=await post<DeviceStart>(session,"/auth/device/start",{clientVersion:VERSION});
