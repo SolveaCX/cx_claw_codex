@@ -67,4 +67,17 @@ describe("native Solvea command registry", () => {
       type: "QA", pageIndex: 3, pageSize: 10, keyword: "新值", directoryId: 33727,
     });
   });
+
+  test("routes resource detail reads using the required knowledge type", async () => {
+    const requests: string[] = [];
+    globalThis.fetch = (async input => {
+      requests.push(String(input));
+      const body = String(input).endsWith("/api_v2/gpt/bots") ? [{ projectId: 302 }] : { id: 8 };
+      return new Response(JSON.stringify(body), { status: 200 });
+    }) as typeof fetch;
+
+    await runSolveaCommand(session, "get-knowledge", ["--id", "8", "--type", "WEBSITE"]);
+
+    expect(requests.at(-1)).toEndWith("/sns_v1/project/302/document/8");
+  });
 });

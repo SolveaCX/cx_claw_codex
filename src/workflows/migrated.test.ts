@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { validateGraph } from "./agent-builder.js";
 import { runDelivery, runPoc } from "./delivery.js";
 import { runKbBuilder } from "./kb-builder.js";
@@ -18,6 +18,7 @@ describe("TypeScript workflow migrations", () => {
   });
 
   test("builds a directory plan without Python or a tenant", async () => {
+    await mkdir("_tmp_", { recursive: true });
     const input = `_tmp_/migrated-kb-${Date.now()}.json`;
     await writeFile(input, JSON.stringify({ pages: [{ title: "Help Center / Orders", url: "https://example.test/orders" }] }));
     const result = await runKbBuilder(undefined, "directory-plan", ["--crawl-result", input, "--output", `${input}.plan.json`]);
