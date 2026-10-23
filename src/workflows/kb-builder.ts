@@ -66,24 +66,118 @@ async function extractWebQa(args: string[]) {
   return { outputDir, files, count: files.length };
 }
 
+type QaPlanItem = { dirPath: string[]; title: string; content: string };
+const flattenDirectories = (nodes: JsonObject[], result: JsonObject[] = []) => {
+  for (const node of nodes) {
+    result.push(node);
+    if (Array.isArray(node.children)) flattenDirectories(node.children.filter(child => child && typeof child === "object") as JsonObject[], result);
+  }
+  return result;
+};
+
+function validateQaItems(values: unknown[], maxDepth: number): QaPlanItem[] {
+  if (!values.length) throw new Error("QA plan must contain at least one item");
+  return values.map((value, index) => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`QA item #${index + 1} must be an object`);
+    const item = value as JsonObject;
+    if (!Array.isArray(item.dir_path) || !item.dir_path.length) throw new Error(`QA item #${index + 1} dir_path must be a non-empty array`);
+    if (item.dir_path.length > maxDepth) throw new Error(`QA item #${index + 1} dir_path exceeds maximum depth ${maxDepth}`);
+    const dirPath = item.dir_path.map((name, depth) => {
+      if (typeof name !== "string" || !name.trim() || /[\\/]/.test(name)) throw new Error(`QA item #${index + 1} dir_path[${depth}] must be a folder name`);
+      return name.trim();
+    });
+    const title = typeof item.question === "string" ? item.question.trim() : "";
+    const content = typeof item.answer === "string" ? item.answer.trim() : "";
+    if (!title) throw new Error(`QA item #${index + 1} question must be a non-empty string`);
+    if (!content) throw new Error(`QA item #${index + 1} answer must be a non-empty markdown string`);
+    return { dirPath, title, content };
+  });
+}
+
+async function resolveDirectory(client: SolveaClient, path: string[], directories: JsonObject[], cache: Map<string, number>) {
+  let parentId = 0;
+  const prefix: string[] = [];
+  for (const name of path) {
+    prefix.push(name);
+    const key = prefix.join("/");
+    const cached = cache.get(key);
+    if (cached !== undefined) { parentId = cached; continue; }
+    const match = directories.find(directory => String(directory.name ?? "") === name && Number(directory.parentId ?? 0) === parentId);
+    if (match) parentId = Number(match.id ?? match.directoryId);
+    else {
+      const createdParentId = parentId;
+      const created = await client.createFolder(name, parentId) as JsonObject;
+      const id = Number(created?.id ?? created?.directoryId);
+      if (!Number.isSafeInteger(id) || id <= 0) throw new Error(`could not create directory ${key}: response has no directory id`);
+      parentId = id;
+      directories.push({ id, name, parentId: Number(created?.parentId ?? createdParentId) });
+    }
+    cache.set(key, parentId);
+  }
+  return parentId;
+}
+
 async function importQa(client: SolveaClient, args: string[]) {
   const qaFile = option(args, "--qa-file"); const fromDir = option(args, "--from-dir");
   if (!qaFile && !fromDir) throw new Error("--qa-file or --from-dir is required");
   const items: unknown[] = [];
   if (qaFile) { const value = await readJson<unknown>(qaFile); items.push(...(Array.isArray(value) ? value : (value as JsonObject).items && Array.isArray((value as JsonObject).items) ? (value as JsonObject).items as unknown[] : [value])); }
   if (fromDir) {
-    const { readdir } = await import("node:fs/promises"); for (const file of (await readdir(fromDir)).filter(name => name.endsWith(".json"))) { const value = await readJson<unknown>(join(fromDir, file)); items.push(...(Array.isArray(value) ? value : (value as JsonObject).items && Array.isArray((value as JsonObject).items) ? (value as JsonObject).items as unknown[] : [value])); }
+    const { readdir } = await import("node:fs/promises"); for (const file of (await readdir(fromDir)).filter(name => name.endsWith(".json")).sort()) { const value = await readJson<unknown>(join(fromDir, file)); items.push(...(Array.isArray(value) ? value : (value as JsonObject).items && Array.isArray((value as JsonObject).items) ? (value as JsonObject).items as unknown[] : [value])); }
   }
+  const maxDepth = intOption(args, "--max-depth", 3);
+  if (!Number.isSafeInteger(maxDepth) || maxDepth <= 0) throw new Error("--max-depth must be a positive integer");
+  const normalized = validateQaItems(items, maxDepth);
   const plan = { items, count: items.length, createdAt: new Date().toISOString() }; const planFile = join(outputRoot("kb-builder"), `qa_import_plan_${Date.now()}.json`); await writeJson(planFile, plan);
   if (flag(args, "--dry-run")) return { dryRun: true, planFile, count: items.length };
-  return { planFile, count: items.length, result: await client.uploadQa(items) };
+  const directories = flattenDirectories(asRows(await client.listDirectories()));
+  const cache = new Map<string, number>();
+  const payload = [];
+  for (const item of normalized) payload.push({ title: item.title, content: item.content, directoryId: await resolveDirectory(client, item.dirPath, directories, cache) });
+  return { planFile, count: payload.length, result: await client.uploadQa(payload) };
 }
 
 async function importSources(client: SolveaClient, args: string[]) {
-  const plan = await readJson<JsonObject>(option(args, "--plan-file", true)!); const documents = Array.isArray(plan.documents) ? plan.documents : Array.isArray(plan.items) ? plan.items : [];
-  const payload = { documents, taskType: "WEB", published: true, isVisible: true, metadata: { tags: [] }, directoryId: String(plan.directoryId ?? "") };
-  if (!flag(args, "--execute")) return { dryRun: true, payload };
-  return client.rawCall("POST", `${client.qamPath}/project/${await client.projectId()}/documents`, payload);
+  const value = await readJson<unknown>(option(args, "--plan-file", true)!);
+  const source = Array.isArray(value) ? value : value && typeof value === "object" && Array.isArray((value as JsonObject).items) ? (value as JsonObject).items as unknown[] : [];
+  if (!source.length) throw new Error("source document plan must be a non-empty array");
+  const maxDepth = intOption(args, "--max-depth", 3);
+  if (!Number.isSafeInteger(maxDepth) || maxDepth <= 0) throw new Error("--max-depth must be a positive integer");
+  const { stat } = await import("node:fs/promises");
+  const normalized: Array<{ source: string; dirPath: string[]; isUrl: boolean; skippedDuplicate: boolean }> = [];
+  const seenUrls = new Set<string>();
+  for (const [index, raw] of source.entries()) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error(`source document #${index + 1} must be an object`);
+    const item = raw as JsonObject;
+    const itemSource = typeof item.source === "string" ? item.source.trim() : "";
+    if (!itemSource) throw new Error(`source document #${index + 1} needs a non-empty source`);
+    const path = item.dir_path ?? [];
+    if (!Array.isArray(path) || path.some(name => typeof name !== "string" || !name.trim() || /[\\/]/.test(name))) throw new Error(`source document #${index + 1} dir_path must contain folder names`);
+    if (path.length > maxDepth) throw new Error(`source document #${index + 1} dir_path exceeds maximum depth ${maxDepth}`);
+    const isUrl = /^https?:\/\//i.test(itemSource);
+    if (!isUrl) {
+      if (![".doc", ".docx", ".pdf"].some(extension => itemSource.toLowerCase().endsWith(extension))) throw new Error(`source document #${index + 1} supports .doc, .docx, or .pdf`);
+      const info = await stat(itemSource).catch(() => undefined);
+      if (!info?.isFile()) throw new Error(`source document #${index + 1} file not found: ${itemSource}`);
+    }
+    const skippedDuplicate = isUrl && seenUrls.has(itemSource);
+    if (isUrl) seenUrls.add(itemSource);
+    normalized.push({ source: itemSource, dirPath: path.map(String).map(name => name.trim()), isUrl, skippedDuplicate });
+  }
+  if (!flag(args, "--execute")) return { dryRun: true, count: normalized.length, items: normalized.map(item => ({ source: item.source, dir_path: item.dirPath, status: item.skippedDuplicate ? "skipped_duplicate" : "pending" })) };
+
+  const directories = flattenDirectories(asRows(await client.listDirectories()));
+  const cache = new Map<string, number>();
+  const results = [];
+  for (const item of normalized) {
+    if (item.skippedDuplicate) { results.push({ source: item.source, status: "skipped_duplicate" }); continue; }
+    const directoryId = await resolveDirectory(client, item.dirPath, directories, cache);
+    const filePath = item.isUrl ? item.source : await client.uploadKnowledgeFile(item.source);
+    const documents = [{ filePath, docType: "TC", ...(item.isUrl ? { fileType: "website" } : {}) }];
+    const result = await client.createDocuments(documents, directoryId, item.isUrl ? "WEB" : "FILE");
+    results.push({ source: item.source, directoryId, status: "submitted", result });
+  }
+  return { count: normalized.length, results };
 }
 
 async function importTemplates(client: SolveaClient, args: string[]) {

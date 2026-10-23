@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@alicloud/log": "^1.2.6",
+    "@aws-sdk/client-s3": "^3.1156.0",
     "@napi-rs/keyring": "^2.1.2",
     "compare-versions": "^6.1.1",
     "exceljs": "^4.4.0",

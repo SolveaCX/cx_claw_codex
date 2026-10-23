@@ -110,7 +110,7 @@ export async function runSolveaCommand(session: Session, command: string, args: 
     case "update-custom-quality-rule": return client.updateCustomQualityRule(await data(args));
     case "delete-custom-quality-rule": return client.deleteCustomQualityRule(option(args, "--inspection-key", true)!);
     case "list-knowledge": return client.listKnowledge(await knowledgeFilters(args));
-    case "get-knowledge": return client.getKnowledge(id());
+    case "get-knowledge": return client.getKnowledgeByType(id(), option(args, "--type", true)!);
     case "update-knowledge": return client.updateKnowledge(id(), await data(args));
     case "upload-qa": return client.uploadQa((await data(args)).items as unknown[]);
     case "list-directories": return client.listDirectories();
