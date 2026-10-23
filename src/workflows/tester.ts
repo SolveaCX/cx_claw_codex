@@ -17,7 +17,7 @@ async function createSheet(args: string[]) {
 }
 
 async function submit(client: SolveaClient, args: string[]) {
-  const file = option(args, "--file", true)!; const result = await client.rawCall("POST", `/api_v2/gpt/label/project/${await client.projectId()}/uploadMessage`, { file, type: option(args, "--mode", true), ...(option(args, "--agent-id") ? { agentId: Number(option(args, "--agent-id")) } : {}), ...(option(args, "--flow-version") ? { flowVersion: Number(option(args, "--flow-version")) } : {}) }); return result;
+  const file = await client.uploadTempFile(option(args, "--file", true)!); const result = await client.rawCall("POST", `/api_v2/gpt/label/project/${await client.projectId()}/uploadMessage`, { file, type: option(args, "--mode", true), ...(option(args, "--agent-id") ? { agentId: Number(option(args, "--agent-id")) } : {}), ...(option(args, "--flow-version") ? { flowVersion: Number(option(args, "--flow-version")) } : {}) }); return { fileKey: file, result };
 }
 
 export async function runAgentTester(session: Session | undefined, action: string | undefined, args: string[]) {

@@ -13,9 +13,9 @@ const reportBody = async (args: string[]) => ({
 });
 
 const handlers: Record<string, Handler> = {
-  "chat-stream": async (c, a) => c.rawCall("POST", `/api_v2/gpt/bot/${await c.botId()}/chat`, { message: option(a, "--message", true), botId: Number(option(a, "--bot-id") ?? await c.botId()), projectId: Number(await project(c)), option: { debug: true }, stream: true }),
+  "chat-stream": async (c, a) => c.chatStream({ message: option(a, "--message", true), botId: Number(option(a, "--bot-id") ?? await c.botId()), touchPoint: option(a, "--touch-point") ?? "LIVE_CHAT", ...(await data(a)) }),
   "update-chatflow": async (c, a) => c.updateChatflow(option(a, "--agent-id", true)!, await jsonData(a), flag(a, "--publish")),
-  "get-conversations-by-intent": async (c, a) => c.listTranscripts({ pageSize: Number(option(a, "--limit") ?? 50), pageIndex: 1, intent: option(a, "--intent", true) }),
+  "get-conversations-by-intent": (c, a) => c.getConversationsByIntent(option(a, "--intent", true)!, Number(option(a, "--limit") ?? 50)),
   "resolve-transcript-chat-id": async (c, a) => c.resolveTranscriptChatId(option(a, "--external-id", true)!, Number(option(a, "--page-size") ?? 10)),
   "list-isolation-keywords": async (c, a) => c.rawCall("GET", `${c.qamPath}/project/${await project(c)}/isolation_keywords`, undefined, { keyword: option(a, "--keyword") ?? "", pageIndex: page(a), pageSize: pageSize(a) }),
   "create-isolation-keyword": async (c, a) => c.rawCall("POST", `${c.qamPath}/project/${await project(c)}/isolation_keyword`, { keyword: option(a, "--keyword", true) }),
@@ -41,12 +41,12 @@ const handlers: Record<string, Handler> = {
   "create-label-node": async (c, a) => c.rawCall("POST", `/api_v2/gpt/label/project/${await project(c)}/updateNode`, { treeId: Number(option(a, "--tree-id", true)), operateType: "CREATE", nodes: [await data(a)] }),
   "update-label-node": async (c, a) => c.rawCall("POST", `/api_v2/gpt/label/project/${await project(c)}/updateNode`, { treeId: Number(option(a, "--tree-id", true)), operateType: "UPDATE", nodes: [{ id: Number(requireId(a)), ...(await data(a)) }] }),
   "delete-label-node": async (c, a) => { requireFlag(a, "--confirm-delete", "delete-label-node"); return c.rawCall("POST", `/api_v2/gpt/label/project/${await project(c)}/updateNode`, { treeId: Number(option(a, "--tree-id", true)), operateType: "DELETE", nodes: [{ id: Number(requireId(a)) }] }); },
-  "download-label-template": async (c, a) => c.rawCall("GET", `/api_v2/gpt/label/project/${await project(c)}/downloadLabelTemplate`, undefined, { type: option(a, "--template-type") ?? "VOC_LABEL" }),
-  "download-labels": async (c, a) => c.rawCall("GET", `/api_v2/gpt/label/project/${await project(c)}/downloadLabel`, undefined, { treeId: option(a, "--tree-id", true)! }),
-  "upload-labels": async (c, a) => c.rawCall("POST", `/api_v2/gpt/label/project/${await project(c)}/uploadLabel`, { treeId: Number(option(a, "--tree-id", true)), file: option(a, "--file", true), ...(option(a, "--init") ? { uploadWay: "INIT" } : {}) }),
+  "download-label-template": async (c, a) => ({ file: await c.downloadLabelTemplate(option(a, "--template-type") === "init" ? "VOC_LABEL_INIT" : "VOC_LABEL", option(a, "--output") ?? `${option(a, "--template-type") ?? "label"}_template.xlsx`) }),
+  "download-labels": async (c, a) => ({ file: await c.downloadLabels(option(a, "--tree-id", true)!, option(a, "--output") ?? `labels_${option(a, "--tree-id", true)}.xlsx`) }),
+  "upload-labels": (c, a) => c.uploadLabelFile(option(a, "--tree-id", true)!, option(a, "--file", true)!, flag(a, "--init")),
   "export-transcripts": async (c, a) => c.rawCall("POST", `/api_v2/gpt/project/${await project(c)}/transcripts/export/async`, { pageSize: pageSize(a), pageIndex: page(a), timeOffset: Number(option(a, "--time-offset") ?? 8), ...(await data(a)) }),
   "get-export-tasks": async (c, a) => c.rawCall("POST", `/api_v2/gpt/label/project/${await project(c)}/getLabelTask`, { page: page(a), pageSize: pageSize(a) }),
-  "upload-batch-test-file": async (c, a) => c.rawCall("GET", `/api_v2/gpt/project/${await project(c)}/sts_credentials`),
+  "upload-batch-test-file": async (c, a) => ({ file: await c.uploadTempFile(option(a, "--file", true)!) }),
   "submit-batch-test": async (c, a) => c.rawCall("POST", `/api_v2/gpt/label/project/${await project(c)}/uploadMessage`, { file: option(a, "--file", true), type: option(a, "--type", true), ...(option(a, "--bot-id") ? { botId: Number(option(a, "--bot-id")) } : {}), ...(await data(a)) }),
   "get-batch-test-tasks": async (c, a) => c.rawCall("POST", `/api_v2/gpt/label/project/${await project(c)}/getLabelTask`, { page: page(a), pageSize: pageSize(a), ...(option(a, "--type") ? { taskType: option(a, "--type")! } : {}) }),
   "list-voice-agents": c => c.listAgents("voice"),

@@ -1,6 +1,6 @@
 import type { Session } from "../types.js";
-import { readFile } from "node:fs/promises";
-import { basename, extname } from "node:path";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { basename, dirname, extname } from "node:path";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 type JsonObject = Record<string, unknown>;
@@ -113,19 +113,36 @@ export class SolveaClient {
   async getAgent(id: string) { return this.post("/api_v2/gpt/ap/queryAgent", { projectId: Number(await this.projectId()), agentId: Number(id), needRelation: true, squareAgent: false }); }
   async getChatflowGraph(id: string) { return this.post("/api_v2/gpt/chatflow/queryGraph/latest", { agentId: Number(id) }); }
   async createAgent(data: JsonObject) { return this.post("/api_v2/gpt/ap/createAgent", { projectId: Number(await this.projectId()), ...data }); }
-  async updateAgent(data: JsonObject) { return this.post("/api_v2/gpt/ap/updateAgent", data); }
+  async updateAgent(data: JsonObject) {
+    const payload: JsonObject = { ...data, projectId: Number(await this.projectId()) };
+    if (payload.agentId === undefined && payload.id !== undefined) payload.agentId = payload.id;
+    return this.post("/api_v2/gpt/ap/updateAgent", payload);
+  }
   async updateChatflow(agentId: string, graph: JsonObject, publish = false) {
     const current = await this.getAgent(agentId);
     const agent = Array.isArray(current) ? current[0] as JsonObject : current as JsonObject;
     if (!agent || agent.type !== "CHAT_FLOW") throw new Error(`Agent ${agentId} is not CHAT_FLOW`);
-    const payload = { ...agent, agentId: agent.id ?? Number(agentId), meta: { ...(agent.meta as JsonObject ?? {}), chatFlowGraph: graph } };
-    return this.updateAgent({ ...payload, ...(publish ? { publish: true } : {}) });
+    if (!graph || !Array.isArray(graph.nodes) || !Array.isArray(graph.edges)) throw new Error("chatFlowGraph must be an object with nodes and edges");
+    const payload: JsonObject = { ...agent, agentId: agent.id ?? Number(agentId), meta: { ...(agent.meta as JsonObject ?? {}), chatFlowGraph: graph } };
+    if (publish) {
+      delete payload.backupType;
+      delete (payload.meta as JsonObject).backupType;
+      delete (payload.meta as JsonObject).draft_flow_updatetime;
+    } else {
+      payload.backupType = "DRAFT";
+      (payload.meta as JsonObject).draft_flow_updatetime = Date.now();
+    }
+    return this.updateAgent(payload);
   }
 
   async listPlugins() { return this.post("/api_v2/gpt/ap/queryPlugin", { projectId: Number(await this.projectId()), needRelation: false }); }
   async getPlugin(id: string) { return this.post("/api_v2/gpt/ap/queryPlugin", { projectId: Number(await this.projectId()), pluginId: Number(id), convertStrategyV5: true }); }
   async createPlugin(data: JsonObject) { return this.post("/api_v2/gpt/ap/createPlugin", { projectId: Number(await this.projectId()), ...data }); }
-  async updatePlugin(data: JsonObject) { return this.post("/api_v2/gpt/ap/updatePlugin", { projectId: Number(await this.projectId()), ...data }); }
+  async updatePlugin(data: JsonObject) {
+    const payload: JsonObject = { projectId: Number(await this.projectId()), ...data };
+    if (payload.pluginId === undefined && payload.id !== undefined) payload.pluginId = payload.id;
+    return this.post("/api_v2/gpt/ap/updatePlugin", payload);
+  }
   async deletePlugin(id: string) { return this.post("/api_v2/gpt/ap/deletePlugin", { projectId: Number(await this.projectId()), pluginId: Number(id) }); }
   async runPlugin(config: unknown, requestBody?: JsonObject) {
     return this.post("/api_v2/gpt/ap/runHttpPlugin", {
@@ -153,8 +170,37 @@ export class SolveaClient {
   async deleteManagedAiField(id: string) { return this.get(`/api_v2/tars/api/field/manage/delete/${encodeURIComponent(id)}`); }
   async toggleManagedAiField(id: string) { return this.get(`/api_v2/tars/api/field/manage/switch/${encodeURIComponent(id)}`); }
 
-  async chat(data: JsonObject) { const bot = String(data.botId ?? await this.botId()); return this.post(`/api_v2/gpt/bot/${bot}/chat`, { botId: Number(bot), projectId: Number(await this.projectId()), option: { debug: true }, ...data }); }
-  async chatAsync(data: JsonObject) { const bot = String(data.botId ?? await this.botId()); return this.post(`/api_v2/gpt/bot/${bot}/chat/async`, { botId: Number(bot), projectId: Number(await this.projectId()), option: { debug: true }, ...data }); }
+  async chat(data: JsonObject) { const bot = String(data.botId ?? await this.botId()); return this.post(`/api_v2/gpt/bot/${bot}/chat`, { ...data, botId: Number(bot), projectId: Number(await this.projectId()), option: data.option ?? { debug: true } }); }
+  async chatStream(data: JsonObject) {
+    const bot = String(data.botId ?? await this.botId());
+    const body = { ...data, botId: Number(bot), projectId: Number(await this.projectId()), option: data.option ?? { debug: true } };
+    const cookie = this.env === "prod" ? "_token" : "_token_staging";
+    const response = await fetch(`${this.baseUrl}/api_v2/gpt/bot/${encodeURIComponent(bot)}/chat/stream`, {
+      method: "POST",
+      headers: {
+        accept: "text/event-stream", "content-type": "application/json", origin: this.baseUrl,
+        referer: `${this.baseUrl}/chatbot`, cookie: `${cookie}=${this.session.tenant!.businessToken}`,
+        "x-cxclaw-client-version": process.env.CXCLAW_PLUGIN_VERSION ?? "unknown",
+      },
+      body: JSON.stringify(body), signal: AbortSignal.timeout(30_000),
+    });
+    const text = await response.text();
+    if (!response.ok) throw new Error(`HTTP ${response.status} POST /api_v2/gpt/bot/${bot}/chat/stream: ${text}`);
+    let finalAction: JsonObject | undefined;
+    const content: string[] = [];
+    for (const line of text.split(/\r?\n/)) {
+      if (!line.startsWith("data:")) continue;
+      const raw = line.slice(5).trim();
+      if (!raw) continue;
+      let event: JsonObject;
+      try { event = asObject(JSON.parse(raw), "stream event must be an object"); } catch { continue; }
+      if (event.errno !== undefined && ![0, "0"].includes(event.errno as never)) throw new Error(`API error POST /api_v2/gpt/bot/${bot}/chat/stream: ${String(event.errmsg ?? event.message ?? event.errno)}`);
+      if (event.content) content.push(String(event.content));
+      if (event.isEnd) finalAction = event.data && typeof event.data === "object" && !Array.isArray(event.data) ? event.data as JsonObject : event;
+    }
+    return finalAction ?? { content: content.join(""), isEnd: true };
+  }
+  async chatAsync(data: JsonObject) { const bot = String(data.botId ?? await this.botId()); return this.post(`/api_v2/gpt/bot/${bot}/chat/async`, { ...data, botId: Number(bot), projectId: Number(await this.projectId()), option: data.option ?? { debug: true } }); }
   async asyncResult(receipt: string, botId?: string) { const bot = botId ?? await this.botId(); return this.get(`/api_v2/gpt/bot/${bot}/chat/async/${encodeURIComponent(receipt)}`); }
 
   async listIntents(category = "E_COMMERCE") { return this.get(`/api_v2/gpt/project/${await this.projectId()}/intents`, category ? { category } : undefined); }
@@ -166,8 +212,8 @@ export class SolveaClient {
   async listEntities() { return this.get(`/api_v2/gpt/project/${await this.projectId()}/entities`); }
   async listStrategies(pageSize = 100) { return this.get(`/api_v2/gpt/project/${await this.projectId()}/strategies`, { pageSize, pageNum: 1 }); }
   async createStrategy(data: JsonObject) { return this.post(`/api_v2/gpt/project/${await this.projectId()}/strategy?v4=true`, data); }
-  async updateStrategy(id: string, data: JsonObject) { return this.request("PUT", `/api_v2/gpt/project/${await this.projectId()}/strategy/${encodeURIComponent(id)}`, data); }
-  async toggleStrategy(id: string, enabled: boolean) { return this.request("PUT", `/api_v2/gpt/project/${await this.projectId()}/strategy/${encodeURIComponent(id)}/status`, { status: enabled ? "ENABLED" : "DISABLED" }); }
+  async updateStrategy(id: string, data: JsonObject) { return this.request("PUT", `/api_v2/gpt/project/${await this.projectId()}/strategy/${encodeURIComponent(id)}`, data, { v4: "true" }); }
+  async toggleStrategy(id: string, enabled: boolean) { return this.request("PUT", `/api_v2/gpt/project/${await this.projectId()}/strategy/${encodeURIComponent(id)}`, { status: enabled ? "ENABLED" : "DISABLED" }, { v4: "true" }); }
 
   async qualityStatus() { return this.get("/api_v2/intelli/inspection/ticket/status"); }
   async setQualityStatus(enabled: boolean) { return this.post("/api_v2/intelli/inspection/ticket/open", { open: enabled, projectId: Number(await this.projectId()) }); }
@@ -246,10 +292,13 @@ export class SolveaClient {
       metadata: { tags: [] }, directoryId, isVisible: true,
     });
   }
-  async uploadKnowledgeFile(filePath: string) {
+  async uploadTempFile(filePath: string, forKnowledge = false) {
+    const credentialPath = forKnowledge
+      ? `${this.qamPrefix}/project/${await this.projectId()}/sts_credentials`
+      : `/api_v2/gpt/project/${await this.projectId()}/sts_credentials`;
     const credentials = asObject(
-      await this.get(`${this.qamPrefix}/project/${await this.projectId()}/sts_credentials`),
-      "knowledge STS credentials must be an object",
+      await this.get(credentialPath),
+      "STS credentials must be an object",
     );
     const required = ["accessKeyId", "secretAccessKey", "sessionToken", "region", "bucketName", "path"];
     const missing = required.filter(key => !credentials[key]);
@@ -271,6 +320,34 @@ export class SolveaClient {
       ContentType: contentTypes[extname(filePath).toLowerCase()] ?? "application/octet-stream",
     }));
     return key;
+  }
+  async uploadKnowledgeFile(filePath: string) { return this.uploadTempFile(filePath, true); }
+  async downloadFile(path: string, target: string, query?: Record<string, string | number | boolean>) {
+    const url = new URL(`${this.baseUrl}${path}`);
+    for (const [key, value] of Object.entries(query ?? {})) url.searchParams.set(key, String(value));
+    const cookie = this.env === "prod" ? "_token" : "_token_staging";
+    const response = await fetch(url, {
+      headers: { accept: "*/*", origin: this.baseUrl, referer: `${this.baseUrl}/chatbot`, cookie: `${cookie}=${this.session.tenant!.businessToken}` },
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status} GET ${path}: ${await response.text()}`);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, new Uint8Array(await response.arrayBuffer()));
+    return target;
+  }
+  async downloadLabelTemplate(templateType: string, target: string) {
+    if (!["VOC_LABEL", "VOC_LABEL_INIT"].includes(templateType)) throw new Error("template type must be VOC_LABEL or VOC_LABEL_INIT");
+    return this.downloadFile(`/api_v2/gpt/label/project/${await this.projectId()}/downloadLabelTemplate`, target, { type: templateType });
+  }
+  async downloadLabels(treeId: string, target: string) {
+    return this.downloadFile(`/api_v2/gpt/label/project/${await this.projectId()}/downloadLabel`, target, { treeId: asPositiveInt(treeId, "tree id must be a positive integer") });
+  }
+  async uploadLabelFile(treeId: string, filePath: string, init = false) {
+    const fileKey = await this.uploadTempFile(filePath);
+    const result = await this.post(`/api_v2/gpt/label/project/${await this.projectId()}/uploadLabel`, {
+      treeId: asPositiveInt(treeId, "tree id must be a positive integer"), file: fileKey, ...(init ? { uploadWay: "INIT" } : {}),
+    });
+    return { fileKey, result };
   }
   async updateKus(value: unknown) {
     const source = Array.isArray(value) ? value : asObject(value, "batch knowledge update must be an array or object with list").list;
@@ -432,6 +509,36 @@ export class SolveaClient {
 
   async transcript(chatId: string) { return this.get(`/api_v2/gpt/project/${await this.projectId()}/transcript/${encodeURIComponent(chatId)}`, { isCompare: true }); }
   async listTranscripts(data: JsonObject) { return this.post(`/api_v2/gpt/project/${await this.projectId()}/transcripts/filter`, data); }
+  async getConversationsByIntent(intent: string, limit = 50) {
+    const intentResponse = await this.listIntents("");
+    const intents = Array.isArray(intentResponse) ? intentResponse
+      : intentResponse && typeof intentResponse === "object" && Array.isArray((intentResponse as JsonObject).data) ? (intentResponse as JsonObject).data as unknown[]
+        : intentResponse && typeof intentResponse === "object" && Array.isArray((intentResponse as JsonObject).list) ? (intentResponse as JsonObject).list as unknown[] : [];
+    const matched = intents.find(value => value && typeof value === "object" && String((value as JsonObject).name ?? "") === intent) as JsonObject | undefined;
+    if (!matched?.id) return [];
+    const response = await this.listTranscripts({ pageSize: limit, pageIndex: 1, intentId: Number(matched.id) });
+    const rows = Array.isArray(response) ? response
+      : response && typeof response === "object" && Array.isArray((response as JsonObject).list) ? (response as JsonObject).list as unknown[] : [];
+    const result = [];
+    for (const value of rows) {
+      if (!value || typeof value !== "object") continue;
+      const row = value as JsonObject, chatId = row.chatId ?? row.id;
+      if (!chatId) continue;
+      try {
+        const detail = asObject(await this.transcript(String(chatId)), `transcript ${chatId} must be an object`);
+        const turns = Array.isArray(detail.turns) ? detail.turns : Array.isArray(detail.messages) ? detail.messages : [];
+        const messages: unknown[] = []; let metadata: JsonObject = {};
+        for (const turnValue of turns) {
+          if (!turnValue || typeof turnValue !== "object") continue;
+          const turn = turnValue as JsonObject, role = turn.role ?? turn.type, content = turn.content ?? turn.message;
+          if (role === "USER" && content) messages.push(content);
+          if (!Object.keys(metadata).length && turn.metadata && typeof turn.metadata === "object" && !Array.isArray(turn.metadata)) metadata = turn.metadata as JsonObject;
+        }
+        if (messages.length) result.push({ source_chat_id: chatId, intent, messages, metadata });
+      } catch { /* One unreadable transcript must not abort the batch. */ }
+    }
+    return result;
+  }
   async resolveTranscriptChatId(externalId: string, pageSize = 10) {
     const result = await this.listTranscripts({ pageSize, pageIndex: 1, debug: false, keyword: externalId });
     const rows = Array.isArray(result) ? result : (result as JsonObject)?.list;
