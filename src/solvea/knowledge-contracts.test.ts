@@ -6,7 +6,7 @@ const originalFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = originalFetch; });
 
 const session: Session = {
-  serverUrl: "https://auth.example", accessToken: "access", refreshToken: "refresh",
+  accessToken: "access", refreshToken: "refresh",
   accessExpiry: Date.now() + 60_000, employeeId: "employee", email: "employee@example.com", channel: "dev",
   tenant: {
     accountId: 5, accountCode: "test", accountName: "Test", environment: "staging",

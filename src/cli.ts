@@ -28,7 +28,10 @@ const usage = () => [
 ].join("\n\n");
 
 async function runAuth(action: string | undefined, args: string[]) {
-  if (action === "login") return print(await login(option(args, "--server", true)!, (option(args, "--channel") ?? "stable") as "stable" | "canary" | "dev"));
+  if (action === "login") {
+    if (flag(args, "--server") || flag(args, "--env")) throw new Error("auth login 固定使用生产授权服务，不支持 --server 或 --env");
+    return print(await login((option(args, "--channel") ?? "stable") as "stable" | "canary" | "dev"));
+  }
   if (action === "logout") { await logout(); return print({ ok: true, loggedOut: true }); }
   if (action === "status") {
     try {
@@ -64,8 +67,9 @@ async function main(args = process.argv.slice(2)) {
     console.log(`cxclawctl ${VERSION}`); return;
   }
   if (command === "setup") {
+    if (flag(args, "--server") || flag(args, "--env")) throw new Error("setup 固定使用生产授权服务，不支持 --server 或 --env");
     const channel = (option(args, "--channel") ?? "stable") as "stable" | "canary" | "dev";
-    await installMarketplace(channel); await login(option(args, "--server", true)!, channel); await installScheduler(); return;
+    await installMarketplace(channel); await login(channel); await installScheduler(); return;
   }
   if (command === "auth") return runAuth(action, rest);
   if (command === "login" || command === "logout") return runAuth(command, args.slice(1));
