@@ -17,6 +17,7 @@ import { runAgentTester } from "./workflows/tester.js";
 import { runDelivery, runPoc } from "./workflows/delivery.js";
 import { runKbBuilder } from "./workflows/kb-builder.js";
 import { runDesk } from "./workflows/desk.js";
+import { errorOutput } from "./cli-error.js";
 
 const print = (value: unknown) => console.log(JSON.stringify(value, null, 2));
 const usage = () => [
@@ -33,7 +34,6 @@ async function runAuth(action: string | undefined, args: string[]) {
     const session = await login((option(args, "--channel") ?? "stable") as "stable" | "canary" | "dev");
     return print(publicAuthStatus(session));
   }
-  if (action === "ensure") return print(publicAuthStatus(await authenticated()));
   if (action === "logout") { await logout(); return print({ ok: true, loggedOut: true }); }
   if (action === "status") {
     try {
@@ -42,7 +42,7 @@ async function runAuth(action: string | undefined, args: string[]) {
     } catch { return print({ ok: true, loggedIn: false }); }
   }
   if (action === "refresh") { return print(publicAuthStatus(await authenticated())); }
-  throw new Error("auth action must be login, ensure, logout, status, or refresh");
+  throw new Error("auth action must be login, logout, status, or refresh");
 }
 
 async function runTenant(action: string | undefined, args: string[]) {
@@ -104,6 +104,7 @@ async function main(args = process.argv.slice(2)) {
 }
 
 main().catch(error => {
-  console.error(`cxclawctl: ${error instanceof Error ? error.message : String(error)}`);
-  process.exitCode = 1;
+  const output = errorOutput(error);
+  console.error(JSON.stringify(output));
+  process.exitCode = output.error.code;
 });

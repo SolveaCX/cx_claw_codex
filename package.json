@@ -10,7 +10,6 @@
     "bin",
     "dist/cli.js",
     "dist/cli.js.map",
-    "runtime",
     "capabilities.lock.json"
   ],
   "scripts": {

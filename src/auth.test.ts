@@ -29,59 +29,52 @@ describe("public auth output", () => {
   });
 });
 
-describe("automatic authentication", () => {
+describe("explicit authentication", () => {
   test("continues with the stored session when refresh succeeds", async () => {
-    let authorized = false;
     const result = await resolveAuthenticated({
       load: async () => session,
       refresh: async value => value,
       remove: async () => undefined,
-      authorize: async () => { authorized = true; return session; },
     });
 
     expect(result).toBe(session);
-    expect(authorized).toBe(false);
   });
 
-  test("starts and waits for authorization when no session exists", async () => {
-    let authorized = false;
-    const result = await resolveAuthenticated({
+  test("returns not_authenticated without opening login when no session exists", async () => {
+    let refreshed = false;
+    const result = resolveAuthenticated({
       load: async () => { throw new SessionNotFoundError(); },
-      refresh: async value => value,
+      refresh: async value => { refreshed = true; return value; },
       remove: async () => undefined,
-      authorize: async () => { authorized = true; return session; },
     });
 
-    expect(result).toBe(session);
-    expect(authorized).toBe(true);
+    await expect(result).rejects.toMatchObject({
+      body: { category: "auth", reason: "not_authenticated", actions: ["cxclawctl auth login"] },
+    });
+    expect(refreshed).toBe(false);
   });
 
-  test("removes an invalid session and authorizes again after 401", async () => {
+  test("removes an invalid session and returns not_authenticated after 401", async () => {
     let removed = false;
-    let authorized = false;
-    const result = await resolveAuthenticated({
+    const result = resolveAuthenticated({
       load: async () => session,
       refresh: async () => { throw new HttpError(401, "expired"); },
       remove: async () => { removed = true; },
-      authorize: async () => { authorized = true; return session; },
     });
 
-    expect(result).toBe(session);
+    await expect(result).rejects.toMatchObject({
+      body: { category: "auth", reason: "not_authenticated", message: "CXClaw 登录已失效" },
+    });
     expect(removed).toBe(true);
-    expect(authorized).toBe(true);
   });
 
   test("does not turn server failures into a new authorization flow", async () => {
-    let authorized = false;
     const failure = new HttpError(503, "unavailable");
     await expect(resolveAuthenticated({
       load: async () => session,
       refresh: async () => { throw failure; },
       remove: async () => undefined,
-      authorize: async () => { authorized = true; return session; },
     })).rejects.toBe(failure);
-
-    expect(authorized).toBe(false);
   });
 });
 
@@ -127,7 +120,7 @@ describe("device authorization wait", () => {
     expect(result.accessToken).toBe("new-access-token");
     expect(logs.join("\n")).not.toContain(start.verificationUriComplete);
     expect(logs).toContain("钉钉授权页已打开，当前命令会持续等待授权结果，无需回复 Codex。");
-    expect(logs).toContain("钉钉授权成功，继续执行当前命令。");
+    expect(logs).toContain("钉钉授权成功。");
   });
 
   test("prints the fallback URL only when the browser cannot be opened", async () => {
