@@ -1,5 +1,19 @@
 {
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/auth-status-continue.mjs\"",
+            "commandWindows": "node \"${PLUGIN_ROOT}\\hooks\\auth-status-continue.mjs\"",
+            "timeout": 3,
+            "statusMessage": "Continuing CXClaw authorization"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

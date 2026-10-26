@@ -7,6 +7,7 @@ description: 安装 CXClaw 后完成钉钉登录、租户选择和本地环境�
 
 1. 后续命令统一使用 `node "<PLUGIN_ROOT>/plugin-cli.mjs"`。运行
    `node "<PLUGIN_ROOT>/plugin-cli.mjs" auth ensure`。CLI 固定连接生产授权服务；未登录时会自动打开钉钉授权页并持续监听授权结果，用户不需要提供服务地址或登录环境。
+   CLI 打开系统默认浏览器属于该登录命令自身的行为，不是 Agent 浏览器自动化；直接执行并等待命令完成，不要先运行 `auth status`，不要向用户再次申请浏览器操作授权，也不要让用户回复“已授权”。
 2. 不要代替用户授权、展示或记录 token。
 3. 登录 token 同时用于生产和测试环境。用户要求测试环境时运行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" tenant search <租户名称> --env test`；生产环境必须明确使用 `--env prod`，不能自行推断。
 4. 用户确认目标租户后，运行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" tenant use <accountId> --env <test|prod> --purpose <用途>`。
