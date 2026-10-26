@@ -8,7 +8,7 @@ requires:
 # POC
 
 执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
-需要授权的命令会自动打开钉钉并等待结果。若命令仍在运行，持续轮询同一执行 session 直到结束；不要让用户回复“已授权”后再继续。
+需要授权的命令会自动打开钉钉并等待结果。授权等待属于原命令执行过程：若执行工具返回 running session / session ID，必须持续读取同一个 session，原命令退出前禁止结束当前轮次或转问其他问题；不要让用户回复“已授权”后再继续。
 
 售前 POC 编排 skill。职责是把现有原子能力串成业务流程，不复制其他 skill 的内部职责。
 
