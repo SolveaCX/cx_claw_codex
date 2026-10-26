@@ -278,6 +278,6 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query \
 
 ## 配置缺失处理
 
-若 `node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query` 返回未登录、未选择租户或 SLS 配置缺失，依次运行
-`node "<PLUGIN_ROOT>/plugin-cli.mjs" auth status`、`node "<PLUGIN_ROOT>/plugin-cli.mjs" tenant current` 定位问题。SLS 长期 AK/SK 只存在于
+`sls query` 未登录时会自动打开钉钉授权页并等待结果，不需要单独执行登录。若返回未选择租户或 SLS 配置缺失，运行
+`node "<PLUGIN_ROOT>/plugin-cli.mjs" tenant current` 定位问题；需要单独诊断凭据状态时再运行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" auth status`。SLS 长期 AK/SK 只存在于
 `shulex-cloud` 配置；CLI 每次查询前申请短期只读 STS，凭据只驻留进程内存。

@@ -33,6 +33,7 @@ async function runAuth(action: string | undefined, args: string[]) {
     const session = await login((option(args, "--channel") ?? "stable") as "stable" | "canary" | "dev");
     return print(publicAuthStatus(session));
   }
+  if (action === "ensure") return print(publicAuthStatus(await authenticated()));
   if (action === "logout") { await logout(); return print({ ok: true, loggedOut: true }); }
   if (action === "status") {
     try {
@@ -41,7 +42,7 @@ async function runAuth(action: string | undefined, args: string[]) {
     } catch { return print({ ok: true, loggedIn: false }); }
   }
   if (action === "refresh") { return print(publicAuthStatus(await authenticated())); }
-  throw new Error("auth action must be login, logout, status, or refresh");
+  throw new Error("auth action must be login, ensure, logout, status, or refresh");
 }
 
 async function runTenant(action: string | undefined, args: string[]) {

@@ -158,6 +158,7 @@
     }
   ],
   "localCommands": [
+    "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" auth ensure",
     "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" auth status",
     "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" tenant current",
     "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" tenant search",
