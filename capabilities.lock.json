@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "plugin": {
-    "pluginVersion": "0.1.8",
-    "cliVersion": "0.1.8",
+    "pluginVersion": "0.1.9",
+    "cliVersion": "0.1.9",
     "toolSchemaVersion": "1",
     "serverApiVersion": "1"
   },
