@@ -4,9 +4,16 @@ import type { Session } from "./types.js";
 const options = process.platform === "linux" ? { linux: { store: "secret-service" as const } } : undefined;
 const entry = () => new AsyncEntry("com.solvea.cxclaw", "session", options);
 
+export class SessionNotFoundError extends Error {
+  constructor() {
+    super("未登录");
+    this.name = "SessionNotFoundError";
+  }
+}
+
 export async function loadSession(): Promise<Session> {
   const raw = await entry().getPassword();
-  if (!raw) throw new Error("未登录，请先运行 cxclawctl auth login");
+  if (!raw) throw new SessionNotFoundError();
   return JSON.parse(raw) as Session;
 }
 export async function saveSession(session: Session): Promise<void> {
