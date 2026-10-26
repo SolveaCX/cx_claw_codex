@@ -3,33 +3,59 @@ import { HttpError, post } from "./http.js";
 import { deleteSession, loadSession, saveSession, SessionNotFoundError } from "./store.js";
 import type { DeviceStart, Session, TokenResponse } from "./types.js";
 import { VERSION } from "./version.js";
+import { withAuthWaitMarker } from "../runtime/auth-wait-state.mjs";
 
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
 let loginInFlight: Promise<Session> | undefined;
+
+interface DeviceAuthorizationRuntime {
+  start: (session: Session) => Promise<DeviceStart>;
+  poll: (session: Session, deviceCode: string) => Promise<TokenResponse>;
+  openBrowser: (url: string) => Promise<void>;
+  save: (session: Session) => Promise<void>;
+  sleep: (ms: number) => Promise<unknown>;
+  now: () => number;
+  log: (message: string) => void;
+}
 
 export function publicAuthStatus(session: Session) {
   return { ok: true, loggedIn: true, email: session.email, channel: session.channel, accessExpiresAt: session.accessExpiry };
 }
 
-async function runLogin(channel:Session["channel"]):Promise<Session>{
+export async function authorizeDevice(channel:Session["channel"], runtime:DeviceAuthorizationRuntime):Promise<Session>{
   const session:Session={channel,accessToken:"",refreshToken:"",accessExpiry:0,employeeId:"",email:""};
-  const start=await post<DeviceStart>(session,"/auth/device/start",{clientVersion:VERSION});
-  console.error(`请在浏览器打开以下地址完成钉钉授权：\n${start.verificationUriComplete}\n设备码：${start.userCode}`);
-  await open(start.verificationUriComplete).catch(()=>undefined);
-  const deadline=Date.now()+start.expiresIn*1000;
-  console.error("正在等待钉钉授权，授权完成后当前命令会自动继续，无需回复 Codex。");
-  let nextProgressAt=Date.now()+15_000;
-  while(Date.now()<deadline){ await sleep(Math.max(2,start.interval)*1000); try {
-    const token=await post<TokenResponse>(session,"/auth/device/token",{deviceCode:start.deviceCode,clientVersion:VERSION});
-    Object.assign(session,{accessToken:token.accessToken,refreshToken:token.refreshToken,accessExpiry:Math.floor(Date.now()/1000)+token.expiresIn,employeeId:token.employee.id,email:token.employee.email});
-    await saveSession(session);
-    console.error("钉钉授权成功，继续执行当前命令。");
+  const start=await runtime.start(session);
+  try {
+    await runtime.openBrowser(start.verificationUriComplete);
+    runtime.log("钉钉授权页已打开，当前命令会持续等待授权结果，无需回复 Codex。");
+  } catch {
+    runtime.log(`未能自动打开浏览器，请打开以下地址完成钉钉授权：\n${start.verificationUriComplete}\n设备码：${start.userCode}`);
+  }
+  const deadline=runtime.now()+start.expiresIn*1000;
+  let nextProgressAt=runtime.now()+15_000;
+  while(runtime.now()<deadline){ await runtime.sleep(Math.max(2,start.interval)*1000); try {
+    const token=await runtime.poll(session,start.deviceCode);
+    Object.assign(session,{accessToken:token.accessToken,refreshToken:token.refreshToken,accessExpiry:Math.floor(runtime.now()/1000)+token.expiresIn,employeeId:token.employee.id,email:token.employee.email});
+    await runtime.save(session);
+    runtime.log("钉钉授权成功，继续执行当前命令。");
     return session;
   } catch(error){
     if(!(error instanceof HttpError) || error.status!==428) throw error;
-    if(Date.now()>=nextProgressAt){console.error("仍在等待钉钉授权……");nextProgressAt=Date.now()+15_000;}
+    if(runtime.now()>=nextProgressAt){runtime.log("仍在等待钉钉授权……");nextProgressAt=runtime.now()+15_000;}
   } }
   throw new Error("device authorization expired");
+}
+
+async function runLogin(channel:Session["channel"]):Promise<Session>{
+  return withAuthWaitMarker(()=>authorizeDevice(channel,{
+    start: session=>post<DeviceStart>(session,"/auth/device/start",{clientVersion:VERSION}),
+    poll: (session,deviceCode)=>post<TokenResponse>(session,"/auth/device/token",{deviceCode,clientVersion:VERSION}),
+    openBrowser: async url=>{await open(url);},
+    save: saveSession,
+    sleep,
+    now: Date.now,
+    log: message=>console.error(message),
+  }));
 }
 
 export function login(channel:Session["channel"]):Promise<Session>{

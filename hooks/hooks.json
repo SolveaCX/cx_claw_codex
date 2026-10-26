@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/auth-wait-guard.mjs\"",
+            "commandWindows": "node \"${PLUGIN_ROOT}\\hooks\\auth-wait-guard.mjs\"",
+            "timeout": 3,
+            "statusMessage": "Waiting for CXClaw authorization"
+          }
+        ]
+      }
+    ]
+  }
+}

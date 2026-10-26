@@ -8,8 +8,6 @@ requires:
 # Agent Analytics
 
 执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
-需要授权的命令会自动打开钉钉并等待结果。若命令仍在运行，持续轮询同一执行 session 直到结束；不要让用户回复“已授权”后再继续。
-
 本 skill 用于查询和分析 Agent 运营数据。
 
 **边界规则：** 如果用户要求解释某次会话为什么异常，或提到 badcase、异常回复、失败节点、报错、卡住、答非所问，由 `shulex-support` 负责主诊断；本 skill 仍可在需要时提供整体指标、趋势或样本下钻，不单独替代根因诊断流程。
