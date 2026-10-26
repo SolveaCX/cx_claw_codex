@@ -176,49 +176,15 @@ bun run check:capabilities
 
 ## 发布
 
-稳定版使用一条命令创建发布 PR：
+稳定版使用一条命令创建发布 PR，日常修复默认使用 `patch`：
 
 ```bash
 bun run release:create patch
 ```
 
-也支持 `minor`、`major` 或明确版本号，例如 `bun run release:create 0.2.0`。命令会从最新 `origin/main` 创建发布分支，统一修改 npm CLI、插件清单和能力清单版本，执行完整发布检查，创建提交并推送，最后创建合入 `main` 的 PR。工作区不干净、版本未递增或同名发布分支已存在时会直接停止。
+也支持 `minor`、`major` 或明确版本号，例如 `bun run release:create 0.2.0`。命令会统一版本、执行完整检查并创建 `release/vX.Y.Z` PR。PR 合入后，发布流水线才会发布 npm、创建 GitHub Release 并推进 `marketplace/stable`；PR 创建成功不等于已经发布。
 
-只需要同步版本文件、不创建分支和 PR 时，仍可使用底层命令：
-
-```bash
-bun run release:prepare <版本号>
-```
-
-版本规则：
-
-- `vX.Y.Z` 发布到 `stable`
-- `vX.Y.Z-canary.N` 发布到 `canary`
-- `vX.Y.Z-dev.N` 发布到 `dev`
-
-稳定版仍然必须经过 `release/vX.Y.Z` PR。PR 经过评审并合入 `main` 后，GitHub Actions 才会创建 tag 和发布。不要直接推送稳定版 tag。
-
-`canary` 和 `dev` 预发布版在通过 CI 的提交上推送对应 tag 后发布：
-
-```bash
-git push origin vX.Y.Z-canary.N
-git push origin vX.Y.Z-dev.N
-```
-
-发布流水线会固定到触发发布的 Git commit，并依次执行测试、构建、能力校验、npm 发布、GitHub Release 和 Marketplace 通道推进。只有前一步成功才会执行下一步；npm 包未发布时不会推进 `marketplace/<channel>`。
-
-npm 发布需要在 GitHub 的 `npm-publish` Environment 或仓库中配置 Secret `NPM_TOKEN`。缺少凭据会让发布失败，不会跳过。
-
-发布产物包括：
-
-```text
-cxclaw-agent-plugin.zip
-cxclaw-agent-plugin.json
-cxclaw-agent-plugin.sha256
-cxclaw-codex-plugin.zip
-```
-
-插件 ZIP 只从已提交的 Git 快照生成，不会包含本地未提交文件。
+维护者和 AI 在操作前必须阅读完整的[发布手册](./docs/releasing.md)。手册包含版本选择、预发布、合并后验收、失败恢复和禁止操作。仓库根目录的 [`AGENTS.md`](./AGENTS.md) 记录了 AI 每次进入仓库都会读取的强制规则。
 
 ## 仓库结构
 
