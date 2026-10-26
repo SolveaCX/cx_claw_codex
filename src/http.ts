@@ -3,9 +3,18 @@ import { AUTH_SERVER_URL } from "./config.js";
 import { VERSION } from "./version.js";
 
 export class HttpError extends Error {
+  public readonly responseCode: number | undefined;
+
   constructor(public readonly status: number, public readonly responseBody: string) {
     super(`server returned ${status}: ${responseBody}`);
     this.name = "HttpError";
+    try {
+      const value = JSON.parse(responseBody) as { code?: unknown };
+      const code = Number(value?.code);
+      this.responseCode = Number.isFinite(code) ? code : undefined;
+    } catch {
+      this.responseCode = undefined;
+    }
   }
 }
 

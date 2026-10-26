@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { authorizeDevice, publicAuthStatus, resolveAuthenticated } from "./auth.js";
+import { authorizeDevice, isAuthorizationPending, publicAuthStatus, resolveAuthenticated } from "./auth.js";
 import { HttpError } from "./http.js";
 import { SessionNotFoundError } from "./store.js";
 import type { Session } from "./types.js";
@@ -100,6 +100,12 @@ describe("device authorization wait", () => {
     employee: { id: "employee-2", email: "employee-2@example.com" },
   };
 
+  test("recognizes pending authorization from HTTP status or response code", () => {
+    expect(isAuthorizationPending(new HttpError(428, '{"message":"pending"}'))).toBe(true);
+    expect(isAuthorizationPending(new HttpError(400, '{"code":428,"message":"authorization_pending"}'))).toBe(true);
+    expect(isAuthorizationPending(new HttpError(400, '{"code":401,"message":"invalid"}'))).toBe(false);
+  });
+
   test("keeps polling without printing the authorization URL when the browser opens", async () => {
     const logs: string[] = [];
     let polls = 0;
@@ -107,7 +113,7 @@ describe("device authorization wait", () => {
       start: async () => start,
       poll: async () => {
         polls += 1;
-        if (polls === 1) throw new HttpError(428, "pending");
+        if (polls === 1) throw new HttpError(400, '{"code":428,"message":"authorization_pending"}');
         return token;
       },
       openBrowser: async () => undefined,

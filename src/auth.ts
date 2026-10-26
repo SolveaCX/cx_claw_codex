@@ -22,6 +22,10 @@ export function publicAuthStatus(session: Session) {
   return { ok: true, loggedIn: true, email: session.email, channel: session.channel, accessExpiresAt: session.accessExpiry };
 }
 
+export function isAuthorizationPending(error: unknown): boolean {
+  return error instanceof HttpError && (error.status === 428 || error.responseCode === 428);
+}
+
 export async function authorizeDevice(channel:Session["channel"], runtime:DeviceAuthorizationRuntime):Promise<Session>{
   const session:Session={channel,accessToken:"",refreshToken:"",accessExpiry:0,employeeId:"",email:""};
   const start=await runtime.start(session);
@@ -40,7 +44,7 @@ export async function authorizeDevice(channel:Session["channel"], runtime:Device
     runtime.log("钉钉授权成功，继续执行当前命令。");
     return session;
   } catch(error){
-    if(!(error instanceof HttpError) || error.status!==428) throw error;
+    if(!isAuthorizationPending(error)) throw error;
     if(runtime.now()>=nextProgressAt){runtime.log("仍在等待钉钉授权……");nextProgressAt=runtime.now()+15_000;}
   } }
   throw new Error("device authorization expired");
