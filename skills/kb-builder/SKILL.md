@@ -8,8 +8,6 @@ requires:
 # Shulex KB Builder
 
 执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
-需要授权的命令会自动打开钉钉并等待结果。授权等待属于原命令执行过程：若执行工具返回 running session / session ID，必须持续读取同一个 session，原命令退出前禁止结束当前轮次或转问其他问题；不要让用户回复“已授权”后再继续。
-
 本 skill 提供知识库的原子管理能力、场景 reference 路由和通用执行规范。
 
 详细格式、字段、确认步骤和异常处理都以对应 reference 为准；只在命中具体场景时读取相关 reference。

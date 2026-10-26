@@ -3,6 +3,7 @@ import { HttpError, post } from "./http.js";
 import { deleteSession, loadSession, saveSession, SessionNotFoundError } from "./store.js";
 import type { DeviceStart, Session, TokenResponse } from "./types.js";
 import { VERSION } from "./version.js";
+import { withAuthWaitMarker } from "../runtime/auth-wait-state.mjs";
 
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
 let loginInFlight: Promise<Session> | undefined;
@@ -46,7 +47,7 @@ export async function authorizeDevice(channel:Session["channel"], runtime:Device
 }
 
 async function runLogin(channel:Session["channel"]):Promise<Session>{
-  return authorizeDevice(channel,{
+  return withAuthWaitMarker(()=>authorizeDevice(channel,{
     start: session=>post<DeviceStart>(session,"/auth/device/start",{clientVersion:VERSION}),
     poll: (session,deviceCode)=>post<TokenResponse>(session,"/auth/device/token",{deviceCode,clientVersion:VERSION}),
     openBrowser: async url=>{await open(url);},
@@ -54,7 +55,7 @@ async function runLogin(channel:Session["channel"]):Promise<Session>{
     sleep,
     now: Date.now,
     log: message=>console.error(message),
-  });
+  }));
 }
 
 export function login(channel:Session["channel"]):Promise<Session>{

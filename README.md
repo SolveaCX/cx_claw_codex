@@ -33,7 +33,7 @@ codex plugin marketplace add SolveaCX/cx_claw_codex --ref marketplace/stable
 codex plugin add cxclaw@cxclaw
 ```
 
-安装后不需要单独执行登录命令。首次使用任何需要服务端访问的 CXClaw 能力时，CLI 会自动打开钉钉授权页并持续监听授权结果；授权成功后自动继续原命令，不需要再对 Codex 回复“已授权”。浏览器成功打开时，CLI 不会把授权链接输出给 Agent；只有浏览器无法打开时才显示备用链接和设备码。
+安装后不需要单独执行登录命令。首次使用任何需要服务端访问的 CXClaw 能力时，CLI 会自动打开钉钉授权页并持续监听授权结果；授权成功后自动继续原命令，不需要再对 Codex 回复“已授权”。浏览器成功打开时，CLI 不会把授权链接输出给 Agent；只有浏览器无法打开时才显示备用链接和设备码。插件内置的 Stop hook 会在授权仍进行时阻止 Codex 提前结束当前轮次；首次安装或 hook 内容变化后，需要在 Codex 中审查并信任该 hook。
 
 CLI 固定连接生产授权服务 `https://ai.solvea.cx/api_v2/ticket`，不接受用户指定服务地址或登录环境。一次登录即可访问获准的测试和生产租户。需要人工诊断授权时，可以执行：
 

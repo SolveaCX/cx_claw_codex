@@ -40,6 +40,17 @@ describe("release package layout", () => {
     );
   });
 
+  test("packages one authorization wait hook instead of repeating wait prompts", () => {
+    const skillText = files("skills").map((path) => readFileSync(path, "utf8")).join("\n");
+    const portableManifest = readFileSync("plugin.json", "utf8");
+    const codexManifest = readFileSync(".codex-plugin/plugin.json", "utf8");
+    expect(skillText).not.toContain("running session / session ID");
+    expect(portableManifest).toContain('"hooks": "./hooks/hooks.json"');
+    expect(codexManifest).toContain('"hooks": "./hooks/hooks.json"');
+    expect(readFileSync("scripts/package-agent-plugin.mjs", "utf8")).toContain('"hooks"');
+    expect(readFileSync("scripts/package-codex-plugin.mjs", "utf8")).toContain('"hooks"');
+  });
+
   test("refreshes the installed plugin after upgrading its marketplace", () => {
     const updater = readFileSync("src/update.ts", "utf8");
     const marketplaceUpgrade = updater.indexOf(
