@@ -3,10 +3,9 @@ import { HttpError, post } from "./http.js";
 import { deleteSession, loadSession, saveSession, SessionNotFoundError } from "./store.js";
 import type { DeviceStart, Session, TokenResponse } from "./types.js";
 import { VERSION } from "./version.js";
-import { withAuthWaitMarker } from "../runtime/auth-wait-state.mjs";
+import { notAuthenticated } from "./cli-error.js";
 
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
-let loginInFlight: Promise<Session> | undefined;
 
 interface DeviceAuthorizationRuntime {
   start: (session: Session) => Promise<DeviceStart>;
@@ -41,7 +40,7 @@ export async function authorizeDevice(channel:Session["channel"], runtime:Device
     const token=await runtime.poll(session,start.deviceCode);
     Object.assign(session,{accessToken:token.accessToken,refreshToken:token.refreshToken,accessExpiry:Math.floor(runtime.now()/1000)+token.expiresIn,employeeId:token.employee.id,email:token.employee.email});
     await runtime.save(session);
-    runtime.log("钉钉授权成功，继续执行当前命令。");
+    runtime.log("钉钉授权成功。");
     return session;
   } catch(error){
     if(!isAuthorizationPending(error)) throw error;
@@ -51,7 +50,7 @@ export async function authorizeDevice(channel:Session["channel"], runtime:Device
 }
 
 async function runLogin(channel:Session["channel"]):Promise<Session>{
-  return withAuthWaitMarker(()=>authorizeDevice(channel,{
+  return authorizeDevice(channel,{
     start: session=>post<DeviceStart>(session,"/auth/device/start",{clientVersion:VERSION}),
     poll: (session,deviceCode)=>post<TokenResponse>(session,"/auth/device/token",{deviceCode,clientVersion:VERSION}),
     openBrowser: async url=>{await open(url);},
@@ -59,12 +58,11 @@ async function runLogin(channel:Session["channel"]):Promise<Session>{
     sleep,
     now: Date.now,
     log: message=>console.error(message),
-  }));
+  });
 }
 
 export function login(channel:Session["channel"]):Promise<Session>{
-  if (!loginInFlight) loginInFlight=runLogin(channel).finally(()=>{loginInFlight=undefined;});
-  return loginInFlight;
+  return runLogin(channel);
 }
 
 export async function ensureAccess(session:Session):Promise<Session>{
@@ -77,7 +75,6 @@ interface AuthenticationRuntime {
   load: () => Promise<Session>;
   refresh: (session: Session) => Promise<Session>;
   remove: () => Promise<void>;
-  authorize: () => Promise<Session>;
 }
 
 export async function resolveAuthenticated(runtime: AuthenticationRuntime):Promise<Session>{
@@ -85,19 +82,17 @@ export async function resolveAuthenticated(runtime: AuthenticationRuntime):Promi
     return await runtime.refresh(await runtime.load());
   } catch(error) {
     if (error instanceof SessionNotFoundError) {
-      console.error("CXClaw 尚未授权，正在自动发起钉钉授权。");
-      return runtime.authorize();
+      throw notAuthenticated();
     }
     if (error instanceof HttpError && error.status===401) {
-      console.error("CXClaw 登录已失效，正在重新发起钉钉授权。");
       await runtime.remove().catch(()=>undefined);
-      return runtime.authorize();
+      throw notAuthenticated("CXClaw 登录已失效");
     }
     throw error;
   }
 }
 
 export function authenticated():Promise<Session>{
-  return resolveAuthenticated({load:loadSession,refresh:ensureAccess,remove:deleteSession,authorize:()=>login("stable")});
+  return resolveAuthenticated({load:loadSession,refresh:ensureAccess,remove:deleteSession});
 }
 export async function logout(){let session:Session|undefined;try{session=await loadSession()}catch{};if(session?.refreshToken)await post(session,"/auth/logout",{refreshToken:session.refreshToken}).catch(()=>undefined);await deleteSession()}

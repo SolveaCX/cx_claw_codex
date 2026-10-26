@@ -40,15 +40,14 @@ describe("release package layout", () => {
     );
   });
 
-  test("packages one authorization wait hook instead of repeating wait prompts", () => {
-    const skillText = files("skills").map((path) => readFileSync(path, "utf8")).join("\n");
+  test("uses explicit CLI login and packages no authorization hooks", () => {
     const portableManifest = readFileSync("plugin.json", "utf8");
     const codexManifest = readFileSync(".codex-plugin/plugin.json", "utf8");
-    expect(skillText).not.toContain("running session / session ID");
-    expect(portableManifest).toContain('"hooks": "./hooks/hooks.json"');
-    expect(codexManifest).toContain('"hooks": "./hooks/hooks.json"');
-    expect(readFileSync("scripts/package-agent-plugin.mjs", "utf8")).toContain('"hooks"');
-    expect(readFileSync("scripts/package-codex-plugin.mjs", "utf8")).toContain('"hooks"');
+    expect(portableManifest).not.toContain('"hooks"');
+    expect(codexManifest).not.toContain('"hooks"');
+    expect(readFileSync("scripts/package-agent-plugin.mjs", "utf8")).not.toContain('"hooks"');
+    expect(readFileSync("scripts/package-codex-plugin.mjs", "utf8")).not.toContain('"hooks"');
+    expect(pkg.files).not.toContain("runtime");
   });
 
   test("refreshes the installed plugin after upgrading its marketplace", () => {

@@ -27,9 +27,7 @@ try {
     throw new Error("npm package must not contain Skill documentation");
   }
   if (!existsSync(join(packageRoot, "dist", "cli.js"))) throw new Error("missing compiled CLI");
-  if (!existsSync(join(packageRoot, "runtime", "auth-wait-state.mjs"))) {
-    throw new Error("missing authorization wait runtime");
-  }
+  if (existsSync(join(packageRoot, "runtime"))) throw new Error("obsolete hook runtime was packaged");
 
   const bin =
     process.platform === "win32"
