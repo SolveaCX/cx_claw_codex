@@ -26,7 +26,8 @@ describe("authorization status PostToolUse hook", () => {
 
     expect(result.decision).toBe("block");
     expect(result.reason).toContain("auth ensure");
-    expect(result.reason).toContain("不要再次向用户申请");
+    expect(result.reason).toContain("不要结束当前轮次");
+    expect(result.reason).not.toContain("浏览器操作授权");
   });
 
   test("does not affect logged-in or unrelated commands", () => {
