@@ -21,6 +21,7 @@
     "check:release": "tsx scripts/check-release.ts",
     "test:package": "tsx scripts/test-packed-package.ts",
     "release:prepare": "tsx scripts/prepare-release.ts",
+    "release:create": "tsx scripts/create-release.ts",
     "package:agent-plugin": "node scripts/package-agent-plugin.mjs",
     "package:codex-plugin": "node scripts/package-codex-plugin.mjs"
   },

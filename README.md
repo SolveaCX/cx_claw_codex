@@ -176,7 +176,15 @@ bun run check:capabilities
 
 ## 发布
 
-使用版本准备脚本同步修改 npm、插件清单和能力清单中的版本：
+稳定版使用一条命令创建发布 PR：
+
+```bash
+bun run release:create patch
+```
+
+也支持 `minor`、`major` 或明确版本号，例如 `bun run release:create 0.2.0`。命令会从最新 `origin/main` 创建发布分支，统一修改 npm CLI、插件清单和能力清单版本，执行完整发布检查，创建提交并推送，最后创建合入 `main` 的 PR。工作区不干净、版本未递增或同名发布分支已存在时会直接停止。
+
+只需要同步版本文件、不创建分支和 PR 时，仍可使用底层命令：
 
 ```bash
 bun run release:prepare <版本号>
@@ -188,7 +196,7 @@ bun run release:prepare <版本号>
 - `vX.Y.Z-canary.N` 发布到 `canary`
 - `vX.Y.Z-dev.N` 发布到 `dev`
 
-稳定版必须在 `release/vX.Y.Z` 分支准备版本并创建 PR。PR 经过评审并合入 `main` 后，GitHub Actions 才会创建 tag 和发布。不要直接推送稳定版 tag。
+稳定版仍然必须经过 `release/vX.Y.Z` PR。PR 经过评审并合入 `main` 后，GitHub Actions 才会创建 tag 和发布。不要直接推送稳定版 tag。
 
 `canary` 和 `dev` 预发布版在通过 CI 的提交上推送对应 tag 后发布：
 
