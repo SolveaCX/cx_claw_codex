@@ -4,6 +4,7 @@ import { deleteSession, loadSession, saveSession, SessionNotFoundError } from ".
 import type { DeviceStart, Session, TokenResponse } from "./types.js";
 import { VERSION } from "./version.js";
 import { withAuthWaitMarker } from "../runtime/auth-wait-state.mjs";
+import { singleFlightLogin } from "./auth-singleflight.js";
 
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
 let loginInFlight: Promise<Session> | undefined;
@@ -59,7 +60,10 @@ async function runLogin(channel:Session["channel"]):Promise<Session>{
 }
 
 export function login(channel:Session["channel"]):Promise<Session>{
-  if (!loginInFlight) loginInFlight=runLogin(channel).finally(()=>{loginInFlight=undefined;});
+  if (!loginInFlight) loginInFlight=singleFlightLogin(
+    ()=>runLogin(channel),
+    async ()=>ensureAccess(await loadSession()),
+  ).finally(()=>{loginInFlight=undefined;});
   return loginInFlight;
 }
 
