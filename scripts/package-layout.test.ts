@@ -51,7 +51,7 @@ describe("release package layout", () => {
       expect(interfaceConfig.logo).toBe("./assets/cxclaw.svg");
       expect(interfaceConfig.composerIcon).toBe("./assets/cxclaw.svg");
     }
-    expect(icon).toContain('viewBox="0 0 80 80"');
+    expect(icon).toContain('viewBox="0 0 48 48"');
     expect(icon).toContain('fill="#1D65F5"');
     expect(readFileSync("scripts/package-agent-plugin.mjs", "utf8")).toContain('"assets"');
     expect(readFileSync("scripts/package-codex-plugin.mjs", "utf8")).toContain('"assets"');
