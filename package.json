@@ -10,6 +10,8 @@
     "bin",
     "dist/cli.js",
     "dist/cli.js.map",
+    "dist/tenant-app.js",
+    "dist/tenant-app.js.map",
     "capabilities.lock.json"
   ],
   "scripts": {
@@ -31,7 +33,11 @@
   "dependencies": {
     "@alicloud/log": "^1.2.6",
     "@aws-sdk/client-s3": "^3.1156.0",
+    "@modelcontextprotocol/ext-apps": "^1.7.5",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@modelcontextprotocol/server": "^2.4.0",
     "@napi-rs/keyring": "^2.1.2",
+    "@openai/mcp-extensions": "^0.2.1",
     "compare-versions": "^6.1.1",
     "exceljs": "^4.4.0",
     "open": "^10.2.0"

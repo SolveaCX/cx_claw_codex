@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "tenant-panel": {
+      "command": "node",
+      "args": ["${PLUGIN_ROOT}/plugin-cli.mjs", "mcp-server"]
+    }
+  }
+}

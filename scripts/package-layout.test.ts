@@ -40,6 +40,18 @@ describe("release package layout", () => {
     );
   });
 
+  test("both plugin formats include the tenant panel MCP server", () => {
+    const portableManifest = readFileSync("mcp.json", "utf8");
+    const compatibilityManifest = readFileSync(".mcp.json", "utf8");
+    const codexManifest = readFileSync(".codex-plugin/plugin.json", "utf8");
+    expect(portableManifest).toContain('"type": "stdio"');
+    expect(portableManifest).toContain('"mcp-server"');
+    expect(compatibilityManifest).toContain('"mcp-server"');
+    expect(codexManifest).toContain('"mcpServers": "./.mcp.json"');
+    expect(readFileSync("scripts/package-agent-plugin.mjs", "utf8")).toContain('"mcp.json"');
+    expect(readFileSync("scripts/package-codex-plugin.mjs", "utf8")).toContain('".mcp.json"');
+  });
+
   test("uses explicit CLI login and packages no authorization hooks", () => {
     const portableManifest = readFileSync("plugin.json", "utf8");
     const codexManifest = readFileSync(".codex-plugin/plugin.json", "utf8");

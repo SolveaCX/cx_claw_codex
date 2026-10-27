@@ -2,7 +2,7 @@
 
 CXClaw 是 Solvea 内部使用的 Codex 插件。它把原 CXClaw 的业务能力带到本地 Codex：Codex 负责理解任务和编排步骤，`cxclaw` CLI 负责登录、选择租户、调用业务接口、执行本地工作流和直查 SLS。所有业务代码统一使用 TypeScript，Skills 只描述流程并调用 CLI。
 
-插件不启动本地 MCP，也不依赖 `solvea-kit`。`shulex-cloud` 只提供钉钉授权、租户授权、服务配置和短期凭据；具体业务操作由本机 CLI 执行。
+插件包含一个只读本地 MCP server，用于在 Codex 会话右侧面板展示当前租户；它不承担业务调用。`shulex-cloud` 只提供钉钉授权、租户授权、服务配置和短期凭据；具体业务操作仍由本机 CLI 执行，插件也不依赖 `solvea-kit`。
 
 ## 能力
 
@@ -12,6 +12,7 @@ CXClaw 是 Solvea 内部使用的 Codex 插件。它把原 CXClaw 的业务能�
 - Solvea Desk 工单查询和报告
 - badcase 排查与 SLS 客户端直查
 - 测试、生产环境和跨租户切换
+- Codex 会话右侧面板显示全局当前租户
 - 写操作的预览、确认、提交和结果核验
 
 完整能力映射见 [`capabilities.lock.json`](./capabilities.lock.json)。`runtime-inspector` 只在 `dev` 和 `canary` 通道使用。
@@ -73,6 +74,8 @@ npx --yes @shulex/cxclawctl@latest tenant clear
 ```
 
 切换到生产环境时，重新执行 `tenant search` 和 `tenant use`，并把 `--env` 改为 `prod`。
+
+Codex 桌面端可从会话右侧面板打开“CXClaw 当前租户”。面板读取与 CLI 相同的系统安全凭据库，只展示 `accountId`、`accountCode`、`accountName`、环境、用途和到期时间，不展示任何 token。当前租户是本机全局状态；在一个会话中切换后，其他会话的面板也会同步变化。
 
 ## 常用命令
 

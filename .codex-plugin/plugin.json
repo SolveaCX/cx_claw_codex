@@ -8,6 +8,7 @@
   },
   "repository": "https://github.com/SolveaCX/cx_claw_codex",
   "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "CXClaw",
     "shortDescription": "Solvea 内部跨租户智能助手",

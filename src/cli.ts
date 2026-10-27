@@ -73,6 +73,11 @@ async function main(args = process.argv.slice(2)) {
     const channel = (option(args, "--channel") ?? "stable") as "stable" | "canary" | "dev";
     await installMarketplace(channel); await login(channel); await installScheduler(); return;
   }
+  if (command === "mcp-server") {
+    const { serveTenantMcp } = await import("./mcp/server.js");
+    serveTenantMcp();
+    return;
+  }
   if (command === "auth") return runAuth(action, rest);
   if (command === "login" || command === "logout") return runAuth(command, args.slice(1));
   if (command === "tenant" || command === "context") return runTenant(action, rest);
