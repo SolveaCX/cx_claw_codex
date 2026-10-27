@@ -56,6 +56,7 @@ export function createTenantPanelHtml(script: string): string {
     <dt>环境</dt><dd><span id="environment" class="environment" data-environment="none">未选择</span></dd>
     <dt>Account ID</dt><dd id="account-id">—</dd>
     <dt>Account Code</dt><dd id="account-code">—</dd>
+    <dt>公司名</dt><dd id="company-name">—</dd>
     <dt>用途</dt><dd id="purpose">—</dd>
     <dt>凭据到期</dt><dd id="expires-at">—</dd>
   </dl>
@@ -100,7 +101,7 @@ export function createTenantMcpServer(): McpServer {
     async () => {
       const status = await loadTenantPanelStatus();
       return {
-        content: [{ type: "text", text: status.configured ? `当前租户：${status.accountName ?? status.accountId}` : "当前未选择租户" }],
+        content: [{ type: "text", text: status.configured ? `当前租户：${status.companyName ?? status.accountName ?? status.accountId}` : "当前未选择租户" }],
         structuredContent: status,
       };
     },

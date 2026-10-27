@@ -1,4 +1,5 @@
 import { post } from "./http.js";
+import { SolveaClient } from "./solvea/client.js";
 import { saveSession } from "./store.js";
 import type { Session, Tenant } from "./types.js";
 
@@ -9,7 +10,18 @@ export async function useTenant(session:Session,accountId:number,env:string,purp
   const response=await post<any>(session,"/tenant-contexts",{accountId,environment:environment(env),purpose});
   if(!response.businessToken||!response.services?.businessUrl)throw new Error("authorization server did not return business credentials");
   session.tenant={...response.tenant,environment:response.environment,purpose,context:response.tenantContext,businessToken:response.businessToken,businessUrl:response.services.businessUrl.replace(/\/$/,""),slsUrl:response.services.slsUrl?.replace(/\/$/,""),expiresAt:response.businessTokenExpiresAt||Math.floor(Date.now()/1000)+response.expiresIn} as Tenant;
-  await saveSession(session);return publicTenant(session.tenant);
+  await saveSession(session);
+  try {
+    const info = await new SolveaClient(session).currentTenantInfo();
+    const companyName = typeof info.companyName === "string" ? info.companyName.trim() : "";
+    if (Number(info.accountId) === accountId && companyName) {
+      session.tenant.companyName = companyName;
+      await saveSession(session);
+    }
+  } catch {
+    // Company metadata is optional; tenant selection must still succeed when older deployments omit the endpoint.
+  }
+  return publicTenant(session.tenant);
 }
-export function publicTenant(t?:Tenant){return t?{accountId:t.accountId,accountCode:t.accountCode,accountName:t.accountName,environment:t.environment,purpose:t.purpose,expiresAt:t.expiresAt,configured:Boolean(t.businessToken&&t.businessUrl)}:{configured:false}}
+export function publicTenant(t?:Tenant){return t?{accountId:t.accountId,accountCode:t.accountCode,accountName:t.accountName,companyName:t.companyName,environment:t.environment,purpose:t.purpose,expiresAt:t.expiresAt,configured:Boolean(t.businessToken&&t.businessUrl)}:{configured:false}}
 export async function ensureTenant(session:Session){if(!session.tenant?.accountId)throw new Error("no tenant selected; run npx --yes @shulex/cxclawctl@latest tenant use");if(Date.now()/1000+30>=session.tenant.expiresAt)await useTenant(session,session.tenant.accountId,session.tenant.environment,session.tenant.purpose);return session.tenant}

@@ -1,5 +1,5 @@
 export interface Tenant {
-  accountId: number; accountCode: string; accountName: string; environment: string;
+  accountId: number; accountCode: string; accountName: string; companyName?: string; environment: string;
   purpose: string; context?: string; businessToken?: string; businessUrl?: string;
   slsUrl?: string; expiresAt: number;
 }
