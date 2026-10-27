@@ -29,6 +29,13 @@ function capture(responder: (request: Request) => unknown = () => ({ success: tr
 }
 
 describe("cross-module API migration contracts", () => {
+  test("reads the current tenant company name from the business API", async () => {
+    const requests = capture(() => ({ data: { accountId: 5, accountCode: "test", companyName: "Test Company" } }));
+    const info = await new SolveaClient(session).currentTenantInfo();
+    expect(requests.at(-1)?.url).toEndWith("/api_v2/ticket/agent/plg-user/v2/user-info");
+    expect(info).toMatchObject({ accountId: 5, accountCode: "test", companyName: "Test Company" });
+  });
+
   test("normalizes legacy agent and tool ID fields", async () => {
     const requests = capture();
     const client = new SolveaClient(session);

@@ -12,6 +12,7 @@ export interface TenantPanelStatus {
   accountId?: number;
   accountCode?: string;
   accountName?: string;
+  companyName?: string;
   environment?: string;
   purpose?: string;
   expiresAt?: number;

@@ -17,6 +17,11 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsx src/cli.ts",
+    "dev:plugin": "tsx scripts/dev-plugin.ts sync",
+    "dev:plugin:prepare": "tsx scripts/dev-plugin.ts prepare",
+    "dev:plugin:watch": "tsx scripts/dev-plugin.ts watch",
+    "dev:plugin:status": "tsx scripts/dev-plugin.ts status",
+    "dev:plugin:remove": "tsx scripts/dev-plugin.ts remove",
     "typecheck": "tsc --noEmit",
     "test": "bun test --path-ignore-patterns _tmp_",
     "check:capabilities": "tsx scripts/check-capabilities.ts",

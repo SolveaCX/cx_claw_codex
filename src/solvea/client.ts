@@ -90,6 +90,12 @@ export class SolveaClient {
     return this.request<T>(method, path, body, query);
   }
 
+  async currentTenantInfo(): Promise<JsonObject> {
+    const value = await this.get<{ data?: JsonObject } | JsonObject>("/api_v2/ticket/agent/plg-user/v2/user-info");
+    const data = (value as JsonObject).data;
+    return data && typeof data === "object" && !Array.isArray(data) ? data as JsonObject : value as JsonObject;
+  }
+
   private safePathSegment(value: string, name: string) {
     if (!value || value === "." || value === ".." || /[\\/?#%\u0000-\u001f\u007f]/.test(value)) {
       throw new Error(`${name} must be a safe non-empty path segment`);

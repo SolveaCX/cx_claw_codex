@@ -12,6 +12,7 @@ type TenantStatus = {
   accountId?: number;
   accountCode?: string;
   accountName?: string;
+  companyName?: string;
   environment?: string;
   purpose?: string;
   expiresAt?: number;
@@ -19,6 +20,7 @@ type TenantStatus = {
 
 const app = new App({ name: "CXClaw Tenant", version: "1.0.0" });
 const refreshButton = document.querySelector<HTMLButtonElement>("#refresh");
+document.body.style.paddingTop = "32px";
 
 function text(id: string, value: string): void {
   const element = document.querySelector<HTMLElement>(`#${id}`);
@@ -47,13 +49,14 @@ function render(value: unknown): void {
     text("headline", "无法读取租户状态");
     text("summary", "请检查系统凭据库和 CXClaw 登录状态。");
   } else {
-    text("headline", status.accountName || `租户 ${status.accountId ?? "—"}`);
+    text("headline", status.companyName || status.accountName || `租户 ${status.accountId ?? "—"}`);
     text("summary", status.credentialStatus === "expired" ? "租户凭据已过期，下次业务操作会尝试刷新。" : "当前业务命令将访问这个租户。");
   }
 
   text("environment", environment === "prod" ? "PRODUCTION" : environment === "staging" ? "STAGING" : "未选择");
   text("account-id", status.accountId == null ? "—" : String(status.accountId));
   text("account-code", status.accountCode || "—");
+  text("company-name", status.companyName || "—");
   text("purpose", status.purpose || "—");
   text("expires-at", formatTime(status.expiresAt));
   text("checked-at", `更新于 ${formatTime(status.checkedAt)}`);
