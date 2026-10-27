@@ -21,6 +21,8 @@ describe("local development plugin", () => {
     expect(marketplace.plugins[0].source.path).toBe("./plugins/cxclaw-dev");
     expect(manifest.name).toBe("cxclaw-dev");
     expect(manifest.extensions["com.openai"].interface.displayName).toBe("CXClaw Dev");
+    expect(manifest.extensions["com.openai"].interface.logo).toBe("./assets/cxclaw.svg");
+    expect(readFileSync(join(plugin, "assets", "cxclaw.svg"), "utf8")).toContain("#1D65F5");
     expect(mcp.mcpServers["tenant-panel-dev"].args[0]).toBe("${PLUGIN_ROOT}/plugin-cli.dev.mjs");
     expect(launcher).toContain(join(import.meta.dirname, "..", "dist", "cli.js"));
     expect(launcher).not.toContain("npx");

@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "cxclaw",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "Solvea internal CXClaw assistant for Codex",
   "author": {
     "name": "SolveaCX"
@@ -15,6 +15,9 @@
     "longDescription": "通过钉钉授权访问 Solvea 租户，提供客户支持、Agent 配置、知识库、测试、交付和客户端 SLS 排查能力。",
     "developerName": "SolveaCX",
     "category": "Developer Tools",
+    "brandColor": "#1D65F5",
+    "logo": "./assets/cxclaw.svg",
+    "composerIcon": "./assets/cxclaw.svg",
     "capabilities": ["Read", "Write"],
     "defaultPrompt": ["登录 CXClaw 并选择租户", "排查这个 badcase"]
   }

@@ -123,6 +123,7 @@ export async function prepareDeveloperPlugin(outputRoot = devRoot): Promise<void
   await rm(outputRoot, { recursive: true, force: true });
   await mkdir(join(pluginRoot, ".codex-plugin"), { recursive: true });
   await mkdir(dirname(marketplaceFile), { recursive: true });
+  await cp(join(root, "assets"), join(pluginRoot, "assets"), { recursive: true });
   await cp(join(root, "skills"), join(pluginRoot, "skills"), { recursive: true });
 
   await Promise.all([
