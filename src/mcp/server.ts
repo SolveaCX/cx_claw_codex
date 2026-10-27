@@ -24,7 +24,7 @@ export function createTenantPanelHtml(script: string): string {
   <style>
     :root { color-scheme: light dark; font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     * { box-sizing: border-box; }
-    body { margin: 0; padding: 16px; color: var(--color-text-primary, CanvasText); background: transparent; }
+    body { margin: 0; padding: 32px 16px 16px; color: var(--color-text-primary, CanvasText); background: transparent; }
     .header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
     .eyebrow { margin: 0 0 6px; color: var(--color-text-secondary, GrayText); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
     h1 { margin: 0; font-size: 18px; line-height: 1.35; }

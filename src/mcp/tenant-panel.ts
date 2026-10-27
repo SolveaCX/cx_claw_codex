@@ -19,6 +19,7 @@ type TenantStatus = {
 
 const app = new App({ name: "CXClaw Tenant", version: "1.0.0" });
 const refreshButton = document.querySelector<HTMLButtonElement>("#refresh");
+document.body.style.paddingTop = "32px";
 
 function text(id: string, value: string): void {
   const element = document.querySelector<HTMLElement>(`#${id}`);
