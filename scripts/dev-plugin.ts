@@ -66,7 +66,20 @@ function compatibilityManifest(source: Manifest): Record<string, unknown> {
     author: portable.author,
     repository: portable.repository,
     skills: "./skills/",
+    mcpServers: "./.mcp.json",
     ...openai,
+  };
+}
+
+function mcpManifest(portable: boolean): Record<string, unknown> {
+  const server = {
+    ...(portable ? { type: "stdio" } : {}),
+    command: "node",
+    args: ["${PLUGIN_ROOT}/plugin-cli.dev.mjs", "mcp-server"],
+  };
+  return {
+    ...(portable ? { $schema: "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json" } : {}),
+    mcpServers: { "tenant-panel-dev": server },
   };
 }
 
@@ -115,6 +128,8 @@ export async function prepareDeveloperPlugin(outputRoot = devRoot): Promise<void
   await Promise.all([
     writeFile(join(pluginRoot, "plugin.json"), `${JSON.stringify(developerManifest(source), null, 2)}\n`),
     writeFile(join(pluginRoot, ".codex-plugin", "plugin.json"), `${JSON.stringify(compatibilityManifest(source), null, 2)}\n`),
+    writeFile(join(pluginRoot, "mcp.json"), `${JSON.stringify(mcpManifest(true), null, 2)}\n`),
+    writeFile(join(pluginRoot, ".mcp.json"), `${JSON.stringify(mcpManifest(false), null, 2)}\n`),
     writeFile(join(pluginRoot, "plugin-cli.dev.mjs"), launcherSource(source.version), { mode: 0o755 }),
     writeFile(marketplaceFile, `${JSON.stringify({
       $schema: "https://agent-plugins.org/schemas/1.0.0/marketplace.schema.json",
@@ -130,20 +145,6 @@ export async function prepareDeveloperPlugin(outputRoot = devRoot): Promise<void
       }],
     }, null, 2)}\n`),
   ]);
-}
-
-function removeStandaloneMcp(ignoreMissing = true): void {
-  try {
-    run("codex", ["mcp", "remove", "tenant-panel-dev"], { capture: ignoreMissing });
-  } catch (error) {
-    if (!ignoreMissing) throw error;
-  }
-}
-
-function configureStandaloneMcp(): void {
-  const launcher = join(devRoot, "plugins", "cxclaw-dev", "plugin-cli.dev.mjs");
-  removeStandaloneMcp();
-  run("codex", ["mcp", "add", "tenant-panel-dev", "--", "node", launcher, "mcp-server"]);
 }
 
 function configuredMarketplaceRoot(): string | undefined {
@@ -171,17 +172,21 @@ async function sync(skipBuild: boolean): Promise<void> {
   }
   if (configuredRoot !== devRoot) run("codex", ["plugin", "marketplace", "add", devRoot]);
   run("codex", ["plugin", "add", selector, "--json"]);
-  configureStandaloneMcp();
   console.log([
     "CXClaw Dev is installed from the local workspace.",
     "For the first install, restart the ChatGPT desktop app once.",
-    "After later builds, restart the standalone tenant-panel-dev server from Settings > MCP servers.",
+    "After tenant panel UI builds, invoke tenant.current again to reload the panel resource.",
+    "After MCP server or tool metadata changes, restart the ChatGPT desktop app.",
   ].join("\n"));
 }
 
 async function watch(): Promise<void> {
   await sync(false);
-  console.log("Watching TypeScript bundles. Restart the standalone tenant-panel-dev server from Settings > MCP servers after a rebuild.");
+  console.log([
+    "Watching TypeScript bundles.",
+    "Invoke tenant.current again after tenant panel UI builds.",
+    "Restart the ChatGPT desktop app after MCP server or tool metadata changes.",
+  ].join("\n"));
   const child = spawn("bun", ["x", "tsup", "--watch"], { cwd: root, stdio: "inherit" });
   process.on("SIGINT", () => child.kill("SIGINT"));
   process.on("SIGTERM", () => child.kill("SIGTERM"));
@@ -194,11 +199,9 @@ async function watch(): Promise<void> {
 function status(): void {
   run("codex", ["plugin", "marketplace", "list"]);
   run("codex", ["plugin", "list", "--json"]);
-  run("codex", ["mcp", "get", "tenant-panel-dev", "--json"]);
 }
 
 function remove(): void {
-  removeStandaloneMcp();
   try {
     run("codex", ["plugin", "remove", selector]);
   } catch {
