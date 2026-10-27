@@ -40,6 +40,23 @@ describe("release package layout", () => {
     );
   });
 
+  test("packages the SLG branded plugin icon in both formats", () => {
+    const portableManifest = JSON.parse(readFileSync("plugin.json", "utf8"));
+    const codexManifest = JSON.parse(readFileSync(".codex-plugin/plugin.json", "utf8"));
+    const portableInterface = portableManifest.extensions["com.openai"].interface;
+    const icon = readFileSync("assets/cxclaw.svg", "utf8");
+
+    for (const interfaceConfig of [portableInterface, codexManifest.interface]) {
+      expect(interfaceConfig.brandColor).toBe("#1D65F5");
+      expect(interfaceConfig.logo).toBe("./assets/cxclaw.svg");
+      expect(interfaceConfig.composerIcon).toBe("./assets/cxclaw.svg");
+    }
+    expect(icon).toContain('viewBox="0 0 80 80"');
+    expect(icon).toContain('fill="#1D65F5"');
+    expect(readFileSync("scripts/package-agent-plugin.mjs", "utf8")).toContain('"assets"');
+    expect(readFileSync("scripts/package-codex-plugin.mjs", "utf8")).toContain('"assets"');
+  });
+
   test("both plugin formats include the tenant panel MCP server", () => {
     const portableManifest = readFileSync("mcp.json", "utf8");
     const compatibilityManifest = readFileSync(".mcp.json", "utf8");
