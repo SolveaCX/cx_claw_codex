@@ -163,6 +163,17 @@ bun run check:capabilities
 bun run check:release
 ```
 
+### Codex 插件本地调试
+
+不经过 npm 发版即可调试当前工作区：
+
+```bash
+bun run dev:plugin
+bun run dev:plugin:watch
+```
+
+开发版使用独立的 `cxclaw-dev` 插件，并直接执行当前仓库的构建产物，不会覆盖稳定版。首次安装后只需重启一次 ChatGPT desktop app；后续构建完成后，从 Settings > MCP servers 重启 `tenant-panel-dev` 即可加载新代码。完整说明见 [`docs/plugin-development.md`](docs/plugin-development.md)。
+
 本地执行 CLI：
 
 ```bash

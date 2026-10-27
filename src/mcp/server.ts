@@ -8,6 +8,7 @@ import { loadTenantPanelStatus } from "./tenant-status.js";
 
 const TENANT_PANEL_URI = "ui://cxclaw/tenant-status";
 const MCP_APP_MIME_TYPE = "text/html;profile=mcp-app";
+const DEVELOPMENT_MODE = process.env.CXCLAW_PLUGIN_DEV === "1";
 export const TENANT_PANEL_TOOL_META = {
   ui: { resourceUri: TENANT_PANEL_URI, visibility: ["app"] },
   "openai/ui": { entrypoints: [{ type: "thread" }] } satisfies OpenAIUiToolMetadata,
@@ -45,7 +46,7 @@ export function createTenantPanelHtml(script: string): string {
 <body data-state="loading">
   <div class="header">
     <div>
-      <p class="eyebrow">CXClaw · 全局当前租户</p>
+      <p class="eyebrow">CXClaw${DEVELOPMENT_MODE ? " Dev" : ""} · 全局当前租户</p>
       <h1 id="headline">正在读取租户信息…</h1>
     </div>
     <button id="refresh" class="cursor-interaction" type="button">刷新</button>
@@ -70,13 +71,15 @@ async function tenantPanelHtml(): Promise<string> {
 }
 
 export function createTenantMcpServer(): McpServer {
-  const server = new McpServer({ name: "cxclaw", version: VERSION });
+  const name = DEVELOPMENT_MODE ? "cxclaw-dev" : "cxclaw";
+  const title = DEVELOPMENT_MODE ? "CXClaw Dev 当前租户" : "CXClaw 当前租户";
+  const server = new McpServer({ name, version: VERSION });
   new OpenAIExtensions(server);
 
   server.registerResource(
     "CXClaw current tenant panel",
     TENANT_PANEL_URI,
-    { title: "CXClaw 当前租户", mimeType: MCP_APP_MIME_TYPE },
+    { title, mimeType: MCP_APP_MIME_TYPE },
     async () => ({
       contents: [{
         uri: TENANT_PANEL_URI,
@@ -89,7 +92,7 @@ export function createTenantMcpServer(): McpServer {
   server.registerTool(
     "tenant.current",
     {
-      title: "CXClaw 当前租户",
+      title,
       description: "读取本机 CXClaw 当前选择的全局租户，仅返回非敏感展示字段。",
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
       _meta: TENANT_PANEL_TOOL_META,
