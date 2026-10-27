@@ -8,6 +8,10 @@ import { loadTenantPanelStatus } from "./tenant-status.js";
 
 const TENANT_PANEL_URI = "ui://cxclaw/tenant-status";
 const MCP_APP_MIME_TYPE = "text/html;profile=mcp-app";
+export const TENANT_PANEL_TOOL_META = {
+  ui: { resourceUri: TENANT_PANEL_URI, visibility: ["app"] },
+  "openai/ui": { entrypoints: [{ type: "global" }] } satisfies OpenAIUiToolMetadata,
+};
 
 export function createTenantPanelHtml(script: string): string {
   const safeScript = script.replace(/<\/script/gi, "<\\/script");
@@ -88,10 +92,7 @@ export function createTenantMcpServer(): McpServer {
       title: "CXClaw 当前租户",
       description: "读取本机 CXClaw 当前选择的全局租户，仅返回非敏感展示字段。",
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-      _meta: {
-        ui: { resourceUri: TENANT_PANEL_URI, visibility: ["app"] },
-        "openai/ui": { entrypoints: [{ type: "thread" }] } satisfies OpenAIUiToolMetadata,
-      },
+      _meta: TENANT_PANEL_TOOL_META,
     },
     async () => {
       const status = await loadTenantPanelStatus();
