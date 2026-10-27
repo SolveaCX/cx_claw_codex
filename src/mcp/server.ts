@@ -10,7 +10,7 @@ const TENANT_PANEL_URI = "ui://cxclaw/tenant-status";
 const MCP_APP_MIME_TYPE = "text/html;profile=mcp-app";
 const DEVELOPMENT_MODE = process.env.CXCLAW_PLUGIN_DEV === "1";
 export const TENANT_PANEL_TOOL_META = {
-  ui: { resourceUri: TENANT_PANEL_URI, visibility: ["app"] },
+  ui: { resourceUri: TENANT_PANEL_URI, visibility: ["model", "app"] },
   "openai/ui": { entrypoints: [{ type: "thread" }] } satisfies OpenAIUiToolMetadata,
 };
 

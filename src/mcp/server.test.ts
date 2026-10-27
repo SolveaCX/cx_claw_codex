@@ -12,6 +12,7 @@ describe("tenant MCP App HTML", () => {
 
 describe("tenant MCP App entrypoint", () => {
   test("registers the tenant panel in the conversation side panel", () => {
+    expect(TENANT_PANEL_TOOL_META.ui.visibility).toEqual(["model", "app"]);
     expect(TENANT_PANEL_TOOL_META["openai/ui"].entrypoints).toEqual([{ type: "thread" }]);
   });
 });
