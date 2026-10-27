@@ -10,8 +10,8 @@
     "bin",
     "dist/cli.js",
     "dist/cli.js.map",
-    "dist/tenant-app.js",
-    "dist/tenant-app.js.map",
+    "dist/tenant-panel.js",
+    "dist/tenant-panel.js.map",
     "capabilities.lock.json"
   ],
   "scripts": {

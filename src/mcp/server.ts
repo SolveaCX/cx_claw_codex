@@ -61,7 +61,7 @@ export function createTenantPanelHtml(script: string): string {
 }
 
 async function tenantPanelHtml(): Promise<string> {
-  const script = await readFile(new URL("./tenant-app.js", import.meta.url), "utf8");
+  const script = await readFile(new URL("./tenant-panel.js", import.meta.url), "utf8");
   return createTenantPanelHtml(script);
 }
 

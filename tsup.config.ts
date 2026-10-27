@@ -13,7 +13,7 @@ export default defineConfig([
     banner: { js: "#!/usr/bin/env node" },
   },
   {
-    entry: { "tenant-app": "src/mcp/tenant-app.ts" },
+    entry: { "tenant-panel": "src/mcp/tenant-panel.ts" },
     format: ["iife"],
     target: "es2022",
     platform: "browser",
