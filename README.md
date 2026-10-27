@@ -172,7 +172,7 @@ bun run dev:plugin
 bun run dev:plugin:watch
 ```
 
-开发版使用独立的 `cxclaw-dev` 插件，并直接执行当前仓库的构建产物，不会覆盖稳定版。首次安装后只需重启一次 ChatGPT desktop app；后续构建完成后，从 Settings > MCP servers 重启 `tenant-panel-dev` 即可加载新代码。完整说明见 [`docs/plugin-development.md`](docs/plugin-development.md)。
+开发版使用独立的 `cxclaw-dev` 插件，并把 `tenant-panel-dev` 注册成独立的本地 MCP server，直接执行当前仓库的构建产物，不会覆盖稳定版。首次安装或从旧开发版迁移后只需重启一次 ChatGPT desktop app；后续构建完成后，从 Settings > MCP servers 重启 `tenant-panel-dev` 即可加载新代码。完整说明见 [`docs/plugin-development.md`](docs/plugin-development.md)。
 
 本地执行 CLI：
 
