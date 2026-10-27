@@ -11,7 +11,7 @@ describe("tenant MCP App HTML", () => {
 });
 
 describe("tenant MCP App entrypoint", () => {
-  test("registers the tenant panel in the global sidebar", () => {
-    expect(TENANT_PANEL_TOOL_META["openai/ui"].entrypoints).toEqual([{ type: "global" }]);
+  test("registers the tenant panel in the conversation side panel", () => {
+    expect(TENANT_PANEL_TOOL_META["openai/ui"].entrypoints).toEqual([{ type: "thread" }]);
   });
 });
