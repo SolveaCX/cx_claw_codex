@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
@@ -14,10 +15,14 @@ if (!/^\d+\.\d+\.\d+(?:-(?:canary|dev)\.\d+)?$/.test(version)) {
 }
 
 const npx = process.platform === "win32" ? "npx.cmd" : "npx";
+const cliArgs = process.argv.slice(2);
 const child = spawn(
   npx,
-  ["--yes", `@shulex/cxclawctl@${version}`, ...process.argv.slice(2)],
+  ["--yes", `@shulex/cxclawctl@${version}`, ...cliArgs],
   {
+    // Codex starts plugin MCP servers from the plugin root. Running npx there
+    // makes npm mistake this source checkout for the installed CLI package.
+    cwd: cliArgs[0] === "mcp-server" ? tmpdir() : undefined,
     stdio: "inherit",
     env: {
       ...process.env,
