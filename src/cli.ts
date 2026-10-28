@@ -93,6 +93,7 @@ async function main(args = process.argv.slice(2)) {
   if (command === "api") { if (!action) throw new Error("api command is required"); await runApi(await authenticated(), action, rest); return; }
   if (command === "sls" && action === "query") {
     return print(await slsQuery(await authenticated(), {
+      environment: option(rest, "--env", true),
       from: Number(option(rest, "--from", true)), to: Number(option(rest, "--to", true)),
       query: option(rest, "--query", true)!, line: Number(option(rest, "--line") ?? 50),
       offset: Number(option(rest, "--offset") ?? 0), reverse: flag(rest, "--reverse"),

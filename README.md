@@ -96,6 +96,7 @@ npx --yes @shulex/cxclawctl@latest solvea-desk fetch-tickets --task-id demo
 
 # 直接从本机查询 SLS；from/to 使用 Unix 秒级时间戳
 npx --yes @shulex/cxclawctl@latest sls query \
+  --env test \
   --from <开始时间> \
   --to <结束时间> \
   --query '<查询语句>' \
@@ -145,8 +146,8 @@ npx --yes @shulex/cxclawctl@latest update --install-scheduler
 ## 安全边界
 
 - 登录信息只保存在操作系统安全凭据库。
-- SLS 长期 AK/SK 不下发到客户端；CLI 每次查询只申请短期只读 STS，并直接连接阿里云 SLS。
-- 客户端提供的 `tenantId`、`accountId` 和环境值不能直接作为授权依据，服务端签发的租户上下文才是最终权限边界。
+- SLS 长期 AK/SK 由 Nacos 按环境配置；通过钉钉员工校验后由授权服务经 HTTPS 下发，CLI 只在当前进程内存中使用并直接连接阿里云 SLS。
+- 业务命令仍以服务端签发的租户上下文作为权限边界；SLS 凭据只校验钉钉员工登录，并按客户端明确指定的 `test` 或 `prod` 环境下发。
 - 业务 token 不输出到终端或日志，只在请求对象的生命周期内传给 CLI 的 HTTP client。
 - `main` 分支只用于开发；员工使用由发布流程推进的 `marketplace/stable`、`marketplace/canary` 或 `marketplace/dev`。
 

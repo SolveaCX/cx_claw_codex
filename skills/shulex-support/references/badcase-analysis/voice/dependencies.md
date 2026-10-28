@@ -2,7 +2,7 @@
 
 ## 运行依赖
 
-- SLS：由本机 `node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query` 使用短期只读 STS 直连。
+- SLS：由本机 `node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query` 在钉钉员工校验后获取对应环境 AK/SK 并直连。
 - 语音会话：由 `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-voice-transcripts` / `get-voice-transcript` 查询现有业务 API。
 - 沙箱不需要 VAPI CLI、Twilio CLI、aliyun CLI、本地 `.env` 或平台 token。
 
