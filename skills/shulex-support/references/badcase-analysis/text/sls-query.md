@@ -1,6 +1,6 @@
 # SLS 日志查询
 
-文本 badcase 的日志查询统一执行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query`。CLI 先向 `shulex-cloud` 申请 10～15 分钟只读 STS，再由本机使用 `@alicloud/log` 直连 SLS；临时凭据只驻留内存，禁止写入文件、日志或普通命令输出。
+文本 badcase 的日志查询统一执行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query`。CLI 完成钉钉员工校验后，按必填的 `--env test|prod` 从 `shulex-cloud` 获取对应环境的 SLS AK/SK，再由本机使用 `@alicloud/log` 直连 SLS；凭据只驻留当前进程内存，禁止写入文件、日志或普通命令输出。禁止从历史租户会话推断环境。
 
 ## 基础用法
 
@@ -278,6 +278,6 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query \
 
 ## 配置缺失处理
 
-认证错误统一按 `setup` skill 的登录流程处理，不在本流程重复定义。若返回未选择租户或 SLS 配置缺失，运行
-`node "<PLUGIN_ROOT>/plugin-cli.mjs" tenant current` 定位问题；需要单独诊断凭据状态时再运行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" auth status`。SLS 长期 AK/SK 只存在于
-`shulex-cloud` 配置；CLI 每次查询前申请短期只读 STS，凭据只驻留进程内存。
+认证错误统一按 `setup` skill 的登录流程处理，不在本流程重复定义。每次查询都必须显式传 `--env test|prod`；需要单独诊断登录状态时运行
+`node "<PLUGIN_ROOT>/plugin-cli.mjs" auth status`。若返回 SLS 配置缺失，检查目标环境的 Nacos 配置。SLS 长期 AK/SK 由 `shulex-cloud`
+按环境读取，并在钉钉员工校验通过后下发；凭据只驻留 CLI 当前进程内存。
