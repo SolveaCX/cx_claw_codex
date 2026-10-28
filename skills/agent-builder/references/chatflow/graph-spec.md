@@ -227,27 +227,32 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow inspect \
 node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow deploy \
   --agent-name Example_Chatflow \
   --graph-file /workspace/state/agent-builder/chatflow/chatflow_graph.json \
+  --phase preview \
   --pretty
 
 node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow update \
   --agent-id 2496 \
   --graph-file /workspace/state/agent-builder/chatflow/patch_2496_graph.json \
+  --phase preview \
   --pretty
 
 node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow publish \
   --agent-id 2496 \
   --graph-file /workspace/state/agent-builder/chatflow/patch_2496_graph.json \
+  --phase preview \
   --pretty
 ```
 
 ## Write Discipline
 
-- 新建 agent：校验通过后询问用户是否写入当前环境和 agent 名称；确认后 `deploy`。
+- 新建 agent：校验通过后先 `deploy --phase preview`；展示环境、租户、名称和图摘要，用户确认后再用
+  `--phase commit --confirmation-token-stdin --idempotency-key <key>` 提交。
 - 多个新建 agent 必须逐个 `deploy`，不要在同一条 shell 命令里用 `&` 并发部署。平台
-  `createAgent` 在同租户/项目并发创建时可能返回泛化 `System Error`；builder CLI 有 deploy lock
-  和一次短重试，但操作层仍应顺序创建，避免部分创建成功、部分失败后路由状态不完整。
-- 增量修改：默认 `update` 保存草稿，不发布。
-- 发布：只有用户明确确认后，对同一份 graph 文件执行 `publish`。
+  `createAgent` 在同租户/项目并发创建时可能返回泛化 `System Error`；builder CLI 会按 idempotency key
+  记录本地提交状态，且不会自动重试非幂等的创建请求，但操作层仍应顺序创建，避免部分创建成功、
+  部分失败后路由状态不完整。
+- 增量修改：`update` 同样先 preview，确认后 commit；默认保存草稿，不发布。
+- 发布：只有用户明确确认 preview 后，才对同一份 graph 文件执行 `publish --phase commit`。
 - 部署失败不要回滚；输出错误、agent_id、graph 文件路径。
 
 ## Common Failures

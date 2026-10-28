@@ -67,10 +67,12 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow validate \
     已包含普通工具 ID，并从 Chatflow 专用插件目录按类型绑定当前项目真实的 `TEMPLATE_REPLY` /
     `TRANSFER_TO_HUMAN` 系统插件 ID；同时确认 `transferToHumans=[]`、runtime `prompt` 与 `displayPrompt`
     同步、nextStep 没有被误当成人工接管。
-11. 校验通过后确认是否写入当前环境和 agent 名称；若当前任务先前的整体确认已经明确包含目标环境、名称和
-    保存草稿授权，直接复用，不重复询问。
-12. 用户确认后 deploy 同一份 graph。一次创建多个 CHAT_FLOW agent 时，顺序执行每个 `deploy`；不要用 shell `&` 并发部署多个 agent。
-13. deploy 或现有图 update 后执行一次 `inspect` 回读；逐个检查 LibraryBlock 仍为标准格式。默认只保存草稿，
+11. 校验通过后，对同一份 graph 执行 `deploy --phase preview`，向用户展示环境、租户、Agent 名称和图摘要。
+    preview 只生成短时确认凭证，不创建 Agent。
+12. 用户确认后，对同一份 graph 执行 `deploy --phase commit --confirmation-token-stdin --idempotency-key <key>`；
+    确认凭证只通过 stdin 输入，不放进命令参数、文件或日志。一次创建多个 CHAT_FLOW agent 时，顺序执行；
+    不要用 shell `&` 并发部署多个 agent。
+13. commit 成功后执行一次 `inspect` 回读；逐个检查 LibraryBlock 仍为标准格式。默认只保存草稿，
     除非用户明确要求发布，不执行 `publish`。
 
 本地无网络或尚未准备登录态时，可在 compile 和 validate 后加 `--offline` 做结构预检。离线模式跳过远端 AI 字段、插件存在性和插件参数合同检查；上传前必须联网复核。
@@ -93,15 +95,19 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow inspect \
 node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow update \
   --agent-id <agent_id> \
   --graph-file /workspace/state/agent-builder/chatflow/patch_<agent_id>_graph.json \
+  --phase preview \
   --pretty
 ```
 
-4. 用户明确确认发布后，对同一份 graph 执行 publish：
+4. 用户确认预览后，用 `--phase commit --confirmation-token-stdin --idempotency-key <key>` 保存草稿。
+5. 用户明确确认发布后，对同一份 graph 先执行 `publish --phase preview`，确认后再对同一份 graph 执行
+   `publish --phase commit --confirmation-token-stdin --idempotency-key <key>`：
 
 ```bash
 node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow publish \
   --agent-id <agent_id> \
   --graph-file /workspace/state/agent-builder/chatflow/patch_<agent_id>_graph.json \
+  --phase preview \
   --pretty
 ```
 

@@ -39,8 +39,10 @@ export class SolveaClient {
 
   private get baseUrl() { return this.session.tenant!.businessUrl!.replace(/\/$/, ""); }
   private get env() { return this.session.tenant!.environment; }
+  get environment() { return this.env; }
+  get tenantId() { return this.session.tenant!.accountId; }
 
-  async request<T>(method: string, path: string, body?: unknown, query?: Record<string, string | number | boolean>): Promise<T> {
+  async request<T>(method: string, path: string, body?: unknown, query?: Record<string, string | number | boolean>, requestHeaders?: HeadersInit, maxAttempts = 3): Promise<T> {
     const url = new URL(`${this.baseUrl}${path}`);
     for (const [key, value] of Object.entries(query ?? {})) url.searchParams.set(key, String(value));
     const cookie = this.env === "prod" ? "_token" : "_token_staging";
@@ -51,9 +53,10 @@ export class SolveaClient {
       cookie: `${cookie}=${this.session.tenant!.businessToken}`,
       "x-cxclaw-client-version": process.env.CXCLAW_PLUGIN_VERSION ?? "unknown",
     });
+    for (const [name, value] of new Headers(requestHeaders)) headers.set(name, value);
     if (body !== undefined) headers.set("content-type", "application/json");
     let last: unknown;
-    for (let attempt = 0; attempt < 3; attempt += 1) {
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       try {
         const response = await fetch(url, {
           method,
@@ -76,7 +79,7 @@ export class SolveaClient {
         return value as T;
       } catch (error) {
         last = error;
-        if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 200 * 2 ** attempt));
+        if (attempt + 1 < maxAttempts) await new Promise(resolve => setTimeout(resolve, 200 * 2 ** attempt));
       }
     }
     throw last;
@@ -118,7 +121,10 @@ export class SolveaClient {
   async listAgents(category = "text") { return this.post("/api_v2/gpt/ap/queryAgent", { projectId: Number(await this.projectId()), needRelation: true, noMeta: true, category }); }
   async getAgent(id: string) { return this.post("/api_v2/gpt/ap/queryAgent", { projectId: Number(await this.projectId()), agentId: Number(id), needRelation: true, squareAgent: false }); }
   async getChatflowGraph(id: string) { return this.post("/api_v2/gpt/chatflow/queryGraph/latest", { agentId: Number(id) }); }
-  async createAgent(data: JsonObject) { return this.post("/api_v2/gpt/ap/createAgent", { projectId: Number(await this.projectId()), ...data }); }
+  async createAgent(data: JsonObject, idempotencyKey?: string) {
+    return this.request("POST", "/api_v2/gpt/ap/createAgent", { projectId: Number(await this.projectId()), ...data }, undefined,
+      idempotencyKey ? { "idempotency-key": idempotencyKey, "x-idempotency-key": idempotencyKey } : undefined, 1);
+  }
   async updateAgent(data: JsonObject) {
     const payload: JsonObject = { ...data, projectId: Number(await this.projectId()) };
     if (payload.agentId === undefined && payload.id !== undefined) payload.agentId = payload.id;
@@ -142,6 +148,7 @@ export class SolveaClient {
   }
 
   async listPlugins() { return this.post("/api_v2/gpt/ap/queryPlugin", { projectId: Number(await this.projectId()), needRelation: false }); }
+  async listChatflowPlugins(forAgentNode = true) { return this.post("/api_v2/gpt/chatflow/queryPlugin", { projectId: Number(await this.projectId()), forAgentNode }); }
   async getPlugin(id: string) { return this.post("/api_v2/gpt/ap/queryPlugin", { projectId: Number(await this.projectId()), pluginId: Number(id), convertStrategyV5: true }); }
   async createPlugin(data: JsonObject) { return this.post("/api_v2/gpt/ap/createPlugin", { projectId: Number(await this.projectId()), ...data }); }
   async updatePlugin(data: JsonObject) {
