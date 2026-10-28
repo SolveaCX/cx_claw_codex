@@ -56,6 +56,21 @@ describe("cross-module API migration contracts", () => {
     expect((requests.at(-1)?.body?.meta as Record<string, unknown>).draft_flow_updatetime).toBeNumber();
   });
 
+  test("sends an idempotency key and never retries agent creation", async () => {
+    let createAttempts = 0;
+    let headers: Headers | undefined;
+    globalThis.fetch = (async (input, init) => {
+      if (String(input).endsWith("/api_v2/gpt/bots")) return new Response(JSON.stringify([{ projectId: 302, id: 723 }]), { status: 200 });
+      createAttempts += 1;
+      headers = new Headers(init?.headers);
+      return new Response(JSON.stringify({ message: "temporary failure" }), { status: 503 });
+    }) as typeof fetch;
+    await expect(new SolveaClient(session).createAgent({ name: "Agent" }, "deploy-1")).rejects.toThrow("HTTP 503");
+    expect(createAttempts).toBe(1);
+    expect(headers?.get("idempotency-key")).toBe("deploy-1");
+    expect(headers?.get("x-idempotency-key")).toBe("deploy-1");
+  });
+
   test("uses the v4 strategy update endpoint for updates and toggles", async () => {
     const requests = capture();
     const client = new SolveaClient(session);
