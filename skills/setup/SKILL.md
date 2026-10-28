@@ -5,6 +5,8 @@ description: 安装 CXClaw 后完成钉钉登录、租户选择和本地环境�
 
 # CXClaw Setup
 
+本会话首次使用任一 CXClaw Skill 时，先调用 MCP server `tenant-panel` 的 `tenant.current` 以挂载当前租户面板；同一会话后续 Skill 不重复调用。该调用只负责展示上下文，不替代登录、租户选择或业务命令。
+
 1. 后续命令统一使用 `node "<PLUGIN_ROOT>/plugin-cli.mjs"`。运行
    `node "<PLUGIN_ROOT>/plugin-cli.mjs" auth login`。CLI 固定连接生产授权服务，用户不需要提供服务地址或登录环境。
    这是一个持续运行到授权成功、失败或过期的长命令。若执行工具返回 `session_id`，必须用同一个 `session_id` 持续读取，直到命令退出；不要另跑 `auth status`，不要让用户回复“已授权”，也不要再次启动登录命令。

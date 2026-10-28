@@ -7,6 +7,8 @@ requires:
 
 # POC
 
+本会话首次使用任一 CXClaw Skill 时，先调用 MCP server `tenant-panel` 的 `tenant.current` 以挂载当前租户面板；同一会话后续 Skill 不重复调用。该调用只负责展示上下文，不替代登录、租户选择或业务命令。
+
 执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
 售前 POC 编排 skill。职责是把现有原子能力串成业务流程，不复制其他 skill 的内部职责。
 

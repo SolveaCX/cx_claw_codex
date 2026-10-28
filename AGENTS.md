@@ -21,6 +21,13 @@ bun run check:capabilities
 bun run check:release
 ```
 
+### 本地开发插件验证（强制）
+
+- 每次完成会影响 Codex 插件的开发变更后，在报告完成前必须运行 `bun run dev:plugin`，重新构建并同步 `cxclaw-dev`；仅检查工作区源码、运行单元测试或执行 `bun run build` 不能替代开发插件重载。
+- 影响范围包括 Skill、CLI、MCP server、租户面板、插件 manifest、launcher、capability 和插件资源。纯发布文档或不进入插件包的仓库说明变更可以不重载。
+- 重载后必须针对本次改动验证已安装的 `cxclaw-dev`，不能只验证源码目录，也不能用 stable 插件代替。Skill 变更至少核对安装缓存中的对应文件；CLI 变更通过开发插件 launcher 执行相关命令；MCP server、tool metadata 或面板变更按同步命令提示重新连接或重启客户端，再调用相关工具验证。
+- 如果重载或已安装插件验证失败，必须保留现场并报告失败命令和输出，不得宣称改造完成。
+
 不要提交 `dist/`、`node_modules/` 或 `_tmp_/` 中的文件。不要把 token、AK/SK、钉钉 Secret、测试账号或其他凭据写入源码、测试、文档和日志。
 
 ## 稳定版发布规则
