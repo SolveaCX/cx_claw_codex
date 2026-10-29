@@ -278,6 +278,6 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query \
 
 ## 配置缺失处理
 
-认证错误统一按 `setup` skill 的登录流程处理，不在本流程重复定义。查询默认使用生产环境，测试环境查询才显式传 `--env test`；需要单独诊断登录状态时运行
+认证错误统一按 `cxclawctl` skill 的登录流程处理，不在本流程重复定义。查询默认使用生产环境，测试环境查询才显式传 `--env test`；需要单独诊断登录状态时运行
 `node "<PLUGIN_ROOT>/plugin-cli.mjs" auth status`。若返回 SLS 配置缺失，检查目标环境的 Nacos 配置。SLS 长期 AK/SK 由 `shulex-cloud`
 按环境读取，并在钉钉员工校验通过后下发；凭据只驻留 CLI 当前进程内存。

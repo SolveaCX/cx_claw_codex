@@ -41,6 +41,17 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" <command>
 - 业务操作前可执行 `context current --context <contextId>`，确认并向用户展示 `contextId`、`profileId`、`accountId`、`environment` 和 `purpose`。
 - 不把 tenant token 写入 `process.env`，不从全局“当前租户”猜测业务归属。
 
+## 安装后自检
+
+首次安装或升级插件后，在登录并选择目标租户前后按需执行：
+
+```bash
+node "<PLUGIN_ROOT>/plugin-cli.mjs" doctor
+node "<PLUGIN_ROOT>/plugin-cli.mjs" update --install-scheduler
+```
+
+只有两个命令都成功，才能报告本地环境安装完成。普通业务请求不需要重复执行这两个命令。
+
 常用命令：
 
 ```bash

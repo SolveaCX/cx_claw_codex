@@ -9,7 +9,7 @@
 	"repository": "https://github.com/SolveaCX/cx_claw_codex",
   "extensions": {
     "com.openai": {
-		"onboardingSkill": "./skills/setup/SKILL.md",
+		"onboardingSkill": "./skills/cxclawctl/SKILL.md",
 		"interface": {
 			"displayName": "CXClaw",
 			"shortDescription": "Solvea 内部跨租户智能助手",
