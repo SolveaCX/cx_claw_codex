@@ -58,7 +58,6 @@ const reportPaths: Record<string, string> = {
   "report-transcript": "/api_v2/as_bot/statement/transcript", "report-message": "/api_v2/as_bot/statement/message", "report-agent": "/api_v2/as_bot/statement/agent", "report-intent": "/api_v2/as_bot/statement/transcript/intent", "report-satisfaction": "/api_v2/as_bot/statement/satisfaction/feedback", "report-satisfaction-list": "/api_v2/as_bot/statement/satisfaction/message", "report-knowledge": "/api_v2/as_bot/statement/knowledge", "report-escalation": "/api_v2/as_bot/statement/transcript/reason2", "report-livechat": "/api_v2/as_bot/livechat/report/summary", "report-livechat-table": "/api_v2/as_bot/livechat/report/table", "report-inspection": "/api_v2/intelli/inspection/ticket/count", "report-self-learning": "/api_v2/as_bot/statement/self-learning",
 };
 for (const [name, path] of Object.entries(reportPaths)) handlers[name] = async (c, a) => c.rawCall("POST", path, await reportBody(a));
-
 export const REMAINING_COMMANDS = new Set(Object.keys(handlers));
 export async function runRemainingCommand(client: SolveaClient, command: string, args: string[]) {
   const handler = handlers[command];

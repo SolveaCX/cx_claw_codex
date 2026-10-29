@@ -7,6 +7,15 @@
 - `main` 是开发分支，不直接代表员工正在使用的版本；员工通道由 `marketplace/stable`、`marketplace/canary` 和 `marketplace/dev` 指向。
 - 修改子命令或 Skill 后，必须同步检查 `capabilities.lock.json`；优先运行 `bun run check:capabilities -- --write` 生成，不要手工维护可生成内容。
 
+## CLI 命令规范
+
+- 已迁移的业务命令统一使用 `cxclawctl <resource> <action>`，例如 `cxclawctl analytics messages`、`cxclawctl agent list`。
+- `resource`、`action` 和内部兼容命令名只能使用小写 kebab-case；禁止使用驼峰、下划线和通配符。
+- 新能力必须直接在对应资源 handler 中实现并显式注册。禁止先新增 `api analytics-messages`、`api chat-report-*` 一类旧式扁平命令，再从新命令转发过去。
+- `api <command>` 只用于尚未迁移的兼容能力。命令迁入资源注册表后，必须拒绝继续从 `api` 入口调用。
+- 禁止使用 `startsWith()` 或其他前缀匹配，把一组未登记的命令兜底到同一个实现。每个公开 action 必须有明确映射和请求级测试。
+- 新增或修改命令后，必须运行 CLI 命名校验、相关测试和 `bun run check:capabilities`，并确认 `capabilities.lock.json` 不包含旧式别名或通配符命令。
+
 ## 开发检查
 
 提交代码或创建 PR 前至少运行：

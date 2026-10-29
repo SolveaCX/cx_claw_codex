@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { authenticated, login, logout, publicAuthStatus } from "./auth.js";
 import { flag, option, positionals } from "./args.js";
 import { runApi } from "./business.js";
-import { isResourceCommand, resourceHelp, runResourceCommand } from "./commands/resources.js";
+import { isResourceCommand, resourceCommandForImplementation, resourceHelp, runResourceCommand } from "./commands/resources.js";
 import { diagnose } from "./doctor.js";
 import { query as slsQuery } from "./sls.js";
 import { loadSession, saveSession } from "./store.js";
@@ -18,6 +18,7 @@ import { runDelivery, runPoc } from "./workflows/delivery.js";
 import { runKbBuilder } from "./workflows/kb-builder.js";
 import { runDesk } from "./workflows/desk.js";
 import { errorOutput } from "./cli-error.js";
+import { isFlatAnalyticsCommand } from "./commands/analytics.js";
 
 const print = (value: unknown) => console.log(JSON.stringify(value, null, 2));
 const usage = () => [
@@ -90,7 +91,13 @@ async function main(args = process.argv.slice(2)) {
   if (command === "poc") return print(await runPoc(["classify", "plan", "report", "render", "render-report", "excel", "gen-excel", "manual", "render-summary"].includes(action ?? "") ? undefined : await authenticated(), action, rest));
   if (command === "kb-builder") return print(await runKbBuilder(["crawl", "directory-plan", "extract-web-qa", "extract-ticket-qa", "batch-extract-ticket-qa"].includes(action ?? "") ? undefined : await authenticated(), action, rest));
   if (command === "solvea-desk") return print(await runDesk(await authenticated(), action, rest));
-  if (command === "api") { if (!action) throw new Error("api command is required"); await runApi(await authenticated(), action, rest); return; }
+  if (command === "api") {
+    if (!action) throw new Error("api command is required");
+    if (isFlatAnalyticsCommand(action)) throw new Error("flat analytics commands are not supported; use cxclawctl analytics <action>");
+    const publicCommand = resourceCommandForImplementation(action);
+    if (publicCommand) throw new Error(`use the resource command instead: cxclawctl ${publicCommand}`);
+    await runApi(await authenticated(), action, rest); return;
+  }
   if (command === "sls" && action === "query") {
     return print(await slsQuery(await authenticated(), {
       environment: option(rest, "--env", true),

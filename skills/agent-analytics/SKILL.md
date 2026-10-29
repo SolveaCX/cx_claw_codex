@@ -28,7 +28,7 @@ requires:
 3. **应用时区和过滤条件**：Agent 看板使用 `startDate` / `endDate`（`YYYY-MM-DD`），可选 `botId`、`channel`（或 `touchPoint`）、`intentId`、`agentId`；前端未选择渠道表示全部渠道，不要自动补 `LIVE_CHAT`。标记为旧版的 `report-*` 才使用毫秒时间戳和 `timeOffset=8`。
 4. **分别调用接口**：每个统计或 Agent 会话记录请求独立执行。不要使用 `&&` 把整批命令串起来，避免一个接口失败后跳过全部后续数据。
 5. **阶段性输出进展**：每完成一类指标，简要说明已拿到什么、缺少什么、下一步查什么。
-6. **按需下钻 Agent 会话记录**：复用当前查询的日期范围和适用过滤条件；`chat-report-inbox-scripts` 或 chat ID 可作为下钻入口。分页直到 `hasNext=false` 才能声称明细完整。
+6. **按需下钻 Agent 会话记录**：复用当前查询的日期范围和适用过滤条件；`analytics inbox-scripts` 或 chat ID 可作为下钻入口。分页直到 `hasNext=false` 才能声称明细完整。
 7. **形成结论**：说明时间范围、时区、过滤条件、数据完整性、不可用指标和异常变化。
 
 ## 数据边界
@@ -41,29 +41,29 @@ requires:
 
 ## CLI 入口
 
-所有数据通过以下入口获取：
+所有数据通过以下资源化入口获取：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api <command> ... --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" analytics <action> ... --pretty
 ```
 
 常用命令：
 
 | 场景 | 命令 |
 |---|---|
-| 服务能力（工单量、进线解决率、转人工率） | `chat-report-tickets` |
-| 服务能力（消息量、AI 回复率） | `chat-report-messages` |
-| 服务质量（CSAT 满意度、点赞点踩数、满意率） | `chat-report-satisfaction` |
-| 服务质量（首响时效、AI/人工平均首次响应耗时） | `chat-report-first-response` |
-| 服务收益（AI 售后挽回率） | `chat-report-return-retention` |
-| 风险与质检（规则命中与预警） | `chat-report-inspection-results` |
-| 意图工单分布与趋势 | `chat-report-intents` |
-| 智能体工单分布与趋势 | `chat-report-agents` |
-| 会话下钻查询脚本 | `chat-report-inbox-scripts` |
-| 旧版报表（仅用户明确指定） | `report-*` |
-| 旧版知识、LiveChat、质检、自学习等 | 对应 `report-*`（仅用户明确指定旧版） |
-| 收件箱 Agent 会话记录明细 | `list-transcripts` |
-| 单条完整 Agent 会话记录 | `get-transcript` |
+| 服务能力（工单量、进线解决率、转人工率） | `analytics tickets` |
+| 服务能力（消息量、AI 回复率） | `analytics messages` |
+| 服务质量（CSAT 满意度、点赞点踩数、满意率） | `analytics satisfaction` |
+| 服务质量（首响时效、AI/人工平均首次响应耗时） | `analytics first-response` |
+| 服务收益（AI 售后挽回率） | `analytics return-retention` |
+| 风险与质检（规则命中与预警） | `analytics inspection-results` |
+| 意图工单分布与趋势 | `analytics intents` |
+| 智能体工单分布与趋势 | `analytics agents` |
+| 会话下钻查询脚本 | `analytics inbox-scripts` |
+| 旧版报表（仅用户明确指定） | `api report-*` |
+| 旧版知识、LiveChat、质检、自学习等 | `api report-*`（仅用户明确指定旧版） |
+| 收件箱 Agent 会话记录明细 | `transcript list` |
+| 单条完整 Agent 会话记录 | `transcript get` |
 
 CLI 命令、参数和字段口径以本 skill 的 references 为准。遇到未知命令或字段时先回读对应 reference，不要猜测接口。
 

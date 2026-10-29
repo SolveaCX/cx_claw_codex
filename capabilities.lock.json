@@ -290,15 +290,9 @@
       "execution": "local-cli"
     },
     {
-      "resource": "mock",
-      "action": "query",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" mock query",
-      "execution": "local-cli"
-    },
-    {
-      "resource": "mock",
-      "action": "replace",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" mock replace",
+      "resource": "tool",
+      "action": "run",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" tool run",
       "execution": "local-cli"
     },
     {
@@ -570,6 +564,60 @@
       "action": "result",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" chat result",
       "execution": "local-cli"
+    },
+    {
+      "resource": "analytics",
+      "action": "tickets",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" analytics tickets",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "analytics",
+      "action": "messages",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" analytics messages",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "analytics",
+      "action": "intents",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" analytics intents",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "analytics",
+      "action": "agents",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" analytics agents",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "analytics",
+      "action": "satisfaction",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" analytics satisfaction",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "analytics",
+      "action": "first-response",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" analytics first-response",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "analytics",
+      "action": "return-retention",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" analytics return-retention",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "analytics",
+      "action": "inspection-results",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" analytics inspection-results",
+      "execution": "local-cli"
+    },
+    {
+      "resource": "analytics",
+      "action": "inbox-scripts",
+      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" analytics inbox-scripts",
+      "execution": "local-cli"
     }
   ],
   "solveaApiCommands": [
@@ -592,50 +640,8 @@
       "writeConfirmation": "cli-policy"
     },
     {
-      "name": "chat",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api chat",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "chat-async",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api chat-async",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "chat-report-*",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api chat-report-*",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
       "name": "chat-stream",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api chat-stream",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "create-agent",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api create-agent",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "create-custom-quality-rule",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api create-custom-quality-rule",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "create-folder",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api create-folder",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "create-intent",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api create-intent",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
@@ -658,50 +664,8 @@
       "writeConfirmation": "cli-policy"
     },
     {
-      "name": "create-managed-ai-field",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api create-managed-ai-field",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "create-plugin",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api create-plugin",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
       "name": "create-product-knowledge",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api create-product-knowledge",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "create-quality-alert-rule",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api create-quality-alert-rule",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "create-strategy",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api create-strategy",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "create-template",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api create-template",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "delete-custom-quality-rule",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api delete-custom-quality-rule",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "delete-directory",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api delete-directory",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
@@ -720,30 +684,6 @@
     {
       "name": "delete-label-node",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api delete-label-node",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "delete-managed-ai-field",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api delete-managed-ai-field",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "delete-plugin",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api delete-plugin",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "delete-quality-alert-rule",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api delete-quality-alert-rule",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "delete-templates",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api delete-templates",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
@@ -772,38 +712,8 @@
       "writeConfirmation": "cli-policy"
     },
     {
-      "name": "get-agent",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-agent",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "get-ai-field-guide",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-ai-field-guide",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "get-async-result",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-async-result",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
       "name": "get-batch-test-tasks",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-batch-test-tasks",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "get-chat-context",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-chat-context",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "get-chatflow-graph",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-chatflow-graph",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
@@ -814,26 +724,8 @@
       "writeConfirmation": "cli-policy"
     },
     {
-      "name": "get-custom-quality-rule",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-custom-quality-rule",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
       "name": "get-export-tasks",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-export-tasks",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "get-intent",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-intent",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "get-knowledge",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-knowledge",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
@@ -856,50 +748,8 @@
       "writeConfirmation": "cli-policy"
     },
     {
-      "name": "get-managed-ai-field",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-managed-ai-field",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "get-plugin",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-plugin",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
       "name": "get-project",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-project",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "get-quality-alert-message",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-quality-alert-message",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "get-quality-alert-rule",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-quality-alert-rule",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "get-quality-rule",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-quality-rule",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "get-quality-status",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-quality-status",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "get-transcript",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api get-transcript",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
@@ -910,116 +760,14 @@
       "writeConfirmation": "cli-policy"
     },
     {
-      "name": "initialize-ai-fields",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api initialize-ai-fields",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-agent-ai-fields",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-agent-ai-fields",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-agents",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-agents",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-ai-fields",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-ai-fields",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-directories",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-directories",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-entities",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-entities",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-intents",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-intents",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
       "name": "list-isolation-keywords",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-isolation-keywords",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
-      "name": "list-knowledge",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-knowledge",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-knowledge-tags",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-knowledge-tags",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
       "name": "list-label-groups",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-label-groups",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-managed-ai-fields",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-managed-ai-fields",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-plugins",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-plugins",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-quality-alert-messages",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-quality-alert-messages",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-quality-alert-rules",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-quality-alert-rules",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-quality-rules",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-quality-rules",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-strategies",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-strategies",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-templates",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-templates",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "list-transcripts",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api list-transcripts",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
@@ -1138,44 +886,8 @@
       "writeConfirmation": "cli-policy"
     },
     {
-      "name": "run-plugin",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api run-plugin",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "set-quality-status",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api set-quality-status",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
       "name": "submit-batch-test",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api submit-batch-test",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "toggle-intent",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api toggle-intent",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "toggle-managed-ai-field",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api toggle-managed-ai-field",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "toggle-strategy",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api toggle-strategy",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "update-agent",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-agent",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
@@ -1186,38 +898,14 @@
       "writeConfirmation": "cli-policy"
     },
     {
-      "name": "update-custom-quality-rule",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-custom-quality-rule",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "update-directory",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-directory",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
       "name": "update-document-content",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-document-content",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
     {
-      "name": "update-intent",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-intent",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
       "name": "update-isolation-keyword",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-isolation-keyword",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "update-knowledge",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-knowledge",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
@@ -1234,44 +922,8 @@
       "writeConfirmation": "cli-policy"
     },
     {
-      "name": "update-managed-ai-field",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-managed-ai-field",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "update-plugin",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-plugin",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
       "name": "update-product-knowledge",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-product-knowledge",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "update-quality-alert-rule",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-quality-alert-rule",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "update-quality-rule",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-quality-rule",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "update-strategy",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-strategy",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "update-template",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api update-template",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
@@ -1284,12 +936,6 @@
     {
       "name": "upload-labels",
       "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api upload-labels",
-      "execution": "local-cli",
-      "writeConfirmation": "cli-policy"
-    },
-    {
-      "name": "upload-qa",
-      "command": "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" api upload-qa",
       "execution": "local-cli",
       "writeConfirmation": "cli-policy"
     },
