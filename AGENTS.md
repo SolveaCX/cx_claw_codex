@@ -30,6 +30,8 @@ bun run check:capabilities
 bun run check:release
 ```
 
+每次完成本仓库的代码、Skill、manifest、MCP 或文档改动，并完成相应验证后，必须执行 `bun run dev:plugin`，重新构建并同步本地 `cxclaw-dev` 开发插件。不得只报告源码已修改而遗漏开发插件重载。若修改了 `src/mcp/server.ts`、MCP tool metadata、manifest 或 MCP 配置，还必须明确提醒用户完全退出并重新打开 ChatGPT desktop app；当前宿主没有可依赖的 MCP server 热重载能力。
+
 不要提交 `dist/`、`node_modules/` 或 `_tmp_/` 中的文件。不要把 token、AK/SK、钉钉 Secret、测试账号或其他凭据写入源码、测试、文档和日志。
 
 ## 稳定版发布规则

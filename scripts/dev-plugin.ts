@@ -44,7 +44,7 @@ function developerManifest(source: Manifest): Record<string, unknown> {
     extensions: {
       "com.openai": {
         ...openai,
-        onboardingSkill: "./skills/setup/SKILL.md",
+        onboardingSkill: "./skills/cxclawctl/SKILL.md",
         interface: {
           ...interfaceConfig,
           displayName: "CXClaw Dev",

@@ -4,9 +4,10 @@ import { createTenantPanelHtml, TENANT_PANEL_TOOL_META } from "./server.js";
 describe("tenant MCP App HTML", () => {
   test("embeds the bundled app without allowing a closing script tag", () => {
     const html = createTenantPanelHtml('console.log("ok");</script><p>escaped</p>');
-    expect(html).toContain("CXClaw · 全局当前租户");
+    expect(html).toContain("CXClaw · 当前会话租户");
     expect(html).toContain("padding: 32px 16px 16px");
     expect(html).toContain('<dt>公司名</dt><dd id="company-name">—</dd>');
+    expect(html).toContain('<dt>Context</dt><dd id="context-id">—</dd>');
     expect(html).toContain("<\\/script><p>escaped</p>");
     expect(html.match(/<\/script>/g)).toHaveLength(1);
   });

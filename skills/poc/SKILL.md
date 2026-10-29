@@ -7,7 +7,6 @@ requires:
 
 # POC
 
-执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
 售前 POC 编排 skill。职责是把现有原子能力串成业务流程，不复制其他 skill 的内部职责。
 
 ## 边界原则
@@ -40,7 +39,7 @@ requires:
 node "<PLUGIN_ROOT>/plugin-cli.mjs" poc plan --init
 ```
 
-阶段完成后用 `delivery plan` 更新顶层状态，例如：
+阶段完成后用 `poc plan` 更新顶层状态，例如：
 
 ```bash
 node "<PLUGIN_ROOT>/plugin-cli.mjs" poc plan \

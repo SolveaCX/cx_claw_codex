@@ -7,7 +7,6 @@ requires:
 
 # Shulex Desk
 
-执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
 Shulex Desk / Tars 客服台工单的唯一入口。它与 GPT 标签树配置、CX 产品售后工单是不同的数据和操作面，不要混用。
 
 ## 场景路由

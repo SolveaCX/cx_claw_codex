@@ -7,7 +7,6 @@ requires:
 
 # Agent Builder
 
-执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
 ## 任务分流
 
 用户没有明确指定 Agent 形态时，默认按 CHAT_FLOW 需求处理。只有用户明确指定 SINGLE_AGENT、语音 Agent，或明确要查看、维护、解释、迁移已有 MULTI_AGENT 时，才进入对应分支。MULTI_AGENT 是 legacy 形态，不支持新建；用户要求新建 multi 时，明确说明不支持新建并推荐改用 CHAT_FLOW。

@@ -23,6 +23,16 @@ export function optionList(args: string[], name: string) {
 
 export function flag(args: string[], name: string) { return args.includes(name); }
 
+export function stripOptions(args: string[], names: string[]) {
+  const remove = new Set(names);
+  const out: string[] = [];
+  for (let index = 0; index < args.length; index += 1) {
+    if (remove.has(args[index])) { index += 1; continue; }
+    out.push(args[index]);
+  }
+  return out;
+}
+
 export function positionals(args: string[]) {
   const out: string[] = [];
   for (let index = 0; index < args.length; index += 1) {

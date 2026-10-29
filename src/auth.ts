@@ -1,23 +1,23 @@
 import open from "open";
 import { HttpError, post } from "./http.js";
-import { deleteSession, loadSession, saveSession, SessionNotFoundError } from "./store.js";
-import type { DeviceStart, Session, TokenResponse } from "./types.js";
+import { deleteAllSessions, deleteAuthSession, loadAuthSession, saveAuthSession, SessionNotFoundError } from "./store.js";
+import type { AuthSession, DeviceStart, TokenResponse } from "./types.js";
 import { VERSION } from "./version.js";
 import { notAuthenticated } from "./cli-error.js";
 
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
 
 interface DeviceAuthorizationRuntime {
-  start: (session: Session) => Promise<DeviceStart>;
-  poll: (session: Session, deviceCode: string) => Promise<TokenResponse>;
+  start: (session: AuthSession) => Promise<DeviceStart>;
+  poll: (session: AuthSession, deviceCode: string) => Promise<TokenResponse>;
   openBrowser: (url: string) => Promise<void>;
-  save: (session: Session) => Promise<void>;
+  save: (session: AuthSession) => Promise<void>;
   sleep: (ms: number) => Promise<unknown>;
   now: () => number;
   log: (message: string) => void;
 }
 
-export function publicAuthStatus(session: Session) {
+export function publicAuthStatus(session: AuthSession) {
   return { ok: true, loggedIn: true, email: session.email, channel: session.channel, accessExpiresAt: session.accessExpiry };
 }
 
@@ -25,8 +25,8 @@ export function isAuthorizationPending(error: unknown): boolean {
   return error instanceof HttpError && (error.status === 428 || error.responseCode === 428);
 }
 
-export async function authorizeDevice(channel:Session["channel"], runtime:DeviceAuthorizationRuntime):Promise<Session>{
-  const session:Session={channel,accessToken:"",refreshToken:"",accessExpiry:0,employeeId:"",email:""};
+export async function authorizeDevice(channel:AuthSession["channel"], runtime:DeviceAuthorizationRuntime):Promise<AuthSession>{
+  const session:AuthSession={channel,accessToken:"",refreshToken:"",accessExpiry:0,employeeId:"",email:""};
   const start=await runtime.start(session);
   try {
     await runtime.openBrowser(start.verificationUriComplete);
@@ -49,35 +49,35 @@ export async function authorizeDevice(channel:Session["channel"], runtime:Device
   throw new Error("device authorization expired");
 }
 
-async function runLogin(channel:Session["channel"]):Promise<Session>{
+async function runLogin(channel:AuthSession["channel"]):Promise<AuthSession>{
   return authorizeDevice(channel,{
     start: session=>post<DeviceStart>(session,"/auth/device/start",{clientVersion:VERSION}),
     poll: (session,deviceCode)=>post<TokenResponse>(session,"/auth/device/token",{deviceCode,clientVersion:VERSION}),
     openBrowser: async url=>{await open(url);},
-    save: saveSession,
+    save: saveAuthSession,
     sleep,
     now: Date.now,
     log: message=>console.error(message),
   });
 }
 
-export function login(channel:Session["channel"]):Promise<Session>{
+export function login(channel:AuthSession["channel"]):Promise<AuthSession>{
   return runLogin(channel);
 }
 
-export async function ensureAccess(session:Session):Promise<Session>{
+export async function ensureAccess(session:AuthSession):Promise<AuthSession>{
   if(session.accessToken && Date.now()/1000+30<session.accessExpiry)return session;
   const token=await post<TokenResponse>(session,"/auth/refresh",{refreshToken:session.refreshToken,clientVersion:VERSION});
-  Object.assign(session,{accessToken:token.accessToken,refreshToken:token.refreshToken,accessExpiry:Math.floor(Date.now()/1000)+token.expiresIn}); await saveSession(session); return session;
+  Object.assign(session,{accessToken:token.accessToken,refreshToken:token.refreshToken,accessExpiry:Math.floor(Date.now()/1000)+token.expiresIn}); await saveAuthSession(session); return session;
 }
 
 interface AuthenticationRuntime {
-  load: () => Promise<Session>;
-  refresh: (session: Session) => Promise<Session>;
+  load: () => Promise<AuthSession>;
+  refresh: (session: AuthSession) => Promise<AuthSession>;
   remove: () => Promise<void>;
 }
 
-export async function resolveAuthenticated(runtime: AuthenticationRuntime):Promise<Session>{
+export async function resolveAuthenticated(runtime: AuthenticationRuntime):Promise<AuthSession>{
   try {
     return await runtime.refresh(await runtime.load());
   } catch(error) {
@@ -92,7 +92,7 @@ export async function resolveAuthenticated(runtime: AuthenticationRuntime):Promi
   }
 }
 
-export function authenticated():Promise<Session>{
-  return resolveAuthenticated({load:loadSession,refresh:ensureAccess,remove:deleteSession});
+export function authenticated():Promise<AuthSession>{
+  return resolveAuthenticated({load:loadAuthSession,refresh:ensureAccess,remove:deleteAuthSession});
 }
-export async function logout(){let session:Session|undefined;try{session=await loadSession()}catch{};if(session?.refreshToken)await post(session,"/auth/logout",{refreshToken:session.refreshToken}).catch(()=>undefined);await deleteSession()}
+export async function logout(){let session:AuthSession|undefined;try{session=await loadAuthSession()}catch{};if(session?.refreshToken)await post(session,"/auth/logout",{refreshToken:session.refreshToken}).catch(()=>undefined);await deleteAllSessions()}

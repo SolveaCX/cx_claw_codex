@@ -75,15 +75,13 @@ CHAT_FLOW Agent 不能用 `metadata.specified_agent_id`（或老版 `specified_a
 
 ## 批量测试
 
-> POC 测试业务流程归属 `poc` skill，交付回归业务流程归属 `delivery` skill。
+> POC 测试业务流程归属 `poc` skill；独立交付回归 Skill 已移除。
 > 测试 runner 已归属到对应业务 skill。
 
 ### 用法
 
 ```bash
 # POC 测试：先读 /skills/poc/interfaces/poc-test.md
-# Delivery 回归：先读 /skills/delivery/interfaces/delivery-test.md
-
 # 校验 chatflow 图结构（chatflow 能力在 agent-builder skill 下）
 node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder validate --data-file graph.json
 ```
@@ -156,7 +154,6 @@ Step 2: 转化为测试用例
 
 Step 3: 批量测试
   POC 按 /skills/poc/interfaces/poc-test.md
-  Delivery 按 /skills/delivery/interfaces/delivery-test.md
   检查：意图识别、节点执行链路、INTERNAL_ERROR、回复质量
 
 Step 4: 分析结果 → 生成优化方案

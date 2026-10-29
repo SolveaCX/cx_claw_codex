@@ -131,6 +131,8 @@ function confirmationToken(session: Session, action: MutationAction, args: strin
     agentId: option(args, "--agent-id") ?? null,
     agentName: option(args, "--agent-name") ?? null,
     graphSha256: digest(graph),
+    contextId: session.runtimeContext?.contextId ?? null,
+    profileId: session.runtimeContext?.profileId ?? null,
     tenantContext: session.tenant?.context ?? null,
     expiresAt: Date.now() + 10 * 60 * 1000,
   };
@@ -157,7 +159,7 @@ function verifyConfirmationToken(session: Session, token: string, action: Mutati
   let payload: JsonObject;
   try { payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as JsonObject; } catch { throw new Error("invalid confirmation token payload"); }
   if (Number(payload.expiresAt) < Date.now()) throw new Error("confirmation token expired; run preview again");
-  if (payload.action !== action || payload.graphSha256 !== digest(graph) || payload.tenantContext !== (session.tenant?.context ?? null)) {
+  if (payload.action !== action || payload.graphSha256 !== digest(graph) || payload.contextId !== (session.runtimeContext?.contextId ?? null) || payload.profileId !== (session.runtimeContext?.profileId ?? null) || payload.tenantContext !== (session.tenant?.context ?? null)) {
     throw new Error("confirmation token does not match this action, tenant, or graph");
   }
   if (action === "deploy" && payload.agentName !== (option(args, "--agent-name") ?? null)) throw new Error("confirmation token agent name mismatch");
