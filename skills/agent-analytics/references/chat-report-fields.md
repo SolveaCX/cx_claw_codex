@@ -16,15 +16,15 @@
 
 | CLI 命令 | 接口路径 | 对应前台板块 | 主要返回字段 |
 |---|---|---|---|
-| `chat-report-tickets` | `/tickets` | 服务能力（解决率/转人工率） | `totalTicketCount`、`aiIncomingTicketCount`、`handoffTicketCount`、`aiIncomingHandoffTicketCount`、`aiIncomingResolvedTicketCount` 等 |
-| `chat-report-messages` | `/messages` | 服务能力（AI 回复率） | `totalMessageCount`、`aiIncomingMessageCount`、`aiReplyMessageCount`、`aiIncomingReplyMessageCount` |
-| `chat-report-satisfaction` | `/satisfaction` | 服务质量（CSAT 满意度与点赞点踩） | `totalTicketCount`、`satisfactionTicketCount`、`satisfactionRecoveryRate`、`sessionAiSatisfiedCount`、`sessionAiUnsatisfiedCount`、`sessionHumanSatisfiedCount`、`sessionHumanUnsatisfiedCount`、`messageAiSatisfiedCount` (AI 点赞数)、`messageAiUnsatisfiedCount` (AI 点踩数)、`messageHumanSatisfiedCount`、`messageHumanUnsatisfiedCount`、`sessionAiSatisfactionRate`、`messageAiSatisfactionRate`、`overallSatisfactionRate` |
-| `chat-report-first-response` | `/first-response` | 服务质量（首次响应时效） | `aiFirstResponseTicketCount`、`humanFirstResponseTicketCount`、`aiFirstResponseDurationTotal`、`humanFirstResponseDurationTotal`、`aiAverageFirstResponseDuration`、`humanAverageFirstResponseDuration`、`overallAverageFirstResponseDuration` |
-| `chat-report-return-retention` | `/return-retention` | 服务收益（RMA 挽回率） | `totalTicketCount`、`retentionTriggeredTicketCount`、`retentionSuccessTicketCount` |
-| `chat-report-inspection-results` | `/inspection-results` | 风险与质检 | `inspectionResultCount` (平台规则与风险预警数) |
-| `chat-report-intents` | `/intents` | 深度分析（意图工单分布与趋势） | 意图列表及各意图的工单数、进线解决数、转人工数等 |
-| `chat-report-agents` | `/agents` | 深度分析（智能体工单分布与趋势） | 智能体列表及各智能体的工单数、进线解决数、转人工数等 |
-| `chat-report-inbox-scripts` | `/inbox-scripts` | 会话下钻筛选脚本 | 获取按各指标下钻收件箱会话时的 ES 查询脚本 |
+| `analytics tickets` | `/tickets` | 服务能力（解决率/转人工率） | `totalTicketCount`、`aiIncomingTicketCount`、`handoffTicketCount`、`aiIncomingHandoffTicketCount`、`aiIncomingResolvedTicketCount` 等 |
+| `analytics messages` | `/messages` | 服务能力（AI 回复率） | `totalMessageCount`、`aiIncomingMessageCount`、`aiReplyMessageCount`、`aiIncomingReplyMessageCount` |
+| `analytics satisfaction` | `/satisfaction` | 服务质量（CSAT 满意度与点赞点踩） | `totalTicketCount`、`satisfactionTicketCount`、`satisfactionRecoveryRate`、`sessionAiSatisfiedCount`、`sessionAiUnsatisfiedCount`、`sessionHumanSatisfiedCount`、`sessionHumanUnsatisfiedCount`、`messageAiSatisfiedCount` (AI 点赞数)、`messageAiUnsatisfiedCount` (AI 点踩数)、`messageHumanSatisfiedCount`、`messageHumanUnsatisfiedCount`、`sessionAiSatisfactionRate`、`messageAiSatisfactionRate`、`overallSatisfactionRate` |
+| `analytics first-response` | `/first-response` | 服务质量（首次响应时效） | `aiFirstResponseTicketCount`、`humanFirstResponseTicketCount`、`aiFirstResponseDurationTotal`、`humanFirstResponseDurationTotal`、`aiAverageFirstResponseDuration`、`humanAverageFirstResponseDuration`、`overallAverageFirstResponseDuration` |
+| `analytics return-retention` | `/return-retention` | 服务收益（RMA 挽回率） | `totalTicketCount`、`retentionTriggeredTicketCount`、`retentionSuccessTicketCount` |
+| `analytics inspection-results` | `/inspection-results` | 风险与质检 | `inspectionResultCount` (平台规则与风险预警数) |
+| `analytics intents` | `/intents` | 深度分析（意图工单分布与趋势） | 意图列表及各意图的工单数、进线解决数、转人工数等 |
+| `analytics agents` | `/agents` | 深度分析（智能体工单分布与趋势） | 智能体列表及各智能体的工单数、进线解决数、转人工数等 |
+| `analytics inbox-scripts` | `/inbox-scripts` | 会话下钻筛选脚本 | 获取按各指标下钻收件箱会话时的 ES 查询脚本 |
 
 ### 核心公式
 

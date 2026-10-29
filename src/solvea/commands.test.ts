@@ -23,6 +23,9 @@ describe("native Solvea command registry", () => {
     expect(isNativeSolveaCommand("create-quality-alert-rule")).toBe(true);
     expect(isNativeSolveaCommand("delete-templates")).toBe(true);
     expect(isNativeSolveaCommand("list-voice-agents")).toBe(true);
+    expect(isNativeSolveaCommand("analytics-messages")).toBe(false);
+    expect(isNativeSolveaCommand("analytics-inbox-scripts")).toBe(false);
+    expect(isNativeSolveaCommand("chat-report-messages")).toBe(false);
     expect(isNativeSolveaCommand("unknown-command")).toBe(false);
   });
 

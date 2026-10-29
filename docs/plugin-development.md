@@ -58,3 +58,11 @@ bun run dev:plugin:remove
 ```
 
 本地开发产物都在 `_tmp_/codex-plugin-dev/`，不会提交到 Git。
+
+## CLI 命名规范
+
+- 已迁移业务命令统一使用 `cxclawctl <resource> <action>`，例如 `analytics messages`、`agent list`。
+- `resource` 和 `action` 只能使用小写 kebab-case（单词用 `-` 连接），不得使用驼峰、下划线或通配符。
+- 新能力直接在资源 handler 中实现；不得新增 `api analytics-messages`、`api chat-report-*` 一类扁平别名再转发。
+- `api <command>` 只保留给尚未迁移的兼容能力。已经进入资源注册表的命令会拒绝从 `api` 入口调用。
+- 禁止用 `startsWith()` 将一组未知命令兜底到同一个实现；每个公开 action 必须显式注册并有请求级测试。

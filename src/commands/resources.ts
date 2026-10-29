@@ -1,15 +1,17 @@
 import type { Session } from "../types.js";
 import { runApi } from "../business.js";
+import { runAnalyticsAction } from "./analytics.js";
 
 type ActionDefinition = {
-  command: string;
+  command?: string;
   summary: string;
   usage: string;
 };
 
 const action = (command: string, summary: string, usage = ""): ActionDefinition => ({ command, summary, usage });
+const directAction = (summary: string, usage = ""): ActionDefinition => ({ summary, usage });
 
-const resources = {
+export const resources = {
   agent: {
     list: action("list-agents", "List agents", "[--category text|voice]"),
     get: action("get-agent", "Get one agent", "--id <agent-id>"),
@@ -98,7 +100,42 @@ const resources = {
     async: action("chat-async", "Send an asynchronous chat message", "--message <text> [--bot-id <bot-id>] [--chat-id <chat-id>]"),
     result: action("get-async-result", "Get an asynchronous chat result", "--receipt <receipt> [--bot-id <bot-id>]"),
   },
+  analytics: {
+    tickets: directAction("Query Agent ticket metrics", "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--channel <channel>] [--bot-id <bot-id>]"),
+    messages: directAction("Query Agent message metrics", "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--channel <channel>] [--bot-id <bot-id>]"),
+    intents: directAction("Query Agent intent metrics", "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--channel <channel>] [--bot-id <bot-id>] [--intent-id <intent-id>]"),
+    agents: directAction("Query Agent metrics by agent", "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--channel <channel>] [--bot-id <bot-id>] [--agent-id <agent-id>]"),
+    satisfaction: directAction("Query Agent satisfaction metrics", "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--channel <channel>] [--bot-id <bot-id>]"),
+    "first-response": directAction("Query first-response metrics", "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--channel <channel>] [--bot-id <bot-id>]"),
+    "return-retention": directAction("Query retention metrics", "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--channel <channel>] [--bot-id <bot-id>]"),
+    "inspection-results": directAction("Query inspection metrics", "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--channel <channel>] [--bot-id <bot-id>]"),
+    "inbox-scripts": directAction("Get Agent inbox drill-down scripts"),
+  },
 } as const;
+
+const CLI_NAME = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
+for (const [resource, actions] of Object.entries(resources)) {
+  if (!CLI_NAME.test(resource)) throw new Error(`invalid CLI resource name: ${resource}`);
+  for (const [actionName, definition] of Object.entries(actions)) {
+    if (!CLI_NAME.test(actionName)) throw new Error(`invalid CLI action name: ${resource} ${actionName}`);
+    if (definition.command && !CLI_NAME.test(definition.command)) throw new Error(`invalid internal command name: ${definition.command}`);
+  }
+}
+
+export function resourceCommandDefinitions() {
+  return Object.entries(resources).flatMap(([resource, actions]) =>
+    Object.entries(actions).map(([actionName, definition]) => ({
+      resource,
+      action: actionName,
+      implementation: definition.command,
+    })),
+  );
+}
+
+export function resourceCommandForImplementation(command: string) {
+  const definition = resourceCommandDefinitions().find(item => item.implementation === command);
+  return definition ? `${definition.resource} ${definition.action}` : undefined;
+}
 
 export type ResourceName = keyof typeof resources;
 
@@ -129,9 +166,15 @@ export function resolveResourceCommand(resource: ResourceName, action?: string):
   if (!action || action === "help") throw new Error(resourceHelp(resource));
   const definition = (resources[resource] as Record<string, ActionDefinition>)[action];
   if (!definition) throw new Error(`unknown ${resource} action: ${action}\n${resourceHelp(resource)}`);
+  if (!definition.command) throw new Error(`${resource} ${action} is implemented directly`);
   return definition.command;
 }
 
 export async function runResourceCommand(session: Session, resource: ResourceName, action: string | undefined, args: string[]) {
-  await runApi(session, resolveResourceCommand(resource, action), args);
+  if (!action || action === "help") throw new Error(resourceHelp(resource));
+  const definition = (resources[resource] as Record<string, ActionDefinition>)[action];
+  if (!definition) throw new Error(`unknown ${resource} action: ${action}\n${resourceHelp(resource)}`);
+  if (resource === "analytics") return runAnalyticsAction(session, action, args);
+  if (!definition.command) throw new Error(`${resource} ${action} has no implementation`);
+  await runApi(session, definition.command, args);
 }
