@@ -1,6 +1,6 @@
 # 语音链路 SLS 查询 Playbook
 
-所有 SLS 查询都通过本机 `node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query`，完成钉钉员工校验后按环境获取 `shulex-cloud` 下发的 SLS AK/SK 并直连阿里云，不经过业务服务查询代理。每次查询都必须显式传 `--env test|prod`。
+所有 SLS 查询都通过本机 `node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query`，完成钉钉员工校验后按环境获取 `shulex-cloud` 下发的 SLS AK/SK 并直连阿里云，不经过业务服务查询代理。默认查询生产环境；只有测试环境查询才显式传 `--env test`。
 
 ## 基础模板
 

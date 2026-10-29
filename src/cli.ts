@@ -50,8 +50,8 @@ async function runTenant(action: string | undefined, args: string[]) {
   const session = await authenticated();
   if (action === "current") return print(publicTenant(session.tenant));
   if (action === "clear") { delete session.tenant; await saveSession(session); return print({ ok: true, cleared: true }); }
-  if (action === "search") return print(await search(session, positionals(args)[0] ?? "", option(args, "--env", true)!));
-  if (action === "use") return print(await useTenant(session, Number(positionals(args)[0]), option(args, "--env", true)!, option(args, "--purpose", true)!));
+  if (action === "search") return print(await search(session, positionals(args)[0] ?? "", option(args, "--env")));
+  if (action === "use") return print(await useTenant(session, Number(positionals(args)[0]), option(args, "--env"), option(args, "--purpose", true)!));
   throw new Error("tenant action must be search, use, current, or clear");
 }
 
@@ -100,7 +100,7 @@ async function main(args = process.argv.slice(2)) {
   }
   if (command === "sls" && action === "query") {
     return print(await slsQuery(await authenticated(), {
-      environment: option(rest, "--env", true),
+      environment: option(rest, "--env"),
       from: Number(option(rest, "--from", true)), to: Number(option(rest, "--to", true)),
       query: option(rest, "--query", true)!, line: Number(option(rest, "--line") ?? 50),
       offset: Number(option(rest, "--offset") ?? 0), reverse: flag(rest, "--reverse"),

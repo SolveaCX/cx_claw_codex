@@ -57,7 +57,7 @@ npx --yes @shulex/cxclawctl@latest setup \
 
 ## 选择环境和租户
 
-测试环境使用 `--env test`，生产环境使用 `--env prod`。环境由每次租户选择明确指定，不从租户名称推断。
+默认访问生产环境，不需要指定 `--env`。只有访问测试环境时才传 `--env test`（也兼容 `--env staging`）；`--env prod` 可显式指定生产环境。环境不会从租户名称推断。
 
 ```bash
 # 搜索测试环境租户
@@ -68,12 +68,17 @@ npx --yes @shulex/cxclawctl@latest tenant use <accountId> \
   --env test \
   --purpose "badcase 排查"
 
+# 生产环境（默认，可省略 --env）
+npx --yes @shulex/cxclawctl@latest tenant search "租户名称"
+npx --yes @shulex/cxclawctl@latest tenant use <accountId> \
+  --purpose "日常运营"
+
 # 查看或清除当前租户
 npx --yes @shulex/cxclawctl@latest tenant current
 npx --yes @shulex/cxclawctl@latest tenant clear
 ```
 
-切换到生产环境时，重新执行 `tenant search` 和 `tenant use`，并把 `--env` 改为 `prod`。
+切换到生产环境时，重新执行 `tenant search` 和 `tenant use`；可以省略 `--env`，也可以显式传 `--env prod`。
 
 Codex 桌面端可从会话右侧面板打开“CXClaw 当前租户”。面板读取与 CLI 相同的系统安全凭据库，只展示 `accountId`、`accountCode`、`accountName`、环境、用途和到期时间，不展示任何 token。当前租户是本机全局状态；在一个会话中切换后，其他会话的面板也会同步变化。
 
@@ -96,11 +101,12 @@ npx --yes @shulex/cxclawctl@latest solvea-desk fetch-tickets --task-id demo
 
 # 直接从本机查询 SLS；from/to 使用 Unix 秒级时间戳
 npx --yes @shulex/cxclawctl@latest sls query \
-  --env test \
   --from <开始时间> \
   --to <结束时间> \
   --query '<查询语句>' \
   --line 50
+
+# SLS 默认查询生产环境；查询测试环境时增加 --env test
 
 # 刷新登录或退出
 npx --yes @shulex/cxclawctl@latest auth refresh
@@ -147,7 +153,7 @@ npx --yes @shulex/cxclawctl@latest update --install-scheduler
 
 - 登录信息只保存在操作系统安全凭据库。
 - SLS 长期 AK/SK 由 Nacos 按环境配置；通过钉钉员工校验后由授权服务经 HTTPS 下发，CLI 只在当前进程内存中使用并直接连接阿里云 SLS。
-- 业务命令仍以服务端签发的租户上下文作为权限边界；SLS 凭据只校验钉钉员工登录，并按客户端明确指定的 `test` 或 `prod` 环境下发。
+- 业务命令仍以服务端签发的租户上下文作为权限边界；SLS 凭据只校验钉钉员工登录，默认按 `prod` 下发，只有测试查询才使用 `test` 环境。
 - 业务 token 不输出到终端或日志，只在请求对象的生命周期内传给 CLI 的 HTTP client。
 - `main` 分支只用于开发；员工使用由发布流程推进的 `marketplace/stable`、`marketplace/canary` 或 `marketplace/dev`。
 

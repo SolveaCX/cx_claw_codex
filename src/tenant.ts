@@ -3,9 +3,9 @@ import { SolveaClient } from "./solvea/client.js";
 import { saveSession } from "./store.js";
 import type { Session, Tenant } from "./types.js";
 
-export function environment(value:string){const v=value.toLowerCase();if(v==="test"||v==="staging")return "staging";if(v==="prod"||v==="production")return "prod";throw new Error(`unsupported environment ${value}; use test/staging or prod`)}
-export async function search(session:Session,query:string,env:string){return (await post<{items:unknown[]}>(session,"/tenants/search",{query,environment:environment(env)})).items}
-export async function useTenant(session:Session,accountId:number,env:string,purpose:string){
+export function environment(value?:string){const v=(value??"prod").toLowerCase();if(v==="test"||v==="staging")return "staging";if(v==="prod"||v==="production")return "prod";throw new Error(`unsupported environment ${value}; use test/staging or prod`)}
+export async function search(session:Session,query:string,env?:string){return (await post<{items:unknown[]}>(session,"/tenants/search",{query,environment:environment(env)})).items}
+export async function useTenant(session:Session,accountId:number,env:string|undefined,purpose:string){
   if(!purpose)throw new Error("purpose is required");
   const response=await post<any>(session,"/tenant-contexts",{accountId,environment:environment(env),purpose});
   if(!response.businessToken||!response.services?.businessUrl)throw new Error("authorization server did not return business credentials");
