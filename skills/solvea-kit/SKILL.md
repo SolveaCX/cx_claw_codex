@@ -24,7 +24,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api <legacy-command> --pretty
 
 | 用户诉求 | 去哪里 |
 |---|---|
-| 通用意图分类实现（供 POC / Delivery 调用） | `poc classify` / `delivery classify` |
+| 通用意图分类实现（供 POC 调用） | `poc classify` |
 | 意图创建、查询、更新、启停 | 本 skill：`references/intent.md` |
 | 策略创建、查询、更新、启停、entity condition | 本 skill：`references/strategy.md` |
 | 变量系统字段查询、初始化、创建、更新、删除、启停 | 本 skill：`references/variables.md` |
@@ -33,7 +33,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api <legacy-command> --pretty
 | SINGLE_AGENT / 语音 Agent / MULTI_AGENT / CHAT_FLOW / 工具配置 | `agent-builder` |
 | CHAT_FLOW 图构建、校验、迁移 | `agent-builder` |
 | 售前 POC 流程、POC 测试手册 | `poc` |
-| 正式交付流程、交付回归 | `delivery` |
+| 正式交付流程、交付回归 | 当前不再提供独立 `delivery` Skill；按具体需求使用 `poc`、`kb-builder` 和 `agent-tester` |
 | 知识库内容、目录、QA、隔离关键词、回复模板库 | `kb-builder` |
 | badcase、异常回复、失败节点，或按 ChatId / External ID 定位会话 | `shulex-support`（优先级高于所有数据分析入口，进入 Agent 会话诊断场景） |
 | Agent 运营数据、指标、趋势、原始会话列表下钻（不要求解释异常根因） | `agent-analytics` |
@@ -83,4 +83,4 @@ solvea-kit/
 
 - `/skills/solvea-kit/references/agent.md`：已迁入 `agent-builder`
 - `/skills/solvea-kit/references/plugin.md`：工具能力已迁入 `agent-builder`
-- `/skills/solvea-kit/references/chat.md`：测试和会话分析已拆到 `poc` / `delivery` / `agent-analytics` / `shulex-support`
+- `/skills/solvea-kit/references/chat.md`：历史兼容文档，不作为新任务入口

@@ -41,7 +41,7 @@ requires:
 node "<PLUGIN_ROOT>/plugin-cli.mjs" poc plan --init
 ```
 
-阶段完成后用 `delivery plan` 更新顶层状态，例如：
+阶段完成后用 `poc plan` 更新顶层状态，例如：
 
 ```bash
 node "<PLUGIN_ROOT>/plugin-cli.mjs" poc plan \

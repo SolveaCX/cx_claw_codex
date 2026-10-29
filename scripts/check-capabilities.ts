@@ -7,7 +7,7 @@ const root = resolve(import.meta.dirname, "..");
 const skills = join(root, "skills");
 const lock = join(root, "capabilities.lock.json");
 const launcher = 'node "<PLUGIN_ROOT>/plugin-cli.mjs"';
-const groups = ["agent-analytics", "agent-builder", "agent-tester", "delivery", "kb-builder", "poc", "runtime-inspector", "shulex-support", "solvea-desk", "solvea-kit"];
+const groups = ["agent-analytics", "agent-builder", "agent-tester", "kb-builder", "poc", "runtime-inspector", "shulex-support", "solvea-desk", "solvea-kit"];
 
 async function walk(directory: string): Promise<string[]> { const entries = await readdir(directory, { withFileTypes: true }); return (await Promise.all(entries.map(entry => entry.isDirectory() ? walk(join(directory, entry.name)) : [join(directory, entry.name)]))).flat(); }
 async function readAllSkills() { return (await walk(skills)).filter(file => !file.includes("/node_modules/")).map(file => readFile(file, "utf8")); }

@@ -53,21 +53,6 @@
       ]
     },
     {
-      "name": "delivery",
-      "execution": "local-cli",
-      "access": "read-write",
-      "confirmation": "cli-preview-confirm-commit",
-      "channels": [
-        "stable",
-        "canary",
-        "dev"
-      ],
-      "tests": [
-        "skill-present",
-        "command-mapping"
-      ]
-    },
-    {
       "name": "kb-builder",
       "execution": "local-cli",
       "access": "read-write",
