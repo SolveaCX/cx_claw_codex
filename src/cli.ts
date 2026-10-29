@@ -1,12 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { authenticated, login, logout, publicAuthStatus } from "./auth.js";
-import { flag, option, positionals } from "./args.js";
+import { flag, option, positionals, stripOptions } from "./args.js";
 import { runApi } from "./business.js";
 import { isResourceCommand, resourceCommandForImplementation, resourceHelp, runResourceCommand } from "./commands/resources.js";
 import { diagnose } from "./doctor.js";
 import { query as slsQuery } from "./sls.js";
-import { loadSession, saveSession } from "./store.js";
-import { publicTenant, search, useTenant } from "./tenant.js";
+import { deleteProfile, LEGACY_CONTEXT_ID, loadAuthSession, loadContext, loadProfile } from "./store.js";
+import { bindContext, clearContext, createContext, createOrRefreshProfile, publicContext, publicContexts, publicProfile, publicProfiles, resolveTenantSession, search } from "./tenant.js";
 import { installMarketplace, installScheduler, update } from "./update.js";
 import { SERVER_API_VERSION, TOOL_SCHEMA_VERSION, VERSION } from "./version.js";
 import { runRuntime } from "./workflows/runtime.js";
@@ -23,7 +23,7 @@ import { isFlatAnalyticsCommand } from "./commands/analytics.js";
 const print = (value: unknown) => console.log(JSON.stringify(value, null, 2));
 const usage = () => [
   "cxclawctl <resource> <action> [options]",
-  "cxclawctl auth|tenant|sls|runtime|doctor|update|setup|version",
+  "cxclawctl auth|tenant|context|profile|sls|runtime|doctor|update|setup|version",
   "cxclawctl agent-builder|agent-tester|delivery|poc|kb-builder|solvea-desk <action>",
   resourceHelp(),
   "Example: cxclawctl intent create --data-file intent.json",
@@ -38,7 +38,7 @@ async function runAuth(action: string | undefined, args: string[]) {
   if (action === "logout") { await logout(); return print({ ok: true, loggedOut: true }); }
   if (action === "status") {
     try {
-      const session = await loadSession();
+      const session = await loadAuthSession();
       return print(publicAuthStatus(session));
     } catch { return print({ ok: true, loggedIn: false }); }
   }
@@ -47,13 +47,77 @@ async function runAuth(action: string | undefined, args: string[]) {
 }
 
 async function runTenant(action: string | undefined, args: string[]) {
-  const session = await authenticated();
-  if (action === "current") return print(publicTenant(session.tenant));
-  if (action === "clear") { delete session.tenant; await saveSession(session); return print({ ok: true, cleared: true }); }
-  if (action === "search") return print(await search(session, positionals(args)[0] ?? "", option(args, "--env")));
-  if (action === "use") return print(await useTenant(session, Number(positionals(args)[0]), option(args, "--env"), option(args, "--purpose", true)!));
+  const auth = await authenticated();
+  const contextId = option(args, "--context") ?? LEGACY_CONTEXT_ID;
+  const profileId = option(args, "--profile");
+  if (action === "current") {
+    if (profileId) return print(publicProfile(await loadProfile(profileId)));
+    return print(await publicContext(await loadContext(contextId)));
+  }
+  if (action === "clear") return print(await publicContext(await clearContext(contextId)));
+  if (action === "search") return print(await search(auth, positionals(args)[0] ?? "", option(args, "--env")));
+  if (action === "use") {
+    const accountId = Number(positionals(args)[0]);
+    const selectedProfileId = profileId ?? `legacy-${option(args, "--env") ?? "prod"}-${accountId}`;
+    if (!profileId) console.error("未传 --profile，正在更新 legacy default context；新会话应显式使用 --profile 和 --context。");
+    const profile = await createOrRefreshProfile(auth, {
+      accountId,
+      env: option(args, "--env"),
+      purpose: option(args, "--purpose", true)!,
+      profileId: selectedProfileId,
+      displayName: option(args, "--display-name"),
+    });
+    let context = await (async () => {
+      try { return await loadContext(contextId); }
+      catch { return contextId === LEGACY_CONTEXT_ID ? createContext(LEGACY_CONTEXT_ID) : Promise.reject(new Error(`CXClaw context not found: ${contextId}; run context init first`)); }
+    })();
+    context = await bindContext(context.contextId, profile.profileId);
+    return print({ ok: true, context: await publicContext(context) });
+  }
   throw new Error("tenant action must be search, use, current, or clear");
 }
+
+async function runContext(action: string | undefined, args: string[]) {
+  if (action === "init") return print({ ok: true, context: await publicContext(await createContext(option(args, "--id"))) });
+  if (action === "list") return print(await publicContexts());
+  const contextId = option(args, "--context", true)!;
+  if (action === "current") return print(await publicContext(await loadContext(contextId)));
+  if (action === "use") return print({ ok: true, context: await publicContext(await bindContext(contextId, positionals(args)[0] ?? "")) });
+  if (action === "clear") return print({ ok: true, context: await publicContext(await clearContext(contextId)) });
+  throw new Error("context action must be init, list, current, use, or clear");
+}
+
+async function runProfile(action: string | undefined, args: string[]) {
+  if (action === "list") return print(await publicProfiles());
+  const profileId = positionals(args)[0] ?? "";
+  if (action === "inspect") return print(publicProfile(await loadProfile(profileId)));
+  if (action === "delete") { await deleteProfile(profileId); return print({ ok: true, deleted: true, profileId }); }
+  if (action === "create") {
+    const profile = await createOrRefreshProfile(await authenticated(), {
+      profileId,
+      accountId: Number(option(args, "--account-id", true)),
+      env: option(args, "--env"),
+      purpose: option(args, "--purpose", true)!,
+      displayName: option(args, "--display-name"),
+    });
+    return print({ ok: true, profile: publicProfile(profile) });
+  }
+  throw new Error("profile action must be list, create, inspect, or delete");
+}
+
+const runtimeOptions = ["--context", "--profile"];
+async function tenantSession(args: string[]) {
+  const session = await resolveTenantSession(await authenticated(), { contextId: option(args, "--context"), profileId: option(args, "--profile") });
+  console.error(JSON.stringify({ cxclawContext: {
+    contextId: session.runtimeContext?.contextId,
+    profileId: session.runtimeContext?.profileId,
+    accountId: session.tenant?.accountId,
+    environment: session.tenant?.environment,
+    purpose: session.tenant?.purpose,
+  } }));
+  return session;
+}
+const businessArgs = (args: string[]) => stripOptions(args, runtimeOptions);
 
 async function main(args = process.argv.slice(2)) {
   const [command, action, ...rest] = args;
@@ -62,7 +126,7 @@ async function main(args = process.argv.slice(2)) {
     return;
   }
   if (isResourceCommand(command)) {
-    await runResourceCommand(await authenticated(), command, action, rest);
+    await runResourceCommand(await tenantSession(rest), command, action, businessArgs(rest));
     return;
   }
   if (command === "version") {
@@ -81,22 +145,24 @@ async function main(args = process.argv.slice(2)) {
   }
   if (command === "auth") return runAuth(action, rest);
   if (command === "login" || command === "logout") return runAuth(command, args.slice(1));
-  if (command === "tenant" || command === "context") return runTenant(action, rest);
+  if (command === "tenant") return runTenant(action, rest);
+  if (command === "context") return runContext(action, rest);
+  if (command === "profile") return runProfile(action, rest);
   if (command === "runtime") return print(await runRuntime(action, rest));
   if (command === "workflow") return print(await runSolveaKitWorkflow(action, rest));
-  if (command === "support") return print(await runSupport(await authenticated(), action, rest));
-  if (command === "agent-builder") return print(await runAgentBuilder(["validate", "compile", "merge-source", "validate-tool", "migration", "replay"].includes(action ?? "") ? undefined : await authenticated(), action, rest));
-  if (command === "agent-tester") return print(await runAgentTester(action === "create-sheet" ? undefined : await authenticated(), action, rest));
-  if (command === "delivery") return print(await runDelivery(["classify", "plan", "report", "render", "render-report", "excel", "gen-excel", "render-summary"].includes(action ?? "") ? undefined : await authenticated(), action, rest));
-  if (command === "poc") return print(await runPoc(["classify", "plan", "report", "render", "render-report", "excel", "gen-excel", "manual", "render-summary"].includes(action ?? "") ? undefined : await authenticated(), action, rest));
-  if (command === "kb-builder") return print(await runKbBuilder(["crawl", "directory-plan", "extract-web-qa", "extract-ticket-qa", "batch-extract-ticket-qa"].includes(action ?? "") ? undefined : await authenticated(), action, rest));
-  if (command === "solvea-desk") return print(await runDesk(await authenticated(), action, rest));
+  if (command === "support") return print(await runSupport(await tenantSession(rest), action, businessArgs(rest)));
+  if (command === "agent-builder") return print(await runAgentBuilder(["validate", "compile", "merge-source", "validate-tool", "migration", "replay"].includes(action ?? "") ? undefined : await tenantSession(rest), action, businessArgs(rest)));
+  if (command === "agent-tester") return print(await runAgentTester(action === "create-sheet" ? undefined : await tenantSession(rest), action, businessArgs(rest)));
+  if (command === "delivery") return print(await runDelivery(["classify", "plan", "report", "render", "render-report", "excel", "gen-excel", "render-summary"].includes(action ?? "") ? undefined : await tenantSession(rest), action, businessArgs(rest)));
+  if (command === "poc") return print(await runPoc(["classify", "plan", "report", "render", "render-report", "excel", "gen-excel", "manual", "render-summary"].includes(action ?? "") ? undefined : await tenantSession(rest), action, businessArgs(rest)));
+  if (command === "kb-builder") return print(await runKbBuilder(["crawl", "directory-plan", "extract-web-qa", "extract-ticket-qa", "batch-extract-ticket-qa"].includes(action ?? "") ? undefined : await tenantSession(rest), action, businessArgs(rest)));
+  if (command === "solvea-desk") return print(await runDesk(await tenantSession(rest), action, businessArgs(rest)));
   if (command === "api") {
     if (!action) throw new Error("api command is required");
     if (isFlatAnalyticsCommand(action)) throw new Error("flat analytics commands are not supported; use cxclawctl analytics <action>");
     const publicCommand = resourceCommandForImplementation(action);
     if (publicCommand) throw new Error(`use the resource command instead: cxclawctl ${publicCommand}`);
-    await runApi(await authenticated(), action, rest); return;
+    await runApi(await tenantSession(rest), action, businessArgs(rest)); return;
   }
   if (command === "sls" && action === "query") {
     return print(await slsQuery(await authenticated(), {

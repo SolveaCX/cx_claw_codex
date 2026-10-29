@@ -160,6 +160,11 @@
   "localCommands": [
     "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" auth login",
     "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" auth status",
+    "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" context init",
+    "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" context current",
+    "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" context use",
+    "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" profile list",
+    "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" profile create",
     "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" tenant current",
     "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" tenant search",
     "node \"<PLUGIN_ROOT>/plugin-cli.mjs\" tenant use",

@@ -3,6 +3,7 @@ import { McpServer } from "@modelcontextprotocol/server";
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import { OpenAIExtensions } from "@openai/mcp-extensions/server";
 import type { OpenAIUiToolMetadata } from "@openai/mcp-extensions/server";
+import { z } from "zod";
 import { VERSION } from "../version.js";
 import { loadTenantPanelStatus } from "./tenant-status.js";
 
@@ -46,7 +47,7 @@ export function createTenantPanelHtml(script: string): string {
 <body data-state="loading">
   <div class="header">
     <div>
-      <p class="eyebrow">CXClaw${DEVELOPMENT_MODE ? " Dev" : ""} · 全局当前租户</p>
+      <p class="eyebrow">CXClaw${DEVELOPMENT_MODE ? " Dev" : ""} · 当前会话租户</p>
       <h1 id="headline">正在读取租户信息…</h1>
     </div>
     <button id="refresh" class="cursor-interaction" type="button">刷新</button>
@@ -54,6 +55,8 @@ export function createTenantPanelHtml(script: string): string {
   <p id="summary" class="summary">租户切换后，面板会自动更新。</p>
   <dl>
     <dt>环境</dt><dd><span id="environment" class="environment" data-environment="none">未选择</span></dd>
+    <dt>Context</dt><dd id="context-id">—</dd>
+    <dt>Profile</dt><dd id="profile-id">—</dd>
     <dt>Account ID</dt><dd id="account-id">—</dd>
     <dt>Account Code</dt><dd id="account-code">—</dd>
     <dt>公司名</dt><dd id="company-name">—</dd>
@@ -94,14 +97,15 @@ export function createTenantMcpServer(): McpServer {
     "tenant.current",
     {
       title,
-      description: "读取本机 CXClaw 当前选择的全局租户，仅返回非敏感展示字段。",
+      description: "读取指定 CXClaw context 当前选择的租户，仅返回非敏感展示字段。",
+      inputSchema: { contextId: z.string().optional().describe("由 cxclawctl context init 生成的 contextId") },
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
       _meta: TENANT_PANEL_TOOL_META,
     },
-    async () => {
-      const status = await loadTenantPanelStatus();
+    async ({ contextId }) => {
+      const status = await loadTenantPanelStatus(contextId);
       return {
-        content: [{ type: "text", text: status.configured ? `当前租户：${status.companyName ?? status.accountName ?? status.accountId}` : "当前未选择租户" }],
+        content: [{ type: "text", text: status.contextRequired ? "需要传入 contextId" : status.configured ? `当前租户：${status.companyName ?? status.accountName ?? status.accountId}` : "当前 context 未选择租户" }],
         structuredContent: status,
       };
     },

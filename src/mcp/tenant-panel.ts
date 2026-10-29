@@ -9,6 +9,9 @@ type TenantStatus = {
   loggedIn: boolean;
   configured: boolean;
   credentialStatus: "active" | "expired" | "not_selected" | "not_logged_in" | "unavailable";
+  contextRequired?: boolean;
+  contextId?: string;
+  profileId?: string;
   accountId?: number;
   accountCode?: string;
   accountName?: string;
@@ -20,6 +23,7 @@ type TenantStatus = {
 
 const app = new App({ name: "CXClaw Tenant", version: "1.0.0" });
 const refreshButton = document.querySelector<HTMLButtonElement>("#refresh");
+let activeContextId: string | undefined;
 document.body.style.paddingTop = "32px";
 
 function text(id: string, value: string): void {
@@ -34,6 +38,7 @@ function formatTime(value?: number): string {
 function render(value: unknown): void {
   if (!value || typeof value !== "object") return renderError("暂时无法读取租户状态");
   const status = value as TenantStatus;
+  if (status.contextId) activeContextId = status.contextId;
   const environment = status.environment?.toLowerCase();
   const badge = document.querySelector<HTMLElement>("#environment");
   document.body.dataset.state = status.credentialStatus;
@@ -44,7 +49,7 @@ function render(value: unknown): void {
     text("summary", "完成登录并选择租户后，这里会自动显示当前租户。");
   } else if (status.credentialStatus === "not_selected") {
     text("headline", "尚未选择租户");
-    text("summary", "运行 tenant use 后，这里会自动刷新。");
+    text("summary", status.contextRequired ? "调用 tenant.current 时需要传入当前会话的 contextId。" : "运行 tenant use 后，这里会自动刷新。");
   } else if (status.credentialStatus === "unavailable") {
     text("headline", "无法读取租户状态");
     text("summary", "请检查系统凭据库和 CXClaw 登录状态。");
@@ -54,6 +59,8 @@ function render(value: unknown): void {
   }
 
   text("environment", environment === "prod" ? "PRODUCTION" : environment === "staging" ? "STAGING" : "未选择");
+  text("context-id", status.contextId || "—");
+  text("profile-id", status.profileId || "—");
   text("account-id", status.accountId == null ? "—" : String(status.accountId));
   text("account-code", status.accountCode || "—");
   text("company-name", status.companyName || "—");
@@ -71,7 +78,7 @@ function renderError(message: string): void {
 async function refresh(): Promise<void> {
   if (refreshButton) refreshButton.disabled = true;
   try {
-    const result = await app.callServerTool({ name: "tenant.current", arguments: {} });
+    const result = await app.callServerTool({ name: "tenant.current", arguments: activeContextId ? { contextId: activeContextId } : {} });
     if (result.isError) renderError("刷新租户状态失败");
     else render(result.structuredContent);
   } catch {

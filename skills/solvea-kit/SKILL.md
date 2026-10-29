@@ -6,6 +6,7 @@ description: Shulex 路由与运营配置工具包。用于意图、策略、变
 # Solvea Kit
 
 执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
+当前对话首次访问租户前，执行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" context init` 并保留返回的 `contextId`。随后执行租户业务命令（包括 reference 中的命令）时，必须自动追加 `--context <contextId>`；切换租户时执行带同一 `--context` 和命名 `--profile` 的 `tenant use`。只复用当前对话工具输出中的 `contextId`，不得借用其他对话或回退到全局最近租户；无法恢复时重新初始化 context。
 Solvea Kit 保留路由与运营相关配置：意图、策略、变量系统、AI 质检和标签树。Agent、工具、CHAT_FLOW、测试、知识库和分析类需求按下方分流。
 
 ## CXClaw CLI

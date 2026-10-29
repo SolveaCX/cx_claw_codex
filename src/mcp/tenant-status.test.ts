@@ -53,8 +53,13 @@ describe("tenant panel status", () => {
   });
 
   test("does not expose credential-store failures", async () => {
-    const status = await loadTenantPanelStatus(async () => { throw new Error("keychain details"); }, 1_000_000);
+    const status = await loadTenantPanelStatus("ctx-test", { loadAuth: async () => { throw new Error("keychain details"); } }, 1_000_000);
     expect(status.credentialStatus).toBe("unavailable");
     expect(JSON.stringify(status)).not.toContain("keychain details");
+  });
+
+  test("requires an explicit context instead of reading a global tenant", async () => {
+    const status = await loadTenantPanelStatus(undefined, { loadAuth: async () => session(2_000) }, 1_000_000);
+    expect(status).toMatchObject({ loggedIn: true, configured: false, contextRequired: true, credentialStatus: "not_selected" });
   });
 });

@@ -12,7 +12,7 @@ CXClaw 是 Solvea 内部使用的 Codex 插件。它把原 CXClaw 的业务能�
 - Solvea Desk 工单查询和报告
 - badcase 排查与 SLS 客户端直查
 - 测试、生产环境和跨租户切换
-- Codex 会话右侧面板显示全局当前租户
+- Codex 会话通过独立 context 绑定租户，右侧面板显示指定 context 的当前租户
 - 写操作的预览、确认、提交和结果核验
 
 完整能力映射见 [`capabilities.lock.json`](./capabilities.lock.json)。`runtime-inspector` 只在 `dev` 和 `canary` 通道使用。
@@ -59,6 +59,12 @@ npx --yes @shulex/cxclawctl@latest setup \
 
 默认访问生产环境，不需要指定 `--env`。只有访问测试环境时才传 `--env test`（也兼容 `--env staging`）；`--env prod` 可显式指定生产环境。环境不会从租户名称推断。
 
+每个 Codex 会话首次访问租户前先创建独立 context。`contextId` 不是凭据，由 Skill 在当前对话后续命令中持续携带：
+
+```bash
+npx --yes @shulex/cxclawctl@latest context init
+```
+
 ```bash
 # 搜索测试环境租户
 npx --yes @shulex/cxclawctl@latest tenant search "租户名称" --env test
@@ -66,21 +72,26 @@ npx --yes @shulex/cxclawctl@latest tenant search "租户名称" --env test
 # 选择测试环境租户
 npx --yes @shulex/cxclawctl@latest tenant use <accountId> \
   --env test \
+  --profile <profileId> \
+  --context <contextId> \
   --purpose "badcase 排查"
 
 # 生产环境（默认，可省略 --env）
 npx --yes @shulex/cxclawctl@latest tenant search "租户名称"
 npx --yes @shulex/cxclawctl@latest tenant use <accountId> \
+  --profile <profileId> \
+  --context <contextId> \
   --purpose "日常运营"
 
-# 查看或清除当前租户
-npx --yes @shulex/cxclawctl@latest tenant current
-npx --yes @shulex/cxclawctl@latest tenant clear
+# 查看、切换或清除当前会话的租户
+npx --yes @shulex/cxclawctl@latest context current --context <contextId>
+npx --yes @shulex/cxclawctl@latest context use <profileId> --context <contextId>
+npx --yes @shulex/cxclawctl@latest context clear --context <contextId>
 ```
 
 切换到生产环境时，重新执行 `tenant search` 和 `tenant use`；可以省略 `--env`，也可以显式传 `--env prod`。
 
-Codex 桌面端可从会话右侧面板打开“CXClaw 当前租户”。面板读取与 CLI 相同的系统安全凭据库，只展示 `accountId`、`accountCode`、`accountName`、环境、用途和到期时间，不展示任何 token。当前租户是本机全局状态；在一个会话中切换后，其他会话的面板也会同步变化。
+Codex 桌面端可从会话右侧面板打开“CXClaw 当前租户”。调用 `tenant.current` 时传入当前对话的 `contextId`；面板只展示 context、profile、`accountId`、`accountCode`、`accountName`、环境、用途和到期时间，不展示任何 token。一个会话切换 profile 不会改变其他会话的 context。
 
 ## 常用命令
 
@@ -91,8 +102,8 @@ npx --yes @shulex/cxclawctl@latest version --json
 npx --yes @shulex/cxclawctl@latest capabilities
 
 # 调用只读业务命令；业务命令统一使用“资源 + 动作”两层结构
-npx --yes @shulex/cxclawctl@latest agent get --id 456 --pretty
-npx --yes @shulex/cxclawctl@latest intent list --pretty
+npx --yes @shulex/cxclawctl@latest agent get --id 456 --context <contextId> --pretty
+npx --yes @shulex/cxclawctl@latest intent list --context <contextId> --pretty
 
 # 使用 TypeScript CLI 执行本地工作流
 npx --yes @shulex/cxclawctl@latest poc plan --init
@@ -152,6 +163,7 @@ npx --yes @shulex/cxclawctl@latest update --install-scheduler
 ## 安全边界
 
 - 登录信息只保存在操作系统安全凭据库。
+- 员工登录、租户 profile 和会话 context 使用不同的系统安全凭据库 entry；读取一个 context 不会加载其他租户的业务 token。
 - SLS 长期 AK/SK 由 Nacos 按环境配置；通过钉钉员工校验后由授权服务经 HTTPS 下发，CLI 只在当前进程内存中使用并直接连接阿里云 SLS。
 - 业务命令仍以服务端签发的租户上下文作为权限边界；SLS 凭据只校验钉钉员工登录，默认按 `prod` 下发，只有测试查询才使用 `test` 环境。
 - 业务 token 不输出到终端或日志，只在请求对象的生命周期内传给 CLI 的 HTTP client。

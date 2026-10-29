@@ -86,10 +86,14 @@ describe("TypeScript workflow migrations", () => {
         purpose: "test", context: "tenant-context", businessToken: "business-token",
         businessUrl: "https://example.test", expiresAt: Date.now() + 300_000,
       },
+      runtimeContext: { contextId: "ctx-preview", profileId: "tenant-12-prod" },
     };
     const preview = await runAgentBuilder(session, "chatflow", ["deploy", "--agent-name", "Refund", "--graph-file", graphFile, "--phase", "preview"]);
     expect(preview).toMatchObject({ phase: "preview", action: "deploy", environment: "prod", tenantId: 12, agentName: "Refund" });
     expect(preview).toHaveProperty("confirmationToken");
+    const [tokenBody] = String((preview as { confirmationToken: string }).confirmationToken).split(".");
+    const tokenPayload = JSON.parse(Buffer.from(tokenBody, "base64url").toString("utf8"));
+    expect(tokenPayload).toMatchObject({ contextId: "ctx-preview", profileId: "tenant-12-prod", tenantContext: "tenant-context" });
   });
 
   test("keeps delivery and POC state workflows local", async () => {
