@@ -42,12 +42,19 @@ test("SLS query uses employee access and explicit environment without tenant con
   expect(requestHeaders?.has("x-cxclaw-tenant-context")).toBe(false);
 });
 
-test("SLS query never inherits the environment from a previous tenant", async () => {
-  let requested = false;
-  globalThis.fetch = (async (_input: Parameters<typeof fetch>[0], _init?: Parameters<typeof fetch>[1]) => {
-    requested = true;
-    throw new Error("unexpected request");
+test("SLS query defaults to production instead of inheriting a previous tenant", async () => {
+  let requestBody: unknown;
+  globalThis.fetch = (async (_input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+    requestBody = JSON.parse(String(init?.body));
+    return new Response(JSON.stringify({ data: {
+      endpoint: "test.log.aliyuncs.com",
+      project: "project",
+      logstore: "logstore",
+      credentials: { accessKeyId: "ak", accessKeySecret: "sk" },
+      limits: { maxTimeRangeSeconds: 7200, maxResults: 200, maxConcurrency: 2, maxMessageChars: 20000 },
+    } }), { status: 200, headers: { "content-type": "application/json" } });
   }) as unknown as typeof fetch;
+  (LogClient as any).prototype.getLogs = async () => ({ body: [] });
   const session: Session = {
     accessToken: "employee-access",
     refreshToken: "refresh",
@@ -58,9 +65,8 @@ test("SLS query never inherits the environment from a previous tenant", async ()
     tenant: { accountId: 1, accountCode: "V1", accountName: "Tenant", environment: "prod", purpose: "old", expiresAt: 2_000_000_000 },
   };
 
-  await expect(query(session, { from: 100, to: 200, query: "*", line: 1, offset: 0, reverse: false }))
-    .rejects.toThrow("SLS environment is required; use --env test or --env prod");
-  expect(requested).toBe(false);
+  await query(session, { from: 100, to: 200, query: "*", line: 1, offset: 0, reverse: false });
+  expect(requestBody).toEqual({ environment: "prod" });
 });
 
 test("SLS query surfaces the authorization service business error", async () => {
