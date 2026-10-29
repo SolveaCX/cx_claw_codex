@@ -7,8 +7,6 @@ requires:
 
 # Agent Tester
 
-执行命令时，将 `<PLUGIN_ROOT>` 替换为当前 CXClaw 插件根目录，并统一通过 `node "<PLUGIN_ROOT>/plugin-cli.mjs"` 调用与插件同版本的 CLI；禁止直接调用 npm `latest`。
-当前对话首次访问租户前，执行 `node "<PLUGIN_ROOT>/plugin-cli.mjs" context init` 并保留返回的 `contextId`。随后执行租户业务命令（包括 reference 中的命令）时，必须自动追加 `--context <contextId>`；切换租户时执行带同一 `--context` 和命名 `--profile` 的 `tenant use`。只复用当前对话工具输出中的 `contextId`，不得借用其他对话或回退到全局最近租户；无法恢复时重新初始化 context。
 本文件是完整文档目录。先根据请求定位到唯一工作流，然后**直接读取该工作流指定的最终文档**；不要逐层读取无关文档。
 
 ## 文档目录
