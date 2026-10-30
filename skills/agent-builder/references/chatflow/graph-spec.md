@@ -145,6 +145,7 @@ TOOL 单层出参可用 `field`；嵌套出参必须用从顶层开始的 `path`
 提示词变量机制：
 
 - CHAT_FLOW 不感知 `metadata` 路径；所有节点都禁止写 `metadata.xxx`、`metadata.ai_fields.xxx` 或类似点号路径。变量系统字段在进入图后只通过 ai-fields 暴露，并由 `SYSTEM` selector 或 `ai_field_ids` 读取。
+- 读取型 `variableSelector` 可以直接使用 `META` 系统元数据（例如 `["META", "current_time"]`）或已定义流程变量的 `FLOW` selector；assignment target 只能写入 `SYSTEM` / `FLOW`，不能写入 `META`。
 - 如果还需要从 `AttachmentSummary` 等已有系统字段中二次提取，或对 TOOL / CODE / AGENT 输出做转换、赋值，使用 `VARIABLE_PROCESS`。
 - AGENT 和 `REPLY(PROMPT)` 的变量入口是变量系统字段：source 写 `ai_field_ids`，完整 graph 写 `agentData.aiFieldIds` 或 `replyContent.aiFieldIds`。AGENT 的 source `prompt` 可使用 `{#LibraryBlock id=<字段id> type=variable name="<字段名>" #}` 表达变量 chip；模板、普通工具和转人工动作按 `nodes/agent.md` 使用各自 LibraryBlock。builder 编译时写入完整 graph 的 `displayPrompt`、派生运行时 `prompt`，并自动补齐普通工具 ID 以及模板/转人工真实系统插件 ID 到 `usedPlugins`。
 - AGENT / `REPLY(PROMPT)` 不渲染 `[[var:...]]`。如果它们必须稳定使用上游节点输出，先用 `VARIABLE_PROCESS.assignments` 写入 `SYSTEM` 字段，再通过 `ai_field_ids` 引用。
@@ -158,6 +159,7 @@ TOOL 单层出参可用 `field`；嵌套出参必须用从顶层开始的 `path`
 - `nodes`：`id` 唯一，`type` 通常为 `CUSTOM`，`position` 为 `{x, y}`，`data.category` 为节点类型。
 - `edges`：每条边必须包含非空的 `id`、`source`、`sourceHandle`、`target`、`targetHandle`、`type`；`id` 全图唯一，`source`、`target` 必须引用现有节点，当前只允许 `type: default`。
 - `viewport`：`{x, y, zoom}`。
+- `variables`：可选的流程变量定义数组；如果存在，`FLOW` selector 必须引用其中已定义的变量名。
 
 已有完整 graph 可包含 `type: CUSTOM_NOTE`、`data.category: NOTE` 的画布注释节点；详见 `nodes/note.md`。NOTE 不参与运行，不需要连线。
 
