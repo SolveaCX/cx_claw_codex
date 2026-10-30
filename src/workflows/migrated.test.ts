@@ -4,6 +4,7 @@ import { runAgentBuilder, validateGraph } from "./agent-builder.js";
 import { compileChatflowSource } from "./chatflow-compiler.js";
 import { runDelivery, runPoc } from "./delivery.js";
 import { runKbBuilder } from "./kb-builder.js";
+import { validateChatflowGraph } from "./chatflow-validator.js";
 
 describe("TypeScript workflow migrations", () => {
   test("validates graph structure without a tenant session", () => {
@@ -62,6 +63,37 @@ describe("TypeScript workflow migrations", () => {
   test("enforces solvea-kit graph completeness and code safety", () => {
     expect(() => compileChatflowSource({ entry: "ask", nodes: [{ key: "ask", type: "question", mode: "USER_REPLY", question: "Continue?", replies: ["Yes"] }], edges: [{ from: "ask", on: "Yes", to: "$finish" }] })).toThrow("missing OTHER edge");
     expect(() => compileChatflowSource({ entry: "code", nodes: [{ key: "code", type: "code", source_code: "import os\nreturn {}", outputs: [{ field_name: "result" }] }], edges: [{ from: "code", to: "$finish" }] })).toThrow("forbidden Python operations");
+  });
+
+  test("matches current ChatFlow compatibility validation rules", () => {
+    const graph = {
+      nodes: [
+        { id: "start", type: "CUSTOM", data: { category: "START", title: "Start", config: {} } },
+        { id: "note", type: "CUSTOM_NOTE", data: { category: "NOTE", title: "说明", config: {} } },
+        { id: "sub", type: "CUSTOM", data: { category: "SUB_GRAPH", title: "Child", config: { subGraph: { targetAgentId: 9, contextTurnLimit: 0 } } } },
+      ],
+      edges: [
+        { id: "e1", source: "start", sourceHandle: "SOURCE", target: "sub", targetHandle: "SOURCE", type: "default" },
+      ],
+    };
+    expect(validateChatflowGraph(graph)).toMatchObject({ valid: true, nodeCount: 2 });
+    expect(validateChatflowGraph({ ...graph, nodes: graph.nodes.map(node => node.id === "sub" ? { ...node, data: { ...node.data, config: { subGraph: { targetAgentId: 9, contextTurnLimit: 11 } } } } : node) }).errors).toContain("SUB_GRAPH 'Child' contextTurnLimit must be between 0 and 10");
+  });
+
+  test("allows omitted variables and validates META/FLOW selectors", () => {
+    const base = {
+      nodes: [
+        { id: "start", data: { category: "START", config: {} } },
+        { id: "finish", data: { category: "FINISH", title: "Finish", config: {} } },
+        { id: "code", data: { category: "CODE", title: "Code", config: { code: { outputs: [{ fieldName: "x" }], inputs: [{ fieldName: "v", variableSelector: ["META", "current_time"] }] } } } },
+      ],
+      edges: [
+        { id: "e1", source: "start", sourceHandle: "SOURCE", target: "code", targetHandle: "SOURCE", type: "default" },
+        { id: "e2", source: "code", sourceHandle: "SOURCE", target: "finish", targetHandle: "SOURCE", type: "default" },
+      ],
+    };
+    expect(validateChatflowGraph(base).valid).toBe(true);
+    expect(validateChatflowGraph({ ...base, nodes: base.nodes.map(node => node.id === "code" ? { ...node, data: { ...node.data, config: { ...node.data.config, code: { ...node.data.config.code, inputs: [{ fieldName: "v", variableSelector: ["META", "not_allowed"] }] } } } } : node) }).errors.some(error => error.includes("unknown META variable"))).toBe(true);
   });
 
   test("compile creates the target graph file and deploy preview performs no request", async () => {
