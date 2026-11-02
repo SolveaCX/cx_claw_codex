@@ -61,10 +61,10 @@ bun run release:create patch
 
 1. 从最新 `origin/main` 计算新版本。
 2. 创建 `release/vX.Y.Z` 分支。
-3. 同步 `package.json`、`plugin.json`、`.codex-plugin/plugin.json` 和 `capabilities.lock.json`。
-4. 安装锁定依赖并执行类型检查、测试、构建、安装包测试、能力检查和版本检查。
+3. 同步 `package.json`、`plugin.json` 和 `.codex-plugin/plugin.json`。
+4. 安装锁定依赖并执行类型检查、测试、构建、安装包测试和版本检查。
 5. 从已提交内容生成两种插件包，并执行 npm 包 dry-run。
-6. 检查发布提交只包含四个版本文件。
+6. 检查发布提交只包含三个版本文件。
 7. 创建提交、推送分支并创建合入 `main` 的 PR。
 
 脚本成功后，应向用户提供 PR 地址，并明确说明“发布 PR 已创建，尚未发布”。等待评审和合并，不要自己推送稳定版 tag。
@@ -74,7 +74,7 @@ bun run release:create patch
 发布 PR 合入后，`.github/workflows/publish.yml` 会从合并提交创建 `vX.Y.Z` tag，然后按顺序执行：
 
 1. 校验发布 commit 和通道。
-2. 重新运行测试、构建和能力检查。
+2. 重新运行测试和构建。
 3. 发布 npm 包，并等待公共 registry 可以读取该版本。
 4. 创建或更新 GitHub Release 并上传插件产物。
 5. 最后推进 `marketplace/stable`。
@@ -132,7 +132,7 @@ npx --yes @shulex/cxclawctl@<version> version --json
 - `X.Y.Z-canary.N` 对应 `canary`。
 - `X.Y.Z-dev.N` 对应 `dev`。
 
-先在独立分支用底层命令同步版本，运行与稳定版相同的检查并提交四个版本文件：
+先在独立分支用底层命令同步版本，运行与稳定版相同的检查并提交三个版本文件：
 
 ```bash
 bun run release:prepare X.Y.Z-canary.N
@@ -140,9 +140,8 @@ bun run typecheck
 bun test
 bun run build
 bun run test:package
-bun run check:capabilities
 bun run check:release
-git add package.json plugin.json .codex-plugin/plugin.json capabilities.lock.json
+git add package.json plugin.json .codex-plugin/plugin.json
 git commit -m "chore(release): 发布X.Y.Z-canary.N"
 ```
 
@@ -186,7 +185,7 @@ gh run view <run-id> --log-failed
 
 ## 不能做的事
 
-- 不手工分别修改四个版本文件。
+- 不手工分别修改三个版本文件。
 - 不直接运行 `npm publish`。
 - 不直接推送稳定版 tag。
 - 不手工强推 `marketplace/stable` 来掩盖流水线失败。

@@ -37,6 +37,6 @@ describe("resource command hierarchy", () => {
   test("keeps migrated implementations behind resource-action command names", () => {
     expect(resourceCommandForImplementation("analytics-messages")).toBeUndefined();
     expect(resourceCommandForImplementation("get-agent")).toBe("agent get");
-    expect(resourceCommandForImplementation("report-message")).toBeUndefined();
+    expect(resourceCommandForImplementation("report-message")).toBe("report message");
   });
 });

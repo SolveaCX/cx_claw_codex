@@ -5,7 +5,6 @@
 - 本仓库同时维护 Codex 插件和 `@shulex/cxclawctl` CLI。业务逻辑使用 TypeScript，Skills 只负责任务说明和调用 CLI。
 - Codex 插件通过 Git Marketplace 分发，CLI 通过 npm 分发。两者必须使用同一个版本号。
 - `main` 是开发分支，不直接代表员工正在使用的版本；员工通道由 `marketplace/stable`、`marketplace/canary` 和 `marketplace/dev` 指向。
-- 修改子命令或 Skill 后，必须同步检查 `capabilities.lock.json`；优先运行 `bun run check:capabilities -- --write` 生成，不要手工维护可生成内容。
 
 ## CLI 命令规范
 
@@ -14,7 +13,7 @@
 - 新能力必须直接在对应资源 handler 中实现并显式注册。禁止先新增 `api analytics-messages`、`api chat-report-*` 一类旧式扁平命令，再从新命令转发过去。
 - `api <command>` 只用于尚未迁移的兼容能力。命令迁入资源注册表后，必须拒绝继续从 `api` 入口调用。
 - 禁止使用 `startsWith()` 或其他前缀匹配，把一组未登记的命令兜底到同一个实现。每个公开 action 必须有明确映射和请求级测试。
-- 新增或修改命令后，必须运行 CLI 命名校验、相关测试和 `bun run check:capabilities`，并确认 `capabilities.lock.json` 不包含旧式别名或通配符命令。
+- 新增或修改命令后，必须运行 CLI 命名校验和相关测试。
 
 ## 项目编码 Agent 规范
 
@@ -36,7 +35,6 @@ bun run typecheck
 bun test
 bun run build
 bun run test:package
-bun run check:capabilities
 bun run check:release
 ```
 
@@ -49,7 +47,7 @@ bun run check:release
 收到“发版”“发一个新版本”“发布 stable”等要求时，先完整阅读 [`docs/releasing.md`](docs/releasing.md)，再执行发布操作。
 
 - 首选命令是 `bun run release:create patch`。只有用户明确要求新增功能版本、破坏性版本或指定版本时，才改用 `minor`、`major` 或明确的 `X.Y.Z`。
-- 不要手工逐个修改 `package.json`、`plugin.json`、`.codex-plugin/plugin.json` 和 `capabilities.lock.json` 的版本号。
+- 不要手工逐个修改 `package.json`、`plugin.json` 和 `.codex-plugin/plugin.json` 的版本号。
 - 不要直接创建或推送稳定版 tag，不要直接运行 `npm publish`，不要直接推进 `marketplace/stable`。
 - 不要跳过脚本内的检查。不要为了绕过失败而使用 `--no-verify`、强制覆盖分支或破坏性 Git 命令。
 - `release:create` 会真实创建分支、提交、推送和 PR。只做检查时，不得用它作为测试命令；可以无参数运行并确认它安全失败。

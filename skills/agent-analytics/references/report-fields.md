@@ -6,22 +6,22 @@
 
 | `/report` 场景 | 前端接口 | CLI 命令 |
 |---|---|---|
-| 工单量、解决、转人工 | `POST /api_v2/as_bot/statement/transcript` | `report-transcript` |
-| 消息量、AI 消息回复 | `POST /api_v2/as_bot/statement/message` | `report-message` |
-| Agent 绩效 | `POST /api_v2/as_bot/statement/agent` | `report-agent` |
-| 意图分布与下钻 | `POST /api_v2/as_bot/statement/transcript/intent` | `report-intent` |
-| 满意度汇总 | `POST /api_v2/as_bot/statement/satisfaction/feedback` | `report-satisfaction` |
-| 满意度明细 | `POST /api_v2/as_bot/statement/satisfaction/message` | `report-satisfaction-list` |
-| 评分分布 | `POST /api_v2/as_bot/statement/feedback` | `report-feedback` |
-| 知识使用 | `POST /api_v2/as_bot/statement/knowledge` | `report-knowledge` |
-| 转人工原因 | `POST /api_v2/as_bot/statement/transcript/reason2` | `report-escalation` |
-| 三级原因下钻 | `POST /api_v2/as_bot/statement/transcript/reason/three/level` | `report-escalation-drilldown` |
-| Agent 周趋势图 | `POST /api_v2/as_bot/statement/graph/agent` | `report-agent-weekly-graph` |
-| 自学习 | `POST /api_v2/as_bot/statement/self-learning` | `report-self-learning` |
-| LiveChat 漏斗 | `POST /api_v2/as_bot/livechat/report/summary` | `report-livechat` |
-| LiveChat 明细 | `POST /api_v2/as_bot/livechat/report/table` | `report-livechat-table` |
-| AI 质检概览 | 质检 count 接口 | `report-inspection` |
-| AI 质检趋势 | 质检 history 接口 | `report-inspection-history` |
+| 工单量、解决、转人工 | `POST /api_v2/as_bot/statement/transcript` | `report transcript` |
+| 消息量、AI 消息回复 | `POST /api_v2/as_bot/statement/message` | `report message` |
+| Agent 绩效 | `POST /api_v2/as_bot/statement/agent` | `report agent` |
+| 意图分布与下钻 | `POST /api_v2/as_bot/statement/transcript/intent` | `report intent` |
+| 满意度汇总 | `POST /api_v2/as_bot/statement/satisfaction/feedback` | `report satisfaction` |
+| 满意度明细 | `POST /api_v2/as_bot/statement/satisfaction/message` | `report satisfaction-list` |
+| 评分分布 | `POST /api_v2/as_bot/statement/feedback` | `report feedback` |
+| 知识使用 | `POST /api_v2/as_bot/statement/knowledge` | `report knowledge` |
+| 转人工原因 | `POST /api_v2/as_bot/statement/transcript/reason2` | `report escalation` |
+| 三级原因下钻 | `POST /api_v2/as_bot/statement/transcript/reason/three/level` | `report escalation-drilldown` |
+| Agent 周趋势图 | `POST /api_v2/as_bot/statement/graph/agent` | `report agent-weekly-graph` |
+| 自学习 | `POST /api_v2/as_bot/statement/self-learning` | `report self-learning` |
+| LiveChat 漏斗 | `POST /api_v2/as_bot/livechat/report/summary` | `report livechat` |
+| LiveChat 明细 | `POST /api_v2/as_bot/livechat/report/table` | `report livechat-table` |
+| AI 质检概览 | 质检 count 接口 | `report inspection` |
+| AI 质检趋势 | 质检 history 接口 | `report inspection-history` |
 
 ## 请求参数
 
@@ -115,7 +115,7 @@ Report 通用请求与 analysis-service `FilterRequest` 对齐：
 ## 示例
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api report-message \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" report message \
   --begin-ts "$BEGIN_MS" \
   --end-ts "$END_MS" \
   --time-offset 8 \

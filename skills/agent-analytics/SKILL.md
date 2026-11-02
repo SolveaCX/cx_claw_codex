@@ -1,8 +1,6 @@
 ---
 name: agent-analytics
 description: Shulex 客服智能体（AI Agent）运营数据分析。用于统计指标、趋势、排行、报表和运营下钻；badcase 或单次会话根因排查由 shulex-support 主责，本 skill 可按需提供统计和样本辅助证据。
-requires:
-  libs: [solvea-api]
 ---
 
 # Agent Analytics
@@ -16,7 +14,7 @@ requires:
 ## 场景分流
 
 - 查询统计指标、趋势、字段口径或页面对应接口：默认读取 `references/chat-report-fields.md`。
-- 只有用户明确要求“旧版报表”“/report”“statement”或“返回旧版”时，才读取标记为旧版的 `references/report-fields.md` 并调用 `report-*`。
+- 只有用户明确要求“旧版报表”“/report”“statement”或“返回旧版”时，才读取标记为旧版的 `references/report-fields.md` 并调用 `report <action>`。
 - 查询工单明细、筛选样本、分页或单条完整对话：读取 `references/transcript.md`。
 - 同一个问题同时需要统计和样本时，先读取 `chat-report-fields.md` 获取整体指标，再读取 `transcript.md` 下钻解释；若用户指定旧版，则把前者替换为标记为旧版的 `report-fields.md`。
 
@@ -24,7 +22,7 @@ requires:
 
 1. **确认分析目标**：明确用户要看的指标、比较维度和期望结论。
 2. **确认时间范围**：缺少时间范围时必须询问用户，不默认查询本月、最近 30 天或前端默认窗口。
-3. **应用时区和过滤条件**：Agent 看板使用 `startDate` / `endDate`（`YYYY-MM-DD`），可选 `botId`、`channel`（或 `touchPoint`）、`intentId`、`agentId`；前端未选择渠道表示全部渠道，不要自动补 `LIVE_CHAT`。标记为旧版的 `report-*` 才使用毫秒时间戳和 `timeOffset=8`。
+3. **应用时区和过滤条件**：Agent 看板使用 `startDate` / `endDate`（`YYYY-MM-DD`），可选 `botId`、`channel`（或 `touchPoint`）、`intentId`、`agentId`；前端未选择渠道表示全部渠道，不要自动补 `LIVE_CHAT`。Transcript 下钻把同一日期范围换算成 `beginTimestamp` / `endTimestamp` 毫秒边界；旧版 `report <action>` 还需要 `timeOffset`。
 4. **分别调用接口**：每个统计或 Agent 会话记录请求独立执行。不要使用 `&&` 把整批命令串起来，避免一个接口失败后跳过全部后续数据。
 5. **阶段性输出进展**：每完成一类指标，简要说明已拿到什么、缺少什么、下一步查什么。
 6. **按需下钻 Agent 会话记录**：复用当前查询的日期范围和适用过滤条件；`analytics inbox-scripts` 或 chat ID 可作为下钻入口。分页直到 `hasNext=false` 才能声称明细完整。
@@ -40,7 +38,7 @@ requires:
 
 ## CLI 入口
 
-所有数据通过以下资源化入口获取：
+正式 Agent 看板统计通过以下资源化入口获取：
 
 ```bash
 node "<PLUGIN_ROOT>/plugin-cli.mjs" analytics <action> ... --pretty
@@ -59,8 +57,8 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" analytics <action> ... --pretty
 | 意图工单分布与趋势 | `analytics intents` |
 | 智能体工单分布与趋势 | `analytics agents` |
 | 会话下钻查询脚本 | `analytics inbox-scripts` |
-| 旧版报表（仅用户明确指定） | `api report-*` |
-| 旧版知识、LiveChat、质检、自学习等 | `api report-*`（仅用户明确指定旧版） |
+| 旧版报表（仅用户明确指定） | `report <action>` |
+| 旧版知识、LiveChat、质检、自学习等 | `report <action>`（仅用户明确指定旧版） |
 | 收件箱 Agent 会话记录明细 | `transcript list` |
 | 单条完整 Agent 会话记录 | `transcript get` |
 

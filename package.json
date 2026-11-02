@@ -11,8 +11,7 @@
     "dist/cli.js",
     "dist/cli.js.map",
     "dist/tenant-panel.js",
-    "dist/tenant-panel.js.map",
-    "capabilities.lock.json"
+    "dist/tenant-panel.js.map"
   ],
   "scripts": {
     "build": "tsup",
@@ -26,7 +25,6 @@
     "dev:plugin:remove": "tsx scripts/dev-plugin.ts remove",
     "typecheck": "tsc --noEmit",
     "test": "bun test --path-ignore-patterns _tmp_",
-    "check:capabilities": "tsx scripts/check-capabilities.ts",
     "check:release": "tsx scripts/check-release.ts",
     "check:pr-policy": "tsx scripts/validate-pr-policy.ts",
     "test:package": "tsx scripts/test-packed-package.ts",

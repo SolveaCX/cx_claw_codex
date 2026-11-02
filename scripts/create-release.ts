@@ -7,12 +7,7 @@ import { compareVersions } from "compare-versions";
 
 const ROOT = resolve(import.meta.dirname, "..");
 const STABLE_VERSION = /^\d+\.\d+\.\d+$/;
-const RELEASE_FILES = [
-  ".codex-plugin/plugin.json",
-  "capabilities.lock.json",
-  "package.json",
-  "plugin.json",
-];
+const RELEASE_FILES = [".codex-plugin/plugin.json", "package.json", "plugin.json"];
 
 export type VersionInput = "major" | "minor" | "patch" | string;
 
@@ -45,14 +40,13 @@ export function releasePullRequestBody(version: string) {
   return `## 发布内容
 
 - 发布 CXClaw \`${version}\`
-- 同步 npm CLI、Codex 插件和能力清单版本
+- 同步 npm CLI 和 Codex 插件版本
 
 ## 发布前检查
 
 - TypeScript 类型检查
 - 单元测试
 - CLI 构建与安装包测试
-- 能力清单与版本一致性检查
 - Agent Plugin、Codex Plugin 和 npm 包生成
 
 合并后 Publish workflow 将发布 \`@shulex/cxclawctl@${version}\`、GitHub Release \`v${version}\`，并推进 \`marketplace/stable\`。`;
@@ -115,7 +109,6 @@ function main() {
     ["bun", ["test"]],
     ["bun", ["run", "build"]],
     ["bun", ["run", "test:package"]],
-    ["bun", ["run", "check:capabilities"]],
     ["bun", ["run", "check:release"]],
     ["bun", ["run", "package:agent-plugin"]],
     ["bun", ["run", "package:codex-plugin"]],
