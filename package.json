@@ -28,6 +28,7 @@
     "test": "bun test --path-ignore-patterns _tmp_",
     "check:capabilities": "tsx scripts/check-capabilities.ts",
     "check:release": "tsx scripts/check-release.ts",
+    "check:pr-policy": "tsx scripts/validate-pr-policy.ts",
     "test:package": "tsx scripts/test-packed-package.ts",
     "release:prepare": "tsx scripts/prepare-release.ts",
     "release:create": "tsx scripts/create-release.ts",
