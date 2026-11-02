@@ -1,4 +1,3 @@
-import { readFile } from "node:fs/promises";
 import { authenticated, login, logout, publicAuthStatus } from "./auth.js";
 import { flag, option, positionals, stripOptions } from "./args.js";
 import { runApi } from "./business.js";
@@ -342,9 +341,7 @@ async function main(args = process.argv.slice(2)) {
       await new Promise((resolve) => setTimeout(resolve, Math.random() * 1_800_000));
     return print(await update());
   }
-  if (command === "commands" || command === "capabilities")
-    console.log(await readFile(new URL("../capabilities.lock.json", import.meta.url), "utf8"));
-  else throw new Error(`unknown command: ${command}`);
+  throw new Error(`unknown command: ${command}`);
 }
 
 main().catch((error) => {

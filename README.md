@@ -15,7 +15,7 @@ CXClaw 是 Solvea 内部使用的 Codex 插件。它把原 CXClaw 的业务能�
 - Codex 会话通过独立 context 绑定租户，右侧面板显示指定 context 的当前租户
 - 写操作的预览、确认、提交和结果核验
 
-完整能力映射见 [`capabilities.lock.json`](./capabilities.lock.json)。`runtime-inspector` 只在 `dev` 和 `canary` 通道使用。
+`runtime-inspector` 只在 `dev` 和 `canary` 通道使用。
 
 ## 运行要求
 
@@ -96,10 +96,9 @@ Codex 桌面端可从会话右侧面板打开“CXClaw 当前租户”。调用 
 ## 常用命令
 
 ```bash
-# 查看版本和能力清单
+# 查看版本
 npx --yes @shulex/cxclawctl@latest version
 npx --yes @shulex/cxclawctl@latest version --json
-npx --yes @shulex/cxclawctl@latest capabilities
 
 # 调用只读业务命令；业务命令统一使用“资源 + 动作”两层结构
 npx --yes @shulex/cxclawctl@latest agent get --id 456 --context <contextId> --pretty
@@ -178,7 +177,6 @@ bun install --frozen-lockfile
 bun run typecheck
 bun test
 bun run build
-bun run check:capabilities
 bun run check:release
 ```
 
@@ -198,13 +196,6 @@ bun run dev:plugin:watch
 ```bash
 bun run dev -- version
 node bin/cxclawctl.mjs version
-```
-
-修改 Skills 或业务 command 后，重新生成并校验能力清单：
-
-```bash
-bun run check:capabilities -- --write
-bun run check:capabilities
 ```
 
 ## 发布
@@ -228,8 +219,7 @@ plugin-cli.mjs                    将插件固定到同版本 npm CLI
 bin/cxclawctl.mjs                 npm CLI 入口
 src/                              TypeScript CLI 和业务工作流实现
 skills/                           Marketplace Skills、reference 和静态资源
-capabilities.lock.json            Skills 与业务 command 能力映射
-scripts/                          能力校验和发布打包脚本
+scripts/                          发布和打包脚本
 ```
 
 npm 包只包含 CLI 运行时代码；`SKILL.md`、reference 文档和静态资源只通过 Git Marketplace 分发，不在 npm 中重复打包。

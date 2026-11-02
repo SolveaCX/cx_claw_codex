@@ -5,7 +5,7 @@ description: Solvea Kit 运行时自检套件。覆盖沙箱机制、模型行�
 
 # Runtime Inspector
 
-执行前必须先调用 `cxclaw.capabilities`。只有返回 `runtime-inspector: true` 时才继续；stable channel 或生产环境必须拒绝执行。
+该 Skill 只通过 `canary` 和 `dev` channel 分发；stable channel 或生产环境必须拒绝执行。
 
 按 **domain × scenario** 路由到具体测试入口。本 SKILL.md 只做路由，不写测试细节。
 

@@ -19,7 +19,6 @@ const paths = [
   "assets",
   "plugin-cli.mjs",
   "skills",
-  "capabilities.lock.json",
   "README.md",
 ];
 mkdirSync(join(root, "dist"), { recursive: true });
