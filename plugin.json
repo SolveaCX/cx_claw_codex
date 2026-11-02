@@ -3,25 +3,25 @@
   "name": "cxclaw",
   "version": "0.1.21",
   "description": "Solvea internal CXClaw assistant for Codex",
-	"author": {
-		"name": "SolveaCX"
-	},
-	"repository": "https://github.com/SolveaCX/cx_claw_codex",
+  "author": {
+    "name": "SolveaCX"
+  },
+  "repository": "https://github.com/SolveaCX/cx_claw_codex",
   "extensions": {
     "com.openai": {
-		"onboardingSkill": "./skills/cxclawctl/SKILL.md",
-		"interface": {
-			"displayName": "CXClaw",
-			"shortDescription": "Solvea 内部跨租户智能助手",
-			"longDescription": "通过钉钉授权访问 Solvea 租户，提供客户支持、Agent 配置、知识库、测试、交付和客户端 SLS 排查能力。",
-			"developerName": "SolveaCX",
-			"category": "Developer Tools",
-			"brandColor": "#1D65F5",
-			"logo": "./assets/cxclaw.svg",
-			"composerIcon": "./assets/cxclaw.svg",
-			"capabilities": ["Read", "Write"],
-			"defaultPrompt": ["登录 CXClaw 并选择租户", "排查这个 badcase"]
-		}
+      "onboardingSkill": "./skills/cxclawctl/SKILL.md",
+      "interface": {
+        "displayName": "CXClaw",
+        "shortDescription": "Solvea 内部跨租户智能助手",
+        "longDescription": "通过钉钉授权访问 Solvea 租户，提供客户支持、Agent 配置、知识库、测试、交付和客户端 SLS 排查能力。",
+        "developerName": "SolveaCX",
+        "category": "Developer Tools",
+        "brandColor": "#1D65F5",
+        "logo": "./assets/cxclaw.svg",
+        "composerIcon": "./assets/cxclaw.svg",
+        "capabilities": ["Read", "Write"],
+        "defaultPrompt": ["登录 CXClaw 并选择租户", "排查这个 badcase"]
+      }
     }
   }
 }

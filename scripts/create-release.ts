@@ -19,13 +19,14 @@ export type VersionInput = "major" | "minor" | "patch" | string;
 export function resolveReleaseVersion(current: string, input: VersionInput): string {
   if (!STABLE_VERSION.test(current)) throw new Error(`main has invalid stable version: ${current}`);
   const [major, minor, patch] = current.split(".").map(Number) as [number, number, number];
-  const version = input === "major"
-    ? `${major + 1}.0.0`
-    : input === "minor"
-      ? `${major}.${minor + 1}.0`
-      : input === "patch"
-        ? `${major}.${minor}.${patch + 1}`
-        : input;
+  const version =
+    input === "major"
+      ? `${major + 1}.0.0`
+      : input === "minor"
+        ? `${major}.${minor + 1}.0`
+        : input === "patch"
+          ? `${major}.${minor}.${patch + 1}`
+          : input;
 
   if (!STABLE_VERSION.test(version)) {
     throw new Error("release version must be major, minor, patch, or X.Y.Z");
@@ -89,7 +90,9 @@ function main() {
   run("git", ["fetch", "origin", "main", "--tags", "--prune"]);
   run("gh", ["auth", "status"]);
 
-  const mainPackage = JSON.parse(capture("git", ["show", "origin/main:package.json"])) as { version?: string };
+  const mainPackage = JSON.parse(capture("git", ["show", "origin/main:package.json"])) as {
+    version?: string;
+  };
   const current = mainPackage.version;
   if (!current) throw new Error("origin/main package.json has no version");
 
@@ -117,7 +120,8 @@ function main() {
     ["bun", ["run", "package:agent-plugin"]],
     ["bun", ["run", "package:codex-plugin"]],
     ["npm", ["pack", "--dry-run"]],
-  ] as const) run(command, [...args]);
+  ] as const)
+    run(command, [...args]);
   run("git", ["diff", "--check"]);
 
   const changed = changedPaths();
@@ -129,11 +133,16 @@ function main() {
   run("git", ["commit", "-m", `chore(release): 发布${version}`]);
   run("git", ["push", "-u", "origin", branch]);
   const url = capture("gh", [
-    "pr", "create",
-    "--base", "main",
-    "--head", branch,
-    "--title", `chore(release): 发布${version}`,
-    "--body", releasePullRequestBody(version),
+    "pr",
+    "create",
+    "--base",
+    "main",
+    "--head",
+    branch,
+    "--title",
+    `chore(release): 发布${version}`,
+    "--body",
+    releasePullRequestBody(version),
   ]);
   console.log(`Release PR created: ${url}`);
 }

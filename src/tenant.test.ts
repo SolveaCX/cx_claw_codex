@@ -8,16 +8,34 @@ test("tenant environment defaults to production", () => {
   expect(environment("prod")).toBe("prod");
 });
 
-const auth: AuthSession = { accessToken: "access", refreshToken: "refresh", accessExpiry: 9999999999, employeeId: "e1", email: "e@example.com", channel: "stable" };
+const auth: AuthSession = {
+  accessToken: "access",
+  refreshToken: "refresh",
+  accessExpiry: 9999999999,
+  employeeId: "e1",
+  email: "e@example.com",
+  channel: "stable",
+};
 const profile = (profileId: string, accountId: number, context: string): TenantProfile => ({
-  profileId, displayName: profileId, accountId, accountCode: `A${accountId}`, accountName: profileId,
-  environment: "prod", purpose: "test", context, businessToken: `token-${profileId}`,
-  businessUrl: `https://${profileId}.example.com`, expiresAt: 9999999999, createdAt: 1, updatedAt: 1,
+  profileId,
+  displayName: profileId,
+  accountId,
+  accountCode: `A${accountId}`,
+  accountName: profileId,
+  environment: "prod",
+  purpose: "test",
+  context,
+  businessToken: `token-${profileId}`,
+  businessUrl: `https://${profileId}.example.com`,
+  expiresAt: 9999999999,
+  createdAt: 1,
+  updatedAt: 1,
 });
 
 describe("tenant context isolation", () => {
   test("generates opaque unique context ids", () => {
-    const first = newContextId(), second = newContextId();
+    const first = newContextId(),
+      second = newContextId();
     expect(first).toMatch(/^ctx_[0-9a-f_]+$/);
     expect(second).not.toBe(first);
   });
@@ -54,10 +72,16 @@ describe("tenant context isolation", () => {
   });
 
   test("explicit profile overrides context and no implicit global tenant is accepted", async () => {
-    const selected = await resolveTenantSession(auth, { contextId: "a", profileId: "profile-b" }, {
-      loadProfile: async id => profile(id, 20, "tenant-context-b"),
-    });
+    const selected = await resolveTenantSession(
+      auth,
+      { contextId: "a", profileId: "profile-b" },
+      {
+        loadProfile: async (id) => profile(id, 20, "tenant-context-b"),
+      },
+    );
     expect(selected.runtimeContext).toEqual({ contextId: "a", profileId: "profile-b" });
-    await expect(resolveTenantSession(auth, { allowLegacy: false }, { tryLoadContext: async () => undefined })).rejects.toThrow("pass --context");
+    await expect(
+      resolveTenantSession(auth, { allowLegacy: false }, { tryLoadContext: async () => undefined }),
+    ).rejects.toThrow("pass --context");
   });
 });

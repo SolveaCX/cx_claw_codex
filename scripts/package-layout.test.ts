@@ -20,24 +20,22 @@ describe("release package layout", () => {
   });
 
   test("pins CLI execution to the plugin manifest version", () => {
-    expect(launcher).toContain('.codex-plugin/plugin.json');
+    expect(launcher).toContain(".codex-plugin/plugin.json");
     expect(launcher).toContain("`@shulex/cxclawctl@${version}`");
     expect(launcher).toContain("CXCLAW_PLUGIN_VERSION: version");
   });
 
   test("all skills use the plugin launcher instead of npm latest", () => {
-    const text = files("skills").map((path) => readFileSync(path, "utf8")).join("\n");
+    const text = files("skills")
+      .map((path) => readFileSync(path, "utf8"))
+      .join("\n");
     expect(text).not.toContain("@shulex/cxclawctl@latest");
     expect(text).toContain('node "<PLUGIN_ROOT>/plugin-cli.mjs"');
   });
 
   test("both plugin archives include the launcher", () => {
-    expect(readFileSync("scripts/package-agent-plugin.mjs", "utf8")).toContain(
-      '"plugin-cli.mjs"',
-    );
-    expect(readFileSync("scripts/package-codex-plugin.mjs", "utf8")).toContain(
-      '"plugin-cli.mjs"',
-    );
+    expect(readFileSync("scripts/package-agent-plugin.mjs", "utf8")).toContain('"plugin-cli.mjs"');
+    expect(readFileSync("scripts/package-codex-plugin.mjs", "utf8")).toContain('"plugin-cli.mjs"');
   });
 
   test("packages the SLG branded plugin icon in both formats", () => {
@@ -81,9 +79,7 @@ describe("release package layout", () => {
 
   test("refreshes the installed plugin after upgrading its marketplace", () => {
     const updater = readFileSync("src/update.ts", "utf8");
-    const marketplaceUpgrade = updater.indexOf(
-      '["plugin", "marketplace", "upgrade", "cxclaw"]',
-    );
+    const marketplaceUpgrade = updater.indexOf('["plugin", "marketplace", "upgrade", "cxclaw"]');
     const pluginInstall = updater.indexOf('["plugin", "add", "cxclaw@cxclaw"]');
     const pluginList = updater.indexOf('["plugin", "list", "--json"]');
     expect(marketplaceUpgrade).toBeGreaterThan(0);
@@ -92,7 +88,9 @@ describe("release package layout", () => {
   });
 
   test("does not package a Python runtime", () => {
-    expect(pkg.files.some(path => path.includes("python") || path.includes("requirements"))).toBe(false);
+    expect(pkg.files.some((path) => path.includes("python") || path.includes("requirements"))).toBe(
+      false,
+    );
   });
 
   test("keeps the native TypeScript API boundary separate from the legacy fallback", () => {

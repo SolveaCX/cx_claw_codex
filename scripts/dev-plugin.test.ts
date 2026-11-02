@@ -12,7 +12,9 @@ describe("local development plugin", () => {
   test("uses separate identities and runs the workspace bundle", async () => {
     await prepareDeveloperPlugin(output);
 
-    const marketplace = JSON.parse(readFileSync(join(output, ".agents", "plugins", "marketplace.json"), "utf8"));
+    const marketplace = JSON.parse(
+      readFileSync(join(output, ".agents", "plugins", "marketplace.json"), "utf8"),
+    );
     const manifest = JSON.parse(readFileSync(join(plugin, "plugin.json"), "utf8"));
     const mcp = JSON.parse(readFileSync(join(plugin, "mcp.json"), "utf8"));
     const launcher = readFileSync(join(plugin, "plugin-cli.dev.mjs"), "utf8");

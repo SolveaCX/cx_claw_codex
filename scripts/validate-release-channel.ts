@@ -12,7 +12,9 @@ type ReleaseInput = {
 export function validateReleaseChannel(input: ReleaseInput): void {
   const { version, channel, eventName, prHeadRef, manifestVersions } = input;
   if (manifestVersions.some((value) => value !== version)) {
-    throw new Error(`release version ${version} does not match manifests: ${manifestVersions.join(", ")}`);
+    throw new Error(
+      `release version ${version} does not match manifests: ${manifestVersions.join(", ")}`,
+    );
   }
 
   const prerelease = version.match(/^\d+\.\d+\.\d+-(canary|dev)\.\d+$/);
@@ -20,12 +22,14 @@ export function validateReleaseChannel(input: ReleaseInput): void {
 
   if (eventName === "push") {
     if (!prerelease) throw new Error("tag pushes may publish only dev or canary prereleases");
-    if (channel !== prerelease[1]) throw new Error(`version ${version} does not match channel ${channel}`);
+    if (channel !== prerelease[1])
+      throw new Error(`version ${version} does not match channel ${channel}`);
     return;
   }
 
   if (eventName !== "pull_request") throw new Error(`unsupported release event ${eventName}`);
-  if (!stable || channel !== "stable") throw new Error("release PRs may publish only stable versions");
+  if (!stable || channel !== "stable")
+    throw new Error("release PRs may publish only stable versions");
   if (prHeadRef !== `release/v${version}`) {
     throw new Error(`release branch ${prHeadRef} must be release/v${version}`);
   }

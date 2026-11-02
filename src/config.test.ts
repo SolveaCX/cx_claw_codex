@@ -19,14 +19,17 @@ describe("production authorization server", () => {
     }) as typeof fetch;
 
     try {
-      await request({
-        accessToken: "",
-        refreshToken: "",
-        accessExpiry: 0,
-        employeeId: "",
-        email: "",
-        channel: "stable",
-      }, "/plugin-config");
+      await request(
+        {
+          accessToken: "",
+          refreshToken: "",
+          accessExpiry: 0,
+          employeeId: "",
+          email: "",
+          channel: "stable",
+        },
+        "/plugin-config",
+      );
       expect(requestedUrl).toBe(`${AUTH_SERVER_URL}/plugin-config`);
     } finally {
       globalThis.fetch = originalFetch;

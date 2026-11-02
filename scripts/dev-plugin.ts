@@ -127,24 +127,41 @@ export async function prepareDeveloperPlugin(outputRoot = devRoot): Promise<void
   await cp(join(root, "skills"), join(pluginRoot, "skills"), { recursive: true });
 
   await Promise.all([
-    writeFile(join(pluginRoot, "plugin.json"), `${JSON.stringify(developerManifest(source), null, 2)}\n`),
-    writeFile(join(pluginRoot, ".codex-plugin", "plugin.json"), `${JSON.stringify(compatibilityManifest(source), null, 2)}\n`),
+    writeFile(
+      join(pluginRoot, "plugin.json"),
+      `${JSON.stringify(developerManifest(source), null, 2)}\n`,
+    ),
+    writeFile(
+      join(pluginRoot, ".codex-plugin", "plugin.json"),
+      `${JSON.stringify(compatibilityManifest(source), null, 2)}\n`,
+    ),
     writeFile(join(pluginRoot, "mcp.json"), `${JSON.stringify(mcpManifest(true), null, 2)}\n`),
     writeFile(join(pluginRoot, ".mcp.json"), `${JSON.stringify(mcpManifest(false), null, 2)}\n`),
-    writeFile(join(pluginRoot, "plugin-cli.dev.mjs"), launcherSource(source.version), { mode: 0o755 }),
-    writeFile(marketplaceFile, `${JSON.stringify({
-      $schema: "https://agent-plugins.org/schemas/1.0.0/marketplace.schema.json",
-      name: "cxclaw-dev",
-      interface: { displayName: "CXClaw Local Development" },
-      owner: { name: "SolveaCX" },
-      plugins: [{
-        name: "cxclaw-dev",
-        source: { source: "local", path: "./plugins/cxclaw-dev" },
-        description: "CXClaw local development plugin",
-        policy: { installation: "AVAILABLE", authentication: "ON_USE" },
-        category: "Developer Tools",
-      }],
-    }, null, 2)}\n`),
+    writeFile(join(pluginRoot, "plugin-cli.dev.mjs"), launcherSource(source.version), {
+      mode: 0o755,
+    }),
+    writeFile(
+      marketplaceFile,
+      `${JSON.stringify(
+        {
+          $schema: "https://agent-plugins.org/schemas/1.0.0/marketplace.schema.json",
+          name: "cxclaw-dev",
+          interface: { displayName: "CXClaw Local Development" },
+          owner: { name: "SolveaCX" },
+          plugins: [
+            {
+              name: "cxclaw-dev",
+              source: { source: "local", path: "./plugins/cxclaw-dev" },
+              description: "CXClaw local development plugin",
+              policy: { installation: "AVAILABLE", authentication: "ON_USE" },
+              category: "Developer Tools",
+            },
+          ],
+        },
+        null,
+        2,
+      )}\n`,
+    ),
   ]);
 }
 
@@ -152,7 +169,7 @@ function configuredMarketplaceRoot(): string | undefined {
   try {
     const line = run("codex", ["plugin", "marketplace", "list"], { capture: true })
       .split("\n")
-      .find(value => value.trimStart().startsWith("cxclaw-dev "));
+      .find((value) => value.trimStart().startsWith("cxclaw-dev "));
     return line?.trim().match(/^cxclaw-dev\s+(.+)$/)?.[1];
   } catch {
     return undefined;
@@ -173,27 +190,33 @@ async function sync(skipBuild: boolean): Promise<void> {
   }
   if (configuredRoot !== devRoot) run("codex", ["plugin", "marketplace", "add", devRoot]);
   run("codex", ["plugin", "add", selector, "--json"]);
-  console.log([
-    "CXClaw Dev is installed from the local workspace.",
-    "For the first install, restart the ChatGPT desktop app once.",
-    "After tenant panel UI builds, invoke tenant.current again to reload the panel resource.",
-    "After MCP server or tool metadata changes, restart the ChatGPT desktop app.",
-  ].join("\n"));
+  console.log(
+    [
+      "CXClaw Dev is installed from the local workspace.",
+      "For the first install, restart the ChatGPT desktop app once.",
+      "After tenant panel UI builds, invoke tenant.current again to reload the panel resource.",
+      "After MCP server or tool metadata changes, restart the ChatGPT desktop app.",
+    ].join("\n"),
+  );
 }
 
 async function watch(): Promise<void> {
   await sync(false);
-  console.log([
-    "Watching TypeScript bundles.",
-    "Invoke tenant.current again after tenant panel UI builds.",
-    "Restart the ChatGPT desktop app after MCP server or tool metadata changes.",
-  ].join("\n"));
+  console.log(
+    [
+      "Watching TypeScript bundles.",
+      "Invoke tenant.current again after tenant panel UI builds.",
+      "Restart the ChatGPT desktop app after MCP server or tool metadata changes.",
+    ].join("\n"),
+  );
   const child = spawn("bun", ["x", "tsup", "--watch"], { cwd: root, stdio: "inherit" });
   process.on("SIGINT", () => child.kill("SIGINT"));
   process.on("SIGTERM", () => child.kill("SIGTERM"));
   await new Promise<void>((resolve, reject) => {
     child.on("error", reject);
-    child.on("exit", code => code === 0 || code === null ? resolve() : reject(new Error(`tsup watch exited with ${code}`)));
+    child.on("exit", (code) =>
+      code === 0 || code === null ? resolve() : reject(new Error(`tsup watch exited with ${code}`)),
+    );
   });
 }
 

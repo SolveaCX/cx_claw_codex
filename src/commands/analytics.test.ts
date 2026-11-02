@@ -4,14 +4,26 @@ import { isFlatAnalyticsCommand, runAnalyticsAction } from "./analytics.js";
 
 const originalFetch = globalThis.fetch;
 const originalLog = console.log;
-afterEach(() => { globalThis.fetch = originalFetch; console.log = originalLog; });
+afterEach(() => {
+  globalThis.fetch = originalFetch;
+  console.log = originalLog;
+});
 
 const session: Session = {
-  accessToken: "access", refreshToken: "refresh",
-  accessExpiry: Date.now() + 60_000, employeeId: "employee", email: "employee@example.com", channel: "dev",
+  accessToken: "access",
+  refreshToken: "refresh",
+  accessExpiry: Date.now() + 60_000,
+  employeeId: "employee",
+  email: "employee@example.com",
+  channel: "dev",
   tenant: {
-    accountId: 5, accountCode: "test", accountName: "Test", environment: "staging",
-    purpose: "test", businessUrl: "https://apps-staging.example", businessToken: "tenant-token",
+    accountId: 5,
+    accountCode: "test",
+    accountName: "Test",
+    environment: "staging",
+    purpose: "test",
+    businessUrl: "https://apps-staging.example",
+    businessToken: "tenant-token",
     expiresAt: Date.now() + 60_000,
   },
 };
@@ -38,14 +50,23 @@ describe("analytics resource commands", () => {
     for (const [action, endpoint] of Object.entries(actions)) {
       requests.length = 0;
       await runAnalyticsAction(session, action, [
-        "--start-date", "2026-10-01", "--end-date", "2026-10-20",
-        "--bot-id", "723", "--channel", "EMAIL",
+        "--start-date",
+        "2026-10-01",
+        "--end-date",
+        "2026-10-20",
+        "--bot-id",
+        "723",
+        "--channel",
+        "EMAIL",
       ]);
       const request = requests.at(-1);
       expect(request?.url).toEndWith(`/api_v2/as_bot/chat-report/${endpoint}`);
       expect(request?.init?.method).toBe("POST");
       expect(JSON.parse(String(request?.init?.body))).toEqual({
-        startDate: "2026-10-01", endDate: "2026-10-20", botId: 723, touchPoint: "EMAIL",
+        startDate: "2026-10-01",
+        endDate: "2026-10-20",
+        botId: 723,
+        touchPoint: "EMAIL",
       });
     }
   });
@@ -68,7 +89,11 @@ describe("analytics resource commands", () => {
     expect(isFlatAnalyticsCommand("analytics-messages")).toBe(true);
     expect(isFlatAnalyticsCommand("chat-report-messages")).toBe(true);
     expect(isFlatAnalyticsCommand("analytics")).toBe(false);
-    await expect(runAnalyticsAction(session, "analytics-messages", [])).rejects.toThrow("unknown analytics action");
-    await expect(runAnalyticsAction(session, "unknown", [])).rejects.toThrow("unknown analytics action");
+    await expect(runAnalyticsAction(session, "analytics-messages", [])).rejects.toThrow(
+      "unknown analytics action",
+    );
+    await expect(runAnalyticsAction(session, "unknown", [])).rejects.toThrow(
+      "unknown analytics action",
+    );
   });
 });

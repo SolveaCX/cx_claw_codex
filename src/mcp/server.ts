@@ -85,11 +85,13 @@ export function createTenantMcpServer(): McpServer {
     TENANT_PANEL_URI,
     { title, mimeType: MCP_APP_MIME_TYPE },
     async () => ({
-      contents: [{
-        uri: TENANT_PANEL_URI,
-        mimeType: MCP_APP_MIME_TYPE,
-        text: await tenantPanelHtml(),
-      }],
+      contents: [
+        {
+          uri: TENANT_PANEL_URI,
+          mimeType: MCP_APP_MIME_TYPE,
+          text: await tenantPanelHtml(),
+        },
+      ],
     }),
   );
 
@@ -98,14 +100,30 @@ export function createTenantMcpServer(): McpServer {
     {
       title,
       description: "读取指定 CXClaw context 当前选择的租户，仅返回非敏感展示字段。",
-      inputSchema: { contextId: z.string().optional().describe("由 cxclawctl context init 生成的 contextId") },
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+      inputSchema: {
+        contextId: z.string().optional().describe("由 cxclawctl context init 生成的 contextId"),
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
       _meta: TENANT_PANEL_TOOL_META,
     },
     async ({ contextId }) => {
       const status = await loadTenantPanelStatus(contextId);
       return {
-        content: [{ type: "text", text: status.contextRequired ? "需要传入 contextId" : status.configured ? `当前租户：${status.companyName ?? status.accountName ?? status.accountId}` : "当前 context 未选择租户" }],
+        content: [
+          {
+            type: "text",
+            text: status.contextRequired
+              ? "需要传入 contextId"
+              : status.configured
+                ? `当前租户：${status.companyName ?? status.accountName ?? status.accountId}`
+                : "当前 context 未选择租户",
+          },
+        ],
         structuredContent: status,
       };
     },
