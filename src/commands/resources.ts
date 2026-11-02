@@ -1,6 +1,7 @@
 import type { Session } from "../types.js";
 import { runApi } from "../business.js";
 import { runAnalyticsAction } from "./analytics.js";
+import { runReportAction } from "./report.js";
 
 type ActionDefinition = {
   command?: string;
@@ -14,6 +15,8 @@ const action = (command: string, summary: string, usage = ""): ActionDefinition 
   usage,
 });
 const directAction = (summary: string, usage = ""): ActionDefinition => ({ summary, usage });
+const reportAction = (actionName: string, summary: string, usage = "") =>
+  action(`report-${actionName}`, summary, usage);
 
 export const resources = {
   agent: {
@@ -283,6 +286,88 @@ export const resources = {
     ),
     "inbox-scripts": directAction("Get Agent inbox drill-down scripts"),
   },
+  report: {
+    transcript: reportAction(
+      "transcript",
+      "Query legacy report ticket metrics",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--channel <channel>] [--date-unit <DAY|WEEK|TOTAL>]",
+    ),
+    message: reportAction(
+      "message",
+      "Query legacy report message metrics",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--channel <channel>] [--date-unit <DAY|WEEK|TOTAL>]",
+    ),
+    agent: reportAction(
+      "agent",
+      "Query legacy report agent metrics",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--agent-id <id>] [--channel <channel>] [--date-unit <DAY|WEEK|TOTAL>]",
+    ),
+    intent: reportAction(
+      "intent",
+      "Query legacy report intent metrics",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--intent-id <id>] [--channel <channel>] [--date-unit <DAY|WEEK|TOTAL>]",
+    ),
+    satisfaction: reportAction(
+      "satisfaction",
+      "Query legacy report satisfaction summary",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--channel <channel>]",
+    ),
+    "satisfaction-list": reportAction(
+      "satisfaction-list",
+      "Query legacy report satisfaction details",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--page <number>] [--page-size <number>] [--assistant-role <ASSISTANT|HUMAN>] [--satisfied <true|false>]",
+    ),
+    feedback: reportAction(
+      "feedback",
+      "Query legacy report rating distribution",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--channel <channel>]",
+    ),
+    knowledge: reportAction(
+      "knowledge",
+      "Query legacy report knowledge usage",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--page <number>] [--page-size <number>] [--sort-by <json>] [--source <source>]",
+    ),
+    escalation: reportAction(
+      "escalation",
+      "Query legacy report escalation reasons",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--date-unit <DAY|WEEK>] [--bot-id <id>] [--channel <channel>]",
+    ),
+    "escalation-drilldown": reportAction(
+      "escalation-drilldown",
+      "Query legacy report escalation drilldown",
+      "--begin-ts <ms> --end-ts <ms> --reason <reason> [--time-offset <hours>] [--page <number>] [--page-size <number>]",
+    ),
+    "agent-weekly-graph": reportAction(
+      "agent-weekly-graph",
+      "Query legacy report agent weekly graph",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>]",
+    ),
+    "self-learning": reportAction(
+      "self-learning",
+      "Query legacy report self-learning metrics",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--channel <channel>]",
+    ),
+    livechat: reportAction(
+      "livechat",
+      "Query legacy LiveChat report summary",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>]",
+    ),
+    "livechat-table": reportAction(
+      "livechat-table",
+      "Query legacy LiveChat report details",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--page <number>] [--page-size <number>]",
+    ),
+    inspection: reportAction(
+      "inspection",
+      "Query legacy inspection report summary",
+      "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--dimension <dimension>]",
+    ),
+    "inspection-history": reportAction(
+      "inspection-history",
+      "Query legacy inspection report history",
+      "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--dimension <dimension>]",
+    ),
+  },
 } as const;
 
 const CLI_NAME = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
@@ -362,6 +447,7 @@ export async function runResourceCommand(
   if (!definition)
     throw new Error(`unknown ${resource} action: ${action}\n${resourceHelp(resource)}`);
   if (resource === "analytics") return runAnalyticsAction(session, action, args);
+  if (resource === "report") return runReportAction(session, action, args);
   if (!definition.command) throw new Error(`${resource} ${action} has no implementation`);
   await runApi(session, definition.command, args);
 }
