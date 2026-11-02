@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { isResourceCommand, resolveResourceCommand, resourceCommandForImplementation, resourceHelp } from "./resources.js";
+import {
+  isResourceCommand,
+  resolveResourceCommand,
+  resourceCommandForImplementation,
+  resourceHelp,
+} from "./resources.js";
 
 describe("resource command hierarchy", () => {
   test("maps readable resource actions to internal commands", () => {

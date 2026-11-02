@@ -41,26 +41,39 @@ async function requestBody(action: string, args: string[]) {
     const raw = option(args, name) ?? supplied[field];
     if (raw === undefined) return;
     const value = Number(raw);
-    if (!Number.isSafeInteger(value) || value <= 0) throw new Error(`${name} must be a positive integer`);
+    if (!Number.isSafeInteger(value) || value <= 0)
+      throw new Error(`${name} must be a positive integer`);
     body[field] = value;
   };
   numeric("botId", "--bot-id");
   numeric("intentId", "--intent-id");
   numeric("agentId", "--agent-id");
 
-  const touchPoint = option(args, "--channel") ?? option(args, "--touch-point") ?? supplied.touchPoint;
+  const touchPoint =
+    option(args, "--channel") ?? option(args, "--touch-point") ?? supplied.touchPoint;
   if (touchPoint !== undefined) {
-    if (typeof touchPoint !== "string" || !touchPoint.trim()) throw new Error("--channel must be a non-empty string");
+    if (typeof touchPoint !== "string" || !touchPoint.trim())
+      throw new Error("--channel must be a non-empty string");
     body.touchPoint = touchPoint;
   }
   return body;
 }
 
-export async function runAnalyticsAction(session: Session, action: string | undefined, args: string[]) {
-  if (!isAnalyticsAction(action)) throw new Error(`unknown analytics action: ${action ?? "<missing>"}`);
+export async function runAnalyticsAction(
+  session: Session,
+  action: string | undefined,
+  args: string[],
+) {
+  if (!isAnalyticsAction(action))
+    throw new Error(`unknown analytics action: ${action ?? "<missing>"}`);
   const client = new SolveaClient(session);
-  const result = action === "inbox-scripts"
-    ? await client.rawCall("GET", "/api_v2/as_bot/chat-report/inbox-scripts")
-    : await client.rawCall("POST", `/api_v2/as_bot/chat-report/${PATHS[action]}`, await requestBody(action, args));
+  const result =
+    action === "inbox-scripts"
+      ? await client.rawCall("GET", "/api_v2/as_bot/chat-report/inbox-scripts")
+      : await client.rawCall(
+          "POST",
+          `/api_v2/as_bot/chat-report/${PATHS[action]}`,
+          await requestBody(action, args),
+        );
   console.log(JSON.stringify(result, null, 2));
 }

@@ -3,14 +3,25 @@ import type { Session } from "../types.js";
 import { isNativeSolveaCommand, runSolveaCommand } from "./commands.js";
 
 const originalFetch = globalThis.fetch;
-afterEach(() => { globalThis.fetch = originalFetch; });
+afterEach(() => {
+  globalThis.fetch = originalFetch;
+});
 
 const session: Session = {
-  accessToken: "access", refreshToken: "refresh",
-  accessExpiry: Date.now() + 60_000, employeeId: "employee", email: "employee@example.com", channel: "dev",
+  accessToken: "access",
+  refreshToken: "refresh",
+  accessExpiry: Date.now() + 60_000,
+  employeeId: "employee",
+  email: "employee@example.com",
+  channel: "dev",
   tenant: {
-    accountId: 5, accountCode: "test", accountName: "Test", environment: "staging",
-    purpose: "test", businessUrl: "https://apps-staging.example", businessToken: "tenant-token",
+    accountId: 5,
+    accountCode: "test",
+    accountName: "Test",
+    environment: "staging",
+    purpose: "test",
+    businessUrl: "https://apps-staging.example",
+    businessToken: "tenant-token",
     expiresAt: Date.now() + 60_000,
   },
 };
@@ -40,14 +51,24 @@ describe("native Solvea command registry", () => {
     }) as typeof fetch;
 
     await runSolveaCommand(session, "list-knowledge", [
-      "--type", "QA", "--page", "2", "--page-size", "5", "--keyword", "充值",
+      "--type",
+      "QA",
+      "--page",
+      "2",
+      "--page-size",
+      "5",
+      "--keyword",
+      "充值",
     ]);
 
     const request = requests.at(-1);
     expect(request?.url).toEndWith("/sns_v1/project/302/getKnowledge");
     expect(request?.init?.method).toBe("POST");
     expect(JSON.parse(String(request?.init?.body))).toEqual({
-      type: "QA", pageIndex: 2, pageSize: 5, keyword: "充值",
+      type: "QA",
+      pageIndex: 2,
+      pageSize: 5,
+      keyword: "充值",
     });
   });
 
@@ -62,18 +83,36 @@ describe("native Solvea command registry", () => {
     }) as typeof fetch;
 
     await runSolveaCommand(session, "list-knowledge", [
-      "--data", JSON.stringify({ type: "ALL", pageIndex: 9, pageSize: 99, keyword: "旧值", directoryId: 33727 }),
-      "--type", "QA", "--page", "3", "--page-size", "10", "--keyword", "新值",
+      "--data",
+      JSON.stringify({
+        type: "ALL",
+        pageIndex: 9,
+        pageSize: 99,
+        keyword: "旧值",
+        directoryId: 33727,
+      }),
+      "--type",
+      "QA",
+      "--page",
+      "3",
+      "--page-size",
+      "10",
+      "--keyword",
+      "新值",
     ]);
 
     expect(requestBody).toEqual({
-      type: "QA", pageIndex: 3, pageSize: 10, keyword: "新值", directoryId: 33727,
+      type: "QA",
+      pageIndex: 3,
+      pageSize: 10,
+      keyword: "新值",
+      directoryId: 33727,
     });
   });
 
   test("routes resource detail reads using the required knowledge type", async () => {
     const requests: string[] = [];
-    globalThis.fetch = (async input => {
+    globalThis.fetch = (async (input) => {
       requests.push(String(input));
       const body = String(input).endsWith("/api_v2/gpt/bots") ? [{ projectId: 302 }] : { id: 8 };
       return new Response(JSON.stringify(body), { status: 200 });

@@ -1,8 +1,4 @@
-import {
-  App,
-  applyDocumentTheme,
-  applyHostStyleVariables,
-} from "@modelcontextprotocol/ext-apps";
+import { App, applyDocumentTheme, applyHostStyleVariables } from "@modelcontextprotocol/ext-apps";
 
 type TenantStatus = {
   checkedAt: number;
@@ -32,7 +28,11 @@ function text(id: string, value: string): void {
 }
 
 function formatTime(value?: number): string {
-  return value ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "medium" }).format(value * 1_000) : "—";
+  return value
+    ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "medium" }).format(
+        value * 1_000,
+      )
+    : "—";
 }
 
 function render(value: unknown): void {
@@ -49,16 +49,29 @@ function render(value: unknown): void {
     text("summary", "完成登录并选择租户后，这里会自动显示当前租户。");
   } else if (status.credentialStatus === "not_selected") {
     text("headline", "尚未选择租户");
-    text("summary", status.contextRequired ? "调用 tenant.current 时需要传入当前会话的 contextId。" : "运行 tenant use 后，这里会自动刷新。");
+    text(
+      "summary",
+      status.contextRequired
+        ? "调用 tenant.current 时需要传入当前会话的 contextId。"
+        : "运行 tenant use 后，这里会自动刷新。",
+    );
   } else if (status.credentialStatus === "unavailable") {
     text("headline", "无法读取租户状态");
     text("summary", "请检查系统凭据库和 CXClaw 登录状态。");
   } else {
     text("headline", status.companyName || status.accountName || `租户 ${status.accountId ?? "—"}`);
-    text("summary", status.credentialStatus === "expired" ? "租户凭据已过期，下次业务操作会尝试刷新。" : "当前业务命令将访问这个租户。");
+    text(
+      "summary",
+      status.credentialStatus === "expired"
+        ? "租户凭据已过期，下次业务操作会尝试刷新。"
+        : "当前业务命令将访问这个租户。",
+    );
   }
 
-  text("environment", environment === "prod" ? "PRODUCTION" : environment === "staging" ? "STAGING" : "未选择");
+  text(
+    "environment",
+    environment === "prod" ? "PRODUCTION" : environment === "staging" ? "STAGING" : "未选择",
+  );
   text("context-id", status.contextId || "—");
   text("profile-id", status.profileId || "—");
   text("account-id", status.accountId == null ? "—" : String(status.accountId));
@@ -78,7 +91,10 @@ function renderError(message: string): void {
 async function refresh(): Promise<void> {
   if (refreshButton) refreshButton.disabled = true;
   try {
-    const result = await app.callServerTool({ name: "tenant.current", arguments: activeContextId ? { contextId: activeContextId } : {} });
+    const result = await app.callServerTool({
+      name: "tenant.current",
+      arguments: activeContextId ? { contextId: activeContextId } : {},
+    });
     if (result.isError) renderError("刷新租户状态失败");
     else render(result.structuredContent);
   } catch {
@@ -94,7 +110,7 @@ function applyHostContext(): void {
   if (context?.styles?.variables) applyHostStyleVariables(context.styles.variables);
 }
 
-app.ontoolresult = result => render(result.structuredContent);
+app.ontoolresult = (result) => render(result.structuredContent);
 app.addEventListener("hostcontextchanged", applyHostContext);
 refreshButton?.addEventListener("click", () => void refresh());
 document.addEventListener("visibilitychange", () => {

@@ -1,9 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  releaseBranch,
-  releasePullRequestBody,
-  resolveReleaseVersion,
-} from "./create-release.js";
+import { releaseBranch, releasePullRequestBody, resolveReleaseVersion } from "./create-release.js";
 
 describe("release creation", () => {
   test("calculates stable version bumps", () => {

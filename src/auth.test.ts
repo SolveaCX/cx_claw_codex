@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { authorizeDevice, isAuthorizationPending, publicAuthStatus, resolveAuthenticated } from "./auth.js";
+import {
+  authorizeDevice,
+  isAuthorizationPending,
+  publicAuthStatus,
+  resolveAuthenticated,
+} from "./auth.js";
 import { HttpError } from "./http.js";
 import { SessionNotFoundError } from "./store.js";
 import type { Session } from "./types.js";
@@ -33,7 +38,7 @@ describe("explicit authentication", () => {
   test("continues with the stored session when refresh succeeds", async () => {
     const result = await resolveAuthenticated({
       load: async () => session,
-      refresh: async value => value,
+      refresh: async (value) => value,
       remove: async () => undefined,
     });
 
@@ -43,8 +48,13 @@ describe("explicit authentication", () => {
   test("returns not_authenticated without opening login when no session exists", async () => {
     let refreshed = false;
     const result = resolveAuthenticated({
-      load: async () => { throw new SessionNotFoundError(); },
-      refresh: async value => { refreshed = true; return value; },
+      load: async () => {
+        throw new SessionNotFoundError();
+      },
+      refresh: async (value) => {
+        refreshed = true;
+        return value;
+      },
       remove: async () => undefined,
     });
 
@@ -58,8 +68,12 @@ describe("explicit authentication", () => {
     let removed = false;
     const result = resolveAuthenticated({
       load: async () => session,
-      refresh: async () => { throw new HttpError(401, "expired"); },
-      remove: async () => { removed = true; },
+      refresh: async () => {
+        throw new HttpError(401, "expired");
+      },
+      remove: async () => {
+        removed = true;
+      },
     });
 
     await expect(result).rejects.toMatchObject({
@@ -70,11 +84,15 @@ describe("explicit authentication", () => {
 
   test("does not turn server failures into a new authorization flow", async () => {
     const failure = new HttpError(503, "unavailable");
-    await expect(resolveAuthenticated({
-      load: async () => session,
-      refresh: async () => { throw failure; },
-      remove: async () => undefined,
-    })).rejects.toBe(failure);
+    await expect(
+      resolveAuthenticated({
+        load: async () => session,
+        refresh: async () => {
+          throw failure;
+        },
+        remove: async () => undefined,
+      }),
+    ).rejects.toBe(failure);
   });
 });
 
@@ -95,8 +113,12 @@ describe("device authorization wait", () => {
 
   test("recognizes pending authorization from HTTP status or response code", () => {
     expect(isAuthorizationPending(new HttpError(428, '{"message":"pending"}'))).toBe(true);
-    expect(isAuthorizationPending(new HttpError(400, '{"code":428,"message":"authorization_pending"}'))).toBe(true);
-    expect(isAuthorizationPending(new HttpError(400, '{"code":401,"message":"invalid"}'))).toBe(false);
+    expect(
+      isAuthorizationPending(new HttpError(400, '{"code":428,"message":"authorization_pending"}')),
+    ).toBe(true);
+    expect(isAuthorizationPending(new HttpError(400, '{"code":401,"message":"invalid"}'))).toBe(
+      false,
+    );
   });
 
   test("keeps polling without printing the authorization URL when the browser opens", async () => {
@@ -113,7 +135,7 @@ describe("device authorization wait", () => {
       save: async () => undefined,
       sleep: async () => undefined,
       now: () => 0,
-      log: message => logs.push(message),
+      log: (message) => logs.push(message),
     });
 
     expect(polls).toBe(2);
@@ -128,11 +150,13 @@ describe("device authorization wait", () => {
     await authorizeDevice("stable", {
       start: async () => start,
       poll: async () => token,
-      openBrowser: async () => { throw new Error("cannot open browser"); },
+      openBrowser: async () => {
+        throw new Error("cannot open browser");
+      },
       save: async () => undefined,
       sleep: async () => undefined,
       now: () => 0,
-      log: message => logs.push(message),
+      log: (message) => logs.push(message),
     });
 
     expect(logs.join("\n")).toContain(start.verificationUriComplete);

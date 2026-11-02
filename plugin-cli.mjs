@@ -16,21 +16,17 @@ if (!/^\d+\.\d+\.\d+(?:-(?:canary|dev)\.\d+)?$/.test(version)) {
 
 const npx = process.platform === "win32" ? "npx.cmd" : "npx";
 const cliArgs = process.argv.slice(2);
-const child = spawn(
-  npx,
-  ["--yes", `@shulex/cxclawctl@${version}`, ...cliArgs],
-  {
-    // Codex starts plugin MCP servers from the plugin root. Running npx there
-    // makes npm mistake this source checkout for the installed CLI package.
-    cwd: cliArgs[0] === "mcp-server" ? tmpdir() : undefined,
-    stdio: "inherit",
-    env: {
-      ...process.env,
-      CXCLAW_PLUGIN_ROOT: root,
-      CXCLAW_PLUGIN_VERSION: version,
-    },
+const child = spawn(npx, ["--yes", `@shulex/cxclawctl@${version}`, ...cliArgs], {
+  // Codex starts plugin MCP servers from the plugin root. Running npx there
+  // makes npm mistake this source checkout for the installed CLI package.
+  cwd: cliArgs[0] === "mcp-server" ? tmpdir() : undefined,
+  stdio: "inherit",
+  env: {
+    ...process.env,
+    CXCLAW_PLUGIN_ROOT: root,
+    CXCLAW_PLUGIN_VERSION: version,
   },
-);
+});
 
 child.on("error", (error) => {
   console.error(`cxclaw plugin launcher: ${error.message}`);

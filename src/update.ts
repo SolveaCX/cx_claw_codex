@@ -30,8 +30,7 @@ const xml = (value: string) =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
 
-const systemdArg = (value: string) =>
-  `"${value.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
+const systemdArg = (value: string) => `"${value.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
 
 const windowsArg = (value: string) =>
   /[\s"]/.test(value) ? `"${value.replaceAll('"', '\\"')}"` : value;
@@ -84,9 +83,7 @@ export async function update() {
   }
   const metadata = (await response.json()) as { version?: string };
   if (metadata.version !== plugin.version) {
-    throw new Error(
-      `npm returned ${metadata.version ?? "no version"}, expected ${plugin.version}`,
-    );
+    throw new Error(`npm returned ${metadata.version ?? "no version"}, expected ${plugin.version}`);
   }
   return {
     pluginVersion: plugin.version,

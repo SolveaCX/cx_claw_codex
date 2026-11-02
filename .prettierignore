@@ -1,0 +1,9 @@
+_tmp_/
+dist/
+node_modules/
+bun.lock
+capabilities.lock.json
+assets/
+*.md
+skills/
+docs/

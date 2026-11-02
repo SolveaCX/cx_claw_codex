@@ -28,5 +28,7 @@ console.log(`Prepared CXClaw ${version}`);
 if (version.includes("-")) {
   console.log(`Commit the changes, then push tag v${version} to publish the prerelease.`);
 } else {
-  console.log(`Commit the changes on release/v${version}, open a PR to main, and merge it to publish.`);
+  console.log(
+    `Commit the changes on release/v${version}, open a PR to main, and merge it to publish.`,
+  );
 }

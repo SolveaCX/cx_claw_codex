@@ -14,16 +14,29 @@ afterEach(() => {
 test("SLS query uses employee access and explicit environment without tenant context", async () => {
   let requestBody: unknown;
   let requestHeaders: Headers | undefined;
-  globalThis.fetch = (async (_input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+  globalThis.fetch = (async (
+    _input: Parameters<typeof fetch>[0],
+    init?: Parameters<typeof fetch>[1],
+  ) => {
     requestBody = JSON.parse(String(init?.body));
     requestHeaders = new Headers(init?.headers);
-    return new Response(JSON.stringify({ data: {
-      endpoint: "test.log.aliyuncs.com",
-      project: "project",
-      logstore: "logstore",
-      credentials: { accessKeyId: "ak", accessKeySecret: "sk" },
-      limits: { maxTimeRangeSeconds: 7200, maxResults: 200, maxConcurrency: 2, maxMessageChars: 20000 },
-    } }), { status: 200, headers: { "content-type": "application/json" } });
+    return new Response(
+      JSON.stringify({
+        data: {
+          endpoint: "test.log.aliyuncs.com",
+          project: "project",
+          logstore: "logstore",
+          credentials: { accessKeyId: "ak", accessKeySecret: "sk" },
+          limits: {
+            maxTimeRangeSeconds: 7200,
+            maxResults: 200,
+            maxConcurrency: 2,
+            maxMessageChars: 20000,
+          },
+        },
+      }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    );
   }) as unknown as typeof fetch;
   (LogClient as any).prototype.getLogs = async () => ({ body: [] });
   const session: Session = {
@@ -35,7 +48,15 @@ test("SLS query uses employee access and explicit environment without tenant con
     channel: "stable",
   };
 
-  await query(session, { environment: "test", from: 100, to: 200, query: "*", line: 1, offset: 0, reverse: false });
+  await query(session, {
+    environment: "test",
+    from: 100,
+    to: 200,
+    query: "*",
+    line: 1,
+    offset: 0,
+    reverse: false,
+  });
 
   expect(requestBody).toEqual({ environment: "staging" });
   expect(requestHeaders?.get("authorization")).toBe("Bearer employee-access");
@@ -44,15 +65,28 @@ test("SLS query uses employee access and explicit environment without tenant con
 
 test("SLS query defaults to production instead of inheriting a previous tenant", async () => {
   let requestBody: unknown;
-  globalThis.fetch = (async (_input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+  globalThis.fetch = (async (
+    _input: Parameters<typeof fetch>[0],
+    init?: Parameters<typeof fetch>[1],
+  ) => {
     requestBody = JSON.parse(String(init?.body));
-    return new Response(JSON.stringify({ data: {
-      endpoint: "test.log.aliyuncs.com",
-      project: "project",
-      logstore: "logstore",
-      credentials: { accessKeyId: "ak", accessKeySecret: "sk" },
-      limits: { maxTimeRangeSeconds: 7200, maxResults: 200, maxConcurrency: 2, maxMessageChars: 20000 },
-    } }), { status: 200, headers: { "content-type": "application/json" } });
+    return new Response(
+      JSON.stringify({
+        data: {
+          endpoint: "test.log.aliyuncs.com",
+          project: "project",
+          logstore: "logstore",
+          credentials: { accessKeyId: "ak", accessKeySecret: "sk" },
+          limits: {
+            maxTimeRangeSeconds: 7200,
+            maxResults: 200,
+            maxConcurrency: 2,
+            maxMessageChars: 20000,
+          },
+        },
+      }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    );
   }) as unknown as typeof fetch;
   (LogClient as any).prototype.getLogs = async () => ({ body: [] });
   const session: Session = {
@@ -62,7 +96,14 @@ test("SLS query defaults to production instead of inheriting a previous tenant",
     employeeId: "1",
     email: "employee@example.test",
     channel: "stable",
-    tenant: { accountId: 1, accountCode: "V1", accountName: "Tenant", environment: "prod", purpose: "old", expiresAt: 2_000_000_000 },
+    tenant: {
+      accountId: 1,
+      accountCode: "V1",
+      accountName: "Tenant",
+      environment: "prod",
+      purpose: "old",
+      expiresAt: 2_000_000_000,
+    },
   };
 
   await query(session, { from: 100, to: 200, query: "*", line: 1, offset: 0, reverse: false });
@@ -70,10 +111,14 @@ test("SLS query defaults to production instead of inheriting a previous tenant",
 });
 
 test("SLS query surfaces the authorization service business error", async () => {
-  globalThis.fetch = (async (_input: Parameters<typeof fetch>[0], _init?: Parameters<typeof fetch>[1]) => new Response(
-    JSON.stringify({ code: 200, message: "SLS session is not configured" }),
-    { status: 200, headers: { "content-type": "application/json" } },
-  )) as unknown as typeof fetch;
+  globalThis.fetch = (async (
+    _input: Parameters<typeof fetch>[0],
+    _init?: Parameters<typeof fetch>[1],
+  ) =>
+    new Response(JSON.stringify({ code: 200, message: "SLS session is not configured" }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })) as unknown as typeof fetch;
   const session: Session = {
     accessToken: "employee-access",
     refreshToken: "refresh",
@@ -83,6 +128,15 @@ test("SLS query surfaces the authorization service business error", async () => 
     channel: "stable",
   };
 
-  await expect(query(session, { environment: "test", from: 100, to: 200, query: "*", line: 1, offset: 0, reverse: false }))
-    .rejects.toThrow("SLS credential request failed: SLS session is not configured");
+  await expect(
+    query(session, {
+      environment: "test",
+      from: 100,
+      to: 200,
+      query: "*",
+      line: 1,
+      offset: 0,
+      reverse: false,
+    }),
+  ).rejects.toThrow("SLS credential request failed: SLS session is not configured");
 });
