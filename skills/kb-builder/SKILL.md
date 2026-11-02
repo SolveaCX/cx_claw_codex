@@ -18,6 +18,7 @@ requires:
 | 网页建知识库、探查网站、设计目录 | [`interfaces/web-kb.md`](interfaces/web-kb.md)、[`references/directory.md`](references/directory.md) | `kb-builder crawl`、`kb-builder directory-plan`、`kb-builder create-directories` |
 | 网页/Word/PDF 保留原文 | 本文件“来源模式” | `kb-builder import-source-documents` |
 | 网页/文件/工单整理成问答 | [`qa-quality.md`](references/qa-quality.md)、[`qa-from-web.md`](references/qa-from-web.md)、[`qa-from-help-center.md`](references/qa-from-help-center.md)、[`qa-from-pdf.md`](references/qa-from-pdf.md)、[`qa-from-tickets.md`](references/qa-from-tickets.md) | `kb-builder extract-web-qa`、`kb-builder batch-extract-ticket-qa`、`kb-builder import-qa` |
+| Excel / CSV 整理成问答 | [`references/upload.md`](references/upload.md) | 先解析表格，再按 QA 导入流程执行 |
 | 上传已有 QA 计划 | [`references/upload.md`](references/upload.md) | `kb-builder import-qa` |
 | 回复模板库导入 | [`references/reply-template.md`](references/reply-template.md) | `kb-builder import-templates` |
 | 查看、更新、移动、删除或改变知识状态 | [`references/knowledge.md`](references/knowledge.md) | 按 reference 提供的固定入口 |

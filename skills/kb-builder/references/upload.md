@@ -115,6 +115,26 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-qa --qa-file /path/to/qa_p
 node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-qa --qa-file /path/to/qa_plan.json
 ```
 
+## Excel QA 与嵌入图片
+
+用户提供 Excel 且每行代表一条或多条 QA 时，先把 Excel 当作“待解析的数据源”，不要假定固定 sheet 名、列名或图片格式。先读取所有可见 sheet 的表头和少量样本行，确认问题、答案、目录、SKU 等字段的对应关系；字段含义不明确时先向用户确认，不要根据列名相似度静默猜测。
+
+图片分两类处理：
+
+1. 单元格文本中的图片引用：保留 `https://...` URL；发现 `data:image/...;base64,...` 或本地图片路径时，调用公用 `uploadFile`（`POST /api/upload`，表单字段 `file`），再把返回的 URL 写回 Markdown 图片，例如 `![图片](返回URL)`。
+2. Excel 文件内部的嵌入图片：不能只依赖单元格显示值。先读取 XLSX ZIP 包中的工作表、图片关系和媒体文件（通常位于 `xl/media/`），同时处理普通 drawing 图片、图片公式/占位引用和 WPS/Excel 的 cell-image 关系；根据图片锚点、单元格引用或公式 ID 把图片关联回所属行/列。无法唯一关联时标记为待确认，不要把图片随意挂到相邻 QA。
+
+解析后统一转换为 QA 计划：每条记录至少包含 `question`、`answer`，目录信息按实际目录转换为 `dir_path`。图片放在 `answer` 的 Markdown 中，不能只把内部文件名、公式文本或 ZIP 路径写入答案。图片上传失败时，该条 QA 进入错误清单并停止正式提交，不要静默丢图。
+
+Excel 导入必须分为四步：
+
+1. 解析并输出行数、sheet、字段映射、图片数量和无法关联项。
+2. 生成 QA 计划并执行 `--dry-run`。
+3. 展示计划，等待用户明确确认。
+4. 确认后上传图片和 QA，最后按关键词和目录数量校验结果。
+
+不要为某个文件的 sheet 名、列名、图片 ID 或 `DISPIMG` 文本增加硬编码分支；这些都只是 Excel 文件的具体表现形式，必须走上述通用解析流程。
+
 ## 常见错误
 
 | 错误 | 正确做法 |

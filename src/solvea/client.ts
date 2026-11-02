@@ -1,6 +1,8 @@
 import type { Session } from "../types.js";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { basename, dirname, extname } from "node:path";
+import { basename, dirname, extname, resolve } from "node:path";
+import { Buffer } from "node:buffer";
+import { fileURLToPath } from "node:url";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 type JsonObject = Record<string, unknown>;
@@ -21,6 +23,17 @@ const knowledgeType = (value: unknown) => {
   return normalized;
 };
 const isolationKnowledgeType = (value: unknown) => ({ QA: "QA", LEARN_SELF: "QA", FILE: "DOCUMENT", WEBSITE: "DOCUMENT", PRODUCT: "PRODUCT" })[knowledgeType(value)]!;
+
+const embeddedImagePattern = /data:(image\/[a-z0-9.+-]+);base64,([a-z0-9+/=]+)/gi;
+const localImagePattern = /(\bsrc\s*=\s*["']|!\[[^\]]*\]\()([^"')]+)(["']|\))/gi;
+const imageContentTypes: Record<string, string> = {
+  ".avif": "image/avif", ".gif": "image/gif", ".jpeg": "image/jpeg", ".jpg": "image/jpeg",
+  ".png": "image/png", ".svg": "image/svg+xml", ".webp": "image/webp",
+};
+const imageExtension = (contentType: string) => {
+  const subtype = contentType.slice(contentType.indexOf("/") + 1).toLowerCase().replace(/\+xml$/, "");
+  return subtype === "jpeg" ? "jpg" : subtype.replace(/[^a-z0-9]/g, "") || "bin";
+};
 
 /**
  * Typed transport for the tenant business API.
@@ -54,14 +67,16 @@ export class SolveaClient {
       "x-cxclaw-client-version": process.env.CXCLAW_PLUGIN_VERSION ?? "unknown",
     });
     for (const [name, value] of new Headers(requestHeaders)) headers.set(name, value);
-    if (body !== undefined) headers.set("content-type", "application/json");
+    const isMultipart = typeof FormData !== "undefined" && body instanceof FormData;
+    if (body !== undefined && !isMultipart) headers.set("content-type", "application/json");
     let last: unknown;
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       try {
+        const requestBody = isMultipart ? body as FormData : body === undefined ? undefined : JSON.stringify(body);
         const response = await fetch(url, {
           method,
           headers,
-          body: body === undefined ? undefined : JSON.stringify(body),
+          body: requestBody,
           signal: AbortSignal.timeout(30_000),
         });
         const text = await response.text();
@@ -275,6 +290,7 @@ export class SolveaClient {
   }
   async updateKnowledge(id: string, data: JsonObject) {
     const payload = { ...data };
+    if (typeof payload.content === "string") payload.content = await this.uploadEmbeddedImages(payload.content);
     if (payload.directoryId === undefined) {
       const current = asObject(await this.getKnowledge(id), `could not read knowledge ${id} before update`);
       if (current.directoryId !== undefined) payload.directoryId = current.directoryId;
@@ -283,19 +299,20 @@ export class SolveaClient {
   }
   async uploadQa(items: unknown[]) {
     if (!Array.isArray(items) || !items.length) throw new Error("QA items must be a non-empty array");
-    const payload = items.map((value, index) => {
+    const payload = [];
+    for (const [index, value] of items.entries()) {
       const item = asObject(value, `QA item #${index + 1} must be an object`);
       const title = String(item.title ?? "").trim();
-      const content = String(item.content ?? "").trim();
+      const content = await this.uploadEmbeddedImages(String(item.content ?? "").trim());
       if (!title) throw new Error(`QA item #${index + 1} requires title`);
       if (!content) throw new Error(`QA item #${index + 1} requires content`);
-      return {
+      payload.push({
         title, content, forceIndex: item.forceIndex ?? true, type: "QA",
         published: item.published ?? true, taskType: item.taskType ?? "MANUAL",
         metadata: item.metadata ?? { tags: [] }, directoryId: item.directoryId ?? "",
         isVisible: item.isVisible ?? true,
-      };
-    });
+      });
+    }
     return this.post(`${this.qamPrefix}/project/${await this.projectId()}/kus`, payload);
   }
   async createDocuments(documents: JsonObject[], directoryId: number | string, taskType: "FILE" | "WEB") {
@@ -334,6 +351,64 @@ export class SolveaClient {
     }));
     return key;
   }
+  /** Upload a file through the business API's common multipart endpoint. */
+  async uploadFile(file: string | Blob | Uint8Array, filename?: string, contentType?: string) {
+    const filePath = typeof file === "string" ? file.startsWith("file://") ? fileURLToPath(file) : resolve(file) : undefined;
+    const resolvedName = filename ?? (filePath ? basename(filePath) : "upload.bin");
+    const resolvedType = contentType ?? imageContentTypes[extname(resolvedName).toLowerCase()] ?? "application/octet-stream";
+    const contents: Blob | Uint8Array = filePath ? await readFile(filePath) : file as Blob | Uint8Array;
+    const form = new FormData();
+    const blob = contents instanceof Blob ? contents : new Blob([Uint8Array.from(contents).buffer], { type: resolvedType });
+    form.append("file", blob, resolvedName);
+    const result = await this.request<unknown>("POST", "/api/upload", form);
+    const value = result && typeof result === "object" ? result as JsonObject : {};
+    const data = value.data && typeof value.data === "object" && !Array.isArray(value.data) ? value.data as JsonObject : {};
+    const url = value.url ?? data.url ?? value.fileUrl ?? data.fileUrl;
+    if (typeof url !== "string" || !url) throw new Error("file upload response does not contain url");
+    return url;
+  }
+  async uploadEmbeddedImages(content: string) {
+    const replacements = new Map<string, Promise<string>>();
+    let index = 0;
+    const chunks: string[] = [];
+    let cursor = 0;
+    embeddedImagePattern.lastIndex = 0;
+    for (const match of content.matchAll(embeddedImagePattern)) {
+      const [full, contentType, encoded] = match;
+      const start = match.index ?? 0;
+      chunks.push(content.slice(cursor, start));
+      const existing = replacements.get(full);
+      const upload = existing ?? (async () => {
+        const bytes = Buffer.from(encoded.replace(/\s/g, ""), "base64");
+        if (!bytes.length) throw new Error("embedded image base64 is empty");
+        return this.uploadFile(bytes, `embedded-${++index}.${imageExtension(contentType)}`, contentType);
+      })();
+      replacements.set(full, upload);
+      chunks.push(await upload);
+      cursor = start + full.length;
+    }
+    chunks.push(content.slice(cursor));
+    const withoutBase64 = chunks.join("");
+    const localReplacements = new Map<string, Promise<string>>();
+    const localChunks: string[] = [];
+    cursor = 0;
+    localImagePattern.lastIndex = 0;
+    for (const match of withoutBase64.matchAll(localImagePattern)) {
+      const [full, prefix, source, suffix] = match;
+      const start = match.index ?? 0;
+      localChunks.push(withoutBase64.slice(cursor, start));
+      const extension = extname(source).toLowerCase();
+      if (!imageContentTypes[extension] || /^(?:https?:|data:)/i.test(source)) localChunks.push(full);
+      else {
+        const upload = localReplacements.get(source) ?? this.uploadFile(source);
+        localReplacements.set(source, upload);
+        localChunks.push(`${prefix}${await upload}${suffix}`);
+      }
+      cursor = start + full.length;
+    }
+    localChunks.push(withoutBase64.slice(cursor));
+    return localChunks.join("");
+  }
   async uploadKnowledgeFile(filePath: string) { return this.uploadTempFile(filePath, true); }
   async downloadFile(path: string, target: string, query?: Record<string, string | number | boolean>) {
     const url = new URL(`${this.baseUrl}${path}`);
@@ -370,6 +445,7 @@ export class SolveaClient {
       const row = { ...asObject(value, `batch knowledge item #${index + 1} must be an object`) };
       row.kuId = asPositiveInt(row.kuId ?? row.id, `batch knowledge item #${index + 1} requires kuId or id`);
       delete row.id;
+      if (typeof row.content === "string") row.content = await this.uploadEmbeddedImages(row.content);
       if (row.directoryId === undefined) {
         const current = asObject(await this.getKnowledge(String(row.kuId)), `could not read knowledge ${row.kuId} before update`);
         if (current.directoryId !== undefined) row.directoryId = current.directoryId;
@@ -386,19 +462,22 @@ export class SolveaClient {
     if (changes.fileText === undefined && changes.filePath === undefined) throw new Error("document update requires fileText or filePath");
     const documentId = asPositiveInt(id, "document id must be a positive integer");
     const current = asObject(await this.getDocument(id), `could not read document ${id} before update`);
-    const payload = {
+    const payload: JsonObject = {
       type: normalized, directoryId: current.directoryId,
       fileName: current.fileName ?? current.name ?? current.title,
       title: current.title ?? current.fileName ?? current.name,
       metadata: current.metadata && typeof current.metadata === "object" && !Array.isArray(current.metadata) ? current.metadata : {},
       ...changes, knowledgeIds: [documentId],
     };
+    if (typeof payload.fileText === "string") payload.fileText = await this.uploadEmbeddedImages(payload.fileText);
     return this.request("PUT", `${this.qamPrefix}/project/${await this.projectId()}/document/${documentId}/contentV2`, payload);
   }
   async createProductKnowledge(data: JsonObject) {
     if (!data.title || !data.spuUrl) throw new Error("product knowledge requires title and spuUrl");
+    const payload = { ...data };
+    if (typeof payload.image === "string") payload.image = await this.uploadKnowledgeImage(payload.image);
     return this.post(`${this.qamPrefix}/project/${await this.projectId()}/ku_product`, {
-      source: "MANUAL", published: true, isVisible: true, metadata: { tags: [] }, ...data,
+      source: "MANUAL", published: true, isVisible: true, metadata: { tags: [] }, ...payload,
     });
   }
   async updateProductKnowledge(id: string, changes: JsonObject) {
@@ -409,9 +488,16 @@ export class SolveaClient {
     const payload: JsonObject = {};
     for (const key of allowed) if (current[key] !== undefined) payload[key] = current[key];
     for (const key of allowed) if (changes[key] !== undefined) payload[key] = changes[key];
+    if (typeof payload.image === "string") payload.image = await this.uploadKnowledgeImage(payload.image);
     const missing = ["title", "describe", "spuUrl", "image", "source", "published", "isVisible"].filter(key => payload[key] === undefined || payload[key] === "");
     if (missing.length) throw new Error(`product detail is incomplete: ${missing.join(", ")}`);
     return this.request("PUT", `${this.qamPrefix}/project/${await this.projectId()}/ku_product`, { ...payload, kuProductId: asPositiveInt(id, "product id must be a positive integer") });
+  }
+  private async uploadKnowledgeImage(source: string) {
+    if (source.startsWith("data:image/")) return this.uploadEmbeddedImages(source);
+    if (/^https?:\/\//i.test(source)) return source;
+    if (imageContentTypes[extname(source).toLowerCase()]) return this.uploadFile(source);
+    return source;
   }
   async updateKuProducts(value: unknown) {
     const source = Array.isArray(value) ? value : asObject(value, "batch product update must be an array or object with list").list;
