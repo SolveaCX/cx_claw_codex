@@ -20,7 +20,8 @@ jobs:
     if: >-
       github.event_name == 'push' ||
       (github.event.pull_request.merged == true &&
-       startsWith(github.event.pull_request.head.ref, 'release/v'))
+       startsWith(github.event.pull_request.head.ref, 'release/v') &&
+       startsWith(github.event.pull_request.title, 'chore(release): 发布'))
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: npm-publish
