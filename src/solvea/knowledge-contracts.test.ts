@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import { mkdir, writeFile } from "node:fs/promises";
 import type { Session } from "../types.js";
 import { SolveaClient } from "./client.js";
 
@@ -31,6 +32,36 @@ function capture(responder: (request: CapturedRequest) => unknown = () => ({ suc
 }
 
 describe("knowledge API migration contracts", () => {
+  test("uploads embedded base64 images before creating QA knowledge", async () => {
+    await mkdir("_tmp_/knowledge-contracts", { recursive: true });
+    const localImage = `_tmp_/knowledge-contracts/image-${Date.now()}.png`;
+    await writeFile(localImage, "local");
+    const requests: Array<{ url: string; method: string; body?: unknown }> = [];
+    globalThis.fetch = (async (input, init) => {
+      const body = init?.body instanceof FormData
+        ? Object.fromEntries([...init.body.entries()].map(([key, value]) => [key, typeof value === "string" ? value : { name: String((value as any).name), type: String((value as any).type), size: Number((value as any).size) }]))
+        : init?.body === undefined ? undefined : JSON.parse(String(init.body));
+      const request = { url: String(input), method: String(init?.method ?? "GET"), body };
+      requests.push(request);
+      const result = request.url.endsWith("/api/upload") ? { url: "https://cdn.example/image.png" }
+        : request.url.endsWith("/api_v2/gpt/bots") ? [{ projectId: 302 }]
+          : { success: true };
+      return new Response(JSON.stringify(result), { status: 200 });
+    }) as typeof fetch;
+
+    const base64 = "data:image/png;base64,aGVsbG8=";
+    await new SolveaClient(session).uploadQa([{ title: "Q", content: `before ![inline](${base64}) ![local](${localImage}) after` }]);
+
+    expect(requests.filter(request => request.url.endsWith("/api/upload"))).toMatchObject([
+      { method: "POST", body: { file: { name: "embedded-1.png", type: "image/png", size: 5 } } },
+      { method: "POST", body: { file: { name: localImage.split("/").at(-1), type: "image/png", size: 5 } } },
+    ]);
+    expect(requests.at(-1)?.body).toEqual([{
+      title: "Q", content: "before ![inline](https://cdn.example/image.png) ![local](https://cdn.example/image.png) after", forceIndex: true, type: "QA",
+      published: true, taskType: "MANUAL", metadata: { tags: [] }, directoryId: "", isVisible: true,
+    }]);
+  });
+
   test("normalizes QA uploads instead of forwarding plan fields", async () => {
     const requests = capture();
     await new SolveaClient(session).uploadQa([{ title: "Q", content: "A", directoryId: 31577 }]);

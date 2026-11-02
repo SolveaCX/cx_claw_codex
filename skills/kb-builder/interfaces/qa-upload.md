@@ -2,6 +2,8 @@
 
 公开能力：合并 QA parts 或现成 qa_plan，并上传到 Shulex 知识库。
 
+如果来源是 Excel，先按 `references/upload.md` 的“Excel QA 与嵌入图片”流程解析成 QA 计划；不要把 Excel 单元格的图片公式、媒体文件名或 ZIP 路径直接当作答案文本。
+
 ## Stable commands
 
 ```bash
