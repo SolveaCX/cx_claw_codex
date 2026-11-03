@@ -16,7 +16,7 @@ AGENT 是运行时 LLM 节点，不是通用流程容器，也不是给每个简
 以下职责已有专用节点，不使用 AGENT：
 
 - 只把自然语言分到有限类别：`INTENT`；
-- 流程必须取得客户字段、附件、选择或确认后才能继续：`QUESTION`；
+- 流程只需取得客户字段、附件、选择或确认后才能继续：`QUESTION`；如果还需要开放式澄清、唯一性判断或模型决定交接，可使用 `AGENT`；
 - 只发送模板、固定话术或生成一段对客回复：`REPLY`；
 - 调用一个确定工具并按状态/字段分支：`TOOL` 加 actionStatus 出边或 `IF_ELSE`；
 - 对结构化值做条件判断：`IF_ELSE`；生成内部文本：`LLM`；知识检索并回答：`RAG_REPLY`；
@@ -135,7 +135,8 @@ TOOL、INTENT 或 QUESTION。
 | 业务需求 | 正确表达 | 不要这样建 |
 |---|---|---|
 | 判断客户消息属于退款、换货还是其他 | `INTENT -> 各意图下游` | `AGENT + refund/replacement/other next_steps` |
-| 必须取得订单号后继续 | `QUESTION(VARIABLE) -> SOURCE` | `AGENT 询问订单号 + got_order next_step` |
+| 只收集一个订单号字段 | `QUESTION(VARIABLE) -> SOURCE` | `AGENT 询问订单号 + got_order next_step` |
+| 判断唯一性、澄清候选或决定交接 | `AGENT + next_steps`，可用 `next_steps[].params` 传递确认后的订单号 | 将开放式判断硬拆成纯字段收集 |
 | 发送政策说明后进入确定下游 | `REPLY -> SOURCE` | `AGENT 发送话术 + continue next_step` |
 | 调工具后按明确状态分支 | `TOOL -> actionStatus` 或 `TOOL -> IF_ELSE` | `AGENT 调工具 + success/fail next_steps` |
 | 多轮排障后，由模型确认应开始 replacement | `AGENT -> start_replacement next_step` | 把排障中的每个小步骤都拆成 next step |

@@ -115,7 +115,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow compile ... --bind-to
 - array/object 参数（如 `itemVos`、`refundProducts`、`productList`）必须确认数组元素结构和同一商品记录的一致性；无法保证时不要把单个商品字段拼成数组执行补发/退款，优先询问或转人工。
 - validator 会按真实 `requestParam.items[]` 检查所有 required 参数；object 参数会递归检查 `objectItems`，完整缺失路径会类似 `address.line1`。
 - array 参数在 validator 中按叶子处理；它只校验该数组参数本身是否配置，不理解数组元素是否来自同一商品记录。涉及补发/退款商品数组时必须人工审计来源一致性。
-- 工具定义里 `source=CUSTOMIZE` 或非 LLM 的必填参数不会被 `--bind-tool-params` 自动补齐；需要根据工具定义和业务语义手写 `text` 或明确 selector，并通过真实 validate 校验。
+- 工具定义里 `source=CUSTOMIZE` 且已有 `value` 的必填参数由运行时注入，不需要复制到画布 `inputParams`；validator 将其视为已满足。`CUSTOMIZE` 无 `value` 仍是缺参，动态必填参数仍必须绑定。
 - object 参数的必填子字段必须逐层写入 `children`，字段名与工具定义 `objectItems[].name` 一致。运行时会把 object 的 `children` 解析成 `{child.name: child_value}`。
 - array 参数的 `children` 在运行时会被解析成列表元素；数组元素是对象时，子项也必须按 object 结构显式表达，不能只把多个平铺字段塞进同一个 array。
 - `input_params[].name` 必须和工具定义 `requestParam.items[].name` 一致；object 子字段同理。

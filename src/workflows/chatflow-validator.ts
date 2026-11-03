@@ -23,6 +23,73 @@ function title(node: JsonObject) {
 function config(node: JsonObject) {
   return record(record(node.data)?.config) ?? {};
 }
+
+function toolParamItems(plugin: JsonObject): JsonObject[] {
+  const meta = record(plugin.meta) ?? plugin;
+  const config = record(meta.externalHttpCallConfig) ?? meta;
+  return flattenParamItems(record(config.requestParam)?.items);
+}
+
+function flattenParamItems(value: unknown): JsonObject[] {
+  return Array.isArray(value) ? (value.filter(record) as JsonObject[]) : [];
+}
+
+function configuredParam(value: JsonObject): boolean {
+  return (
+    (value.text !== undefined && value.text !== null) ||
+    (value.value !== undefined && value.value !== null) ||
+    (value.variableSelector !== undefined && value.variableSelector !== null) ||
+    (value.selector !== undefined && value.selector !== null) ||
+    (Array.isArray(value.children) && value.children.length > 0)
+  );
+}
+
+/** Validate required TOOL inputs against the complete plugin request contract. */
+export function validateToolParameters(graph: unknown, plugins: JsonObject[]): string[] {
+  const root = record(graph);
+  if (!root) return [];
+  const byId = new Map(plugins.map((plugin) => [String(plugin.id ?? plugin.pluginId), plugin]));
+  const errors: string[] = [];
+  const nodes = Array.isArray(root.nodes) ? (root.nodes.filter(record) as JsonObject[]) : [];
+  for (const node of nodes) {
+    if (category(node) !== "TOOL") continue;
+    const nodeConfig = config(node),
+      tool = record(nodeConfig.tool) ?? {};
+    const plugin = byId.get(String(tool.id ?? ""));
+    if (!plugin) continue;
+    const inputParams = Array.isArray(nodeConfig.inputParams)
+      ? (nodeConfig.inputParams.filter(record) as JsonObject[])
+      : [];
+    const check = (definition: JsonObject, path: string, bindings: JsonObject[]) => {
+      if (definition.required === false) return;
+      const binding = bindings.find(
+        (item) => String(item.name ?? "") === String(definition.name ?? ""),
+      );
+      const source = String(definition.source ?? "").toUpperCase();
+      if (source === "CUSTOMIZE" && definition.value !== undefined && definition.value !== null)
+        return;
+      if (!binding || !configuredParam(binding)) {
+        errors.push(`TOOL '${title(node)}' required tool param '${path}' is not configured`);
+        return;
+      }
+      if (String(definition.type ?? "").toLowerCase() === "object") {
+        const children = Array.isArray(definition.objectItems)
+          ? (definition.objectItems.filter(record) as JsonObject[])
+          : [];
+        const boundChildren = Array.isArray(binding.children)
+          ? (binding.children.filter(record) as JsonObject[])
+          : [];
+        children.forEach((child) =>
+          check(child, `${path}.${String(child.name ?? "")}`, boundChildren),
+        );
+      }
+    };
+    toolParamItems(plugin).forEach((definition) =>
+      check(definition, String(definition.name ?? ""), inputParams),
+    );
+  }
+  return errors;
+}
 function containsCycle(ids: Set<string>, edges: JsonObject[]) {
   const outgoing = new Map<string, string[]>();
   for (const edge of edges)

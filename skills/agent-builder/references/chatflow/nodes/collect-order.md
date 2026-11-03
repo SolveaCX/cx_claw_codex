@@ -8,7 +8,7 @@
 
 - 只需要向用户要订单号：`QUESTION(VARIABLE)`，变量选择订单号字段。
 - 已有订单号后要查订单或物流：订单查询 `TOOL`，工具 actionStatus 完整时直接按状态出边，否则接 `IF_ELSE` 判断结构化字段。
-- 需要模型多轮判断订单问题、解释工具结果或选择下一步：`QUESTION(VARIABLE)` -> `AGENT(next_steps)`，必要时把订单查询工具绑定到 AGENT。
+- 需要模型多轮判断订单问题、解释工具结果或选择下一步：可直接使用 `AGENT + next_steps`；若先收集订单号，再使用 `QUESTION(VARIABLE)` -> `AGENT(next_steps)`，必要时把订单查询工具绑定到 AGENT。
 - 需要把上游结果稳定给 AGENT / REPLY prompt 使用：先用 `VARIABLE_PROCESS.assignments` 写入变量系统字段，再让下游通过 `ai_field_ids` 读取。
 
 ## 创建方式

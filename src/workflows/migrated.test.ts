@@ -4,11 +4,95 @@ import { runAgentBuilder, validateGraph } from "./agent-builder.js";
 import { compileChatflowSource } from "./chatflow-compiler.js";
 import { runDelivery, runPoc } from "./delivery.js";
 import { runKbBuilder } from "./kb-builder.js";
+import { validateToolParameters } from "./chatflow-validator.js";
 
 describe("TypeScript workflow migrations", () => {
   test("validates graph structure without a tenant session", () => {
     expect(validateGraph({ nodes: [{ id: "start", type: "START" }], edges: [] }).valid).toBe(false);
     expect(validateGraph({ nodes: [{ id: "a" }, { id: "a" }], edges: [] }).valid).toBe(false);
+  });
+
+  test("accepts fixed CUSTOMIZE tool parameters supplied by the plugin", () => {
+    const graph = {
+      nodes: [
+        {
+          id: "tool",
+          data: {
+            category: "TOOL",
+            title: "Amazon_tracking",
+            config: {
+              tool: { id: 7 },
+              inputParams: [{ name: "order_ids", variableSelector: ["SYSTEM", "Order", 1] }],
+            },
+          },
+        },
+      ],
+    };
+    const plugin = {
+      id: 7,
+      meta: {
+        externalHttpCallConfig: {
+          requestParam: {
+            items: [
+              {
+                name: "client_id",
+                required: true,
+                source: "CUSTOMIZE",
+                value: "configured-client-id",
+              },
+              {
+                name: "client_secret",
+                required: true,
+                source: "CUSTOMIZE",
+                value: "configured-client-secret",
+              },
+              { name: "order_ids", required: true, source: "LLM" },
+            ],
+          },
+        },
+      },
+    };
+    expect(validateToolParameters(graph, [plugin])).toEqual([]);
+  });
+
+  test("reports missing fixed and nested required tool parameters", () => {
+    const graph = {
+      nodes: [
+        {
+          id: "tool",
+          data: {
+            category: "TOOL",
+            title: "lookup",
+            config: {
+              tool: { id: 8 },
+              inputParams: [{ name: "address", children: [{ name: "city", text: "Seattle" }] }],
+            },
+          },
+        },
+      ],
+    };
+    const plugin = {
+      id: 8,
+      meta: {
+        externalHttpCallConfig: {
+          requestParam: {
+            items: [
+              { name: "api_key", required: true, source: "CUSTOMIZE" },
+              {
+                name: "address",
+                required: true,
+                type: "object",
+                objectItems: [{ name: "line1", required: true }],
+              },
+            ],
+          },
+        },
+      },
+    };
+    expect(validateToolParameters(graph, [plugin])).toEqual([
+      "TOOL 'lookup' required tool param 'api_key' is not configured",
+      "TOOL 'lookup' required tool param 'address.line1' is not configured",
+    ]);
   });
 
   test("compiles a new chatflow source without requiring a pre-existing graph", () => {

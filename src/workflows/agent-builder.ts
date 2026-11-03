@@ -15,7 +15,7 @@ import { createHash, createHmac, randomUUID } from "node:crypto";
 import { open, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { compileChatflowSource } from "./chatflow-compiler.js";
-import { validateChatflowGraph } from "./chatflow-validator.js";
+import { validateChatflowGraph, validateToolParameters } from "./chatflow-validator.js";
 
 type JsonObject = Record<string, unknown>;
 
@@ -62,6 +62,14 @@ function walk(value: unknown, visit: (value: unknown) => void) {
   if (Array.isArray(value)) value.forEach((item) => walk(item, visit));
   else if (value && typeof value === "object")
     Object.values(value).forEach((item) => walk(item, visit));
+}
+function findPluginDetail(value: unknown, id: number): JsonObject | undefined {
+  let found: JsonObject | undefined;
+  walk(value, (candidate) => {
+    const item = record(candidate);
+    if (!found && Number(item?.id ?? item?.pluginId) === id) found = item;
+  });
+  return found;
 }
 function bindSystemPlugins(graph: JsonObject, catalog: JsonObject[]) {
   const byType = new Map(
@@ -143,6 +151,29 @@ async function remoteValidation(client: SolveaClient, graph: JsonObject, bind = 
           errors.push(`TOOL references unknown plugin id ${id}`);
       }
     });
+    const toolIds = new Set<number>();
+    walk(graph, (value) => {
+      const item = record(value);
+      if (item?.category !== "TOOL") return;
+      const id = Number(record(record(item.config)?.tool)?.id);
+      if (Number.isInteger(id)) toolIds.add(id);
+    });
+    const details = await Promise.allSettled(
+      [...toolIds].map(async (id) => ({
+        id,
+        detail: findPluginDetail(await client.getPlugin(String(id)), id),
+      })),
+    );
+    const resolved: JsonObject[] = [];
+    details.forEach((result) => {
+      if (result.status === "rejected")
+        warnings.push(
+          `queryPluginDetails: ${result.reason instanceof Error ? result.reason.message : String(result.reason)}`,
+        );
+      else if (result.value.detail) resolved.push(result.value.detail);
+      else warnings.push(`queryPluginDetails: plugin ${result.value.id} detail was not returned`);
+    });
+    errors.push(...validateToolParameters(graph, resolved));
   }
   if (templates) {
     const byId = new Map(templates.map((item) => [String(item.id ?? item.templateId), item]));
