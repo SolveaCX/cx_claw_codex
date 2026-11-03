@@ -23,6 +23,8 @@
 已存在行为，否则应使用变量系统订单字段、`QUESTION(VARIABLE)`、`TOOL`、`IF_ELSE` / 工具状态分支和必要的
 `AGENT` 组合表达。
 
+纯字段收集使用 `QUESTION(VARIABLE)`；唯一性判断、候选澄清或下游交接可直接使用 `AGENT + next_steps`，并通过 `next_steps[].params` 传递确认后的订单号。
+
 新建图的变量节点只选择 `VARIABLE_PROCESS`；`VARIABLE_EXTRACT` / `VARIABLE_ASSIGNMENT` 只维护已有图。INTENT 节点的 `prompt` 是可选的全局识别 PE，默认使用 `None`；`history_round_limit` 默认使用 `None`，交由后端默认策略。只有当用户需求明确包含跨意图的统一识别规则、边界或优先级时才生成 prompt；生成后先向用户确认是否启用，用户不需要时保留 `prompt: null`。
 
 只要候选里出现 AGENT，必须读 `nodes/agent.md` 的 `next_steps And Transfer Tools`：`next_steps` 只生成流程内跳转工具，AGENT 自主转人工使用标准 `transferHuman` LibraryBlock，不能把转人工配置成 nextStep。不要把 AGENT 当作任意业务步骤的默认容器。
