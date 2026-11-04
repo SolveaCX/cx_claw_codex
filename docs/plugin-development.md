@@ -15,8 +15,17 @@ bun run dev:plugin
 
 1. 构建本地 `dist/cli.js` 和 `dist/tenant-panel.js`。
 2. 在 `_tmp_/codex-plugin-dev/` 生成本地 marketplace 和开发插件。
-3. 注册 `cxclaw-dev` marketplace，并安装 `cxclaw-dev@cxclaw-dev`。
-4. 让开发插件直接执行当前仓库的 `dist/cli.js`，不经过 npm。
+3. 将开发插件同步到仓库根目录下的 `./playground/`，并写入项目级 marketplace、配置和 `AGENTS.md`。
+4. 清理全局 `cxclaw-dev` 注册，确保开发插件只在该目录中启用。
+5. 让开发插件直接执行当前仓库的 `dist/cli.js`，不经过 npm。
+
+首次使用前，在仓库根目录创建 `playground` 目录：
+
+```bash
+mkdir playground
+```
+
+这些目录由 `.gitignore` 忽略，不会提交到 Git。
 
 首次安装完成后重启一次 ChatGPT desktop app。右侧会话栏会同时出现开发版租户面板，标题为 `CXClaw Dev 当前租户`。
 

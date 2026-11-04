@@ -1,12 +1,16 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { readFileSync, rmSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { prepareDeveloperPlugin } from "./dev-plugin.js";
+import { prepareDeveloperPlugin, syncDeveloperPluginToPlaygrounds } from "./dev-plugin.js";
 
 const output = join(import.meta.dirname, "..", "_tmp_", "codex-plugin-dev-test");
 const plugin = join(output, "plugins", "cxclaw-dev");
+const workspace = join(import.meta.dirname, "..", "_tmp_", "codex-plugin-workspace-test");
 
-afterAll(() => rmSync(output, { recursive: true, force: true }));
+afterAll(() => {
+  rmSync(output, { recursive: true, force: true });
+  rmSync(workspace, { recursive: true, force: true });
+});
 
 describe("local development plugin", () => {
   test("uses separate identities and runs the workspace bundle", async () => {
@@ -28,5 +32,35 @@ describe("local development plugin", () => {
     expect(mcp.mcpServers["tenant-panel-dev"].args[0]).toBe("${PLUGIN_ROOT}/plugin-cli.dev.mjs");
     expect(launcher).toContain(join(import.meta.dirname, "..", "dist", "cli.js"));
     expect(launcher).not.toContain("npx");
+  });
+
+  test("enables the plugin only in the exact top-level playground directory", async () => {
+    await prepareDeveloperPlugin(output);
+    const playground = join(workspace, "playground");
+    const fuzzyMatch = join(workspace, "local-playground");
+    mkdirSync(playground, { recursive: true });
+    mkdirSync(join(fuzzyMatch, ".codex"), { recursive: true });
+    writeFileSync(
+      join(playground, ".codex-placeholder"),
+      "project content must remain untouched\n",
+    );
+    writeFileSync(join(playground, "AGENTS.md"), "# Existing instructions\n\nKeep this rule.\n");
+
+    const synced = await syncDeveloperPluginToPlaygrounds(output, workspace);
+
+    expect(synced).toEqual([playground]);
+    expect(
+      JSON.parse(readFileSync(join(playground, ".agents", "plugins", "marketplace.json"), "utf8"))
+        .plugins[0].source.path,
+    ).toBe("./.codex/plugins/cxclaw-dev");
+    expect(readFileSync(join(playground, ".codex", "config.toml"), "utf8")).toContain(
+      'plugins."cxclaw-dev@cxclaw-dev"',
+    );
+    expect(readFileSync(join(playground, ".codex-placeholder"), "utf8")).toContain(
+      "project content",
+    );
+    expect(readFileSync(join(playground, "AGENTS.md"), "utf8")).toContain("用户没有明确要求时");
+    expect(readFileSync(join(playground, "AGENTS.md"), "utf8")).toContain("Keep this rule.");
+    expect(() => readFileSync(join(fuzzyMatch, ".codex", "config.toml"), "utf8")).toThrow();
   });
 });
