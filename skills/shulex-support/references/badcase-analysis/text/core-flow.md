@@ -56,6 +56,8 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get --chat-id <resolvedChatId> --
 
 ## 4. 分类并输出结论和建议
 
+结论必须明确写出 `问题分类`，使用 `resolution-rules.md` 中的完整分类名称，不能只描述现象或根因。证据不足时写 `问题分类：待确认`，并说明缺少的证据。
+
 先写发生了什么，再写为什么。明确区分：
 
 - **已确认**：会话记录、配置或日志直接证明。
@@ -81,7 +83,8 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get --chat-id <resolvedChatId> --
 ## 会话诊断：chatId=<chatId>
 
 ### 结论
-<发生了什么，主根因是什么>
+- **问题分类**：<完整分类名称；证据不足时写“待确认”>
+- **问题结论**：<发生了什么，主根因是什么>
 
 ### 实际执行链路
 <只列与目标问题相关的关键步骤>
