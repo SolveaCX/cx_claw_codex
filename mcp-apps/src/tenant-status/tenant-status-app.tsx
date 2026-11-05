@@ -12,12 +12,13 @@ export function TenantStatusApp() {
   useEffect(() => {
     if (bridge.output) setStatus(bridge.output);
   }, [bridge.output]);
-  const contextId = String(status?.contextId ?? bridge.input.contextId ?? "");
+  const contextId = String(bridge.input.contextId ?? status?.contextId ?? "");
   const refresh = async () => {
     setLoading(true);
     setError(undefined);
     try {
-      const output = await callTool("tenant.current", contextId ? { contextId } : {});
+      if (!contextId) throw new Error("当前卡片缺少 contextId，请在登录并选择租户后重新打开");
+      const output = await callTool("tenant.current", { contextId });
       if (output) setStatus(output);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
@@ -33,20 +34,32 @@ export function TenantStatusApp() {
             CXClaw · 当前会话租户
           </p>
           <h1 className="text-lg font-semibold">
-            {status?.configured ? value(status, "companyName") : "尚未选择租户"}
+            {status?.configured
+              ? String(
+                  status.companyName ??
+                    status.accountName ??
+                    status.accountCode ??
+                    status.accountId ??
+                    "—",
+                )
+              : "尚未选择租户"}
           </h1>
         </div>
         <button
           className="border-app-border bg-app-surface rounded-lg border px-3 py-2 text-sm disabled:opacity-50"
-          disabled={loading || !bridge.connected}
+          disabled={loading || !bridge.connected || !contextId}
           onClick={refresh}
           type="button"
         >
           {loading ? "刷新中…" : "刷新"}
         </button>
       </header>
-      {(error || bridge.error) && (
-        <p className="text-app-danger mt-3 text-sm">{error ?? bridge.error}</p>
+      {(error || bridge.error || !contextId) && (
+        <p className="text-app-danger mt-3 text-sm">
+          {error ??
+            bridge.error ??
+            "当前卡片未绑定 contextId，请在登录并选择租户后重新打开租户卡片"}
+        </p>
       )}
       <dl className="border-app-border mt-5 grid grid-cols-[auto_1fr] border-t text-sm">
         {[

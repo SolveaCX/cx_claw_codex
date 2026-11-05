@@ -159,7 +159,7 @@ export function bindHostTheme(app: App): () => void {
 
 | App | 入口 tool | UI resource | 展示方式 |
 |---|---|---|---|
-| Tenant Status | `tenant.current` | `ui://cxclaw/tenant-status/<content-hash>.html` | thread entrypoint |
+| Tenant Status | `tenant.current` | `ui://cxclaw/tenant-status/<content-hash>.html` | 登录并选择租户后显式调用 |
 | Live Test | `live_test.start` | `ui://cxclaw/live-test/<content-hash>.html` | tool result card |
 
 Live Test 辅助 tools 不绑定 UI resource：
@@ -230,11 +230,11 @@ sequenceDiagram
 
 ### 5.1 `tenant.current`
 
-保持现有行为，Schema 改为完整 Zod object，并补充 `outputSchema`。
+租户卡片只在登录、初始化 context 并选择租户后显式创建。每次切换租户后，使用同一个会话的 `contextId` 重新调用。
 
 ```ts
 inputSchema: z.object({
-  contextId: z.string().optional(),
+  contextId: z.string().min(1),
 }),
 outputSchema: TenantPanelStatusSchema,
 ```
@@ -246,9 +246,6 @@ tool metadata：
   ui: {
     resourceUri: "ui://cxclaw/tenant-status/<content-hash>.html",
     visibility: ["model", "app"],
-  },
-  "openai/ui": {
-    entrypoints: [{ type: "thread" }],
   },
 }
 ```
@@ -333,12 +330,12 @@ const LiveTestStatusInputSchema = z.object({
   contextId: z.string().min(1),
   testRunId: z.string().min(1),
   afterRevision: z.number().int().min(0).optional(),
-  waitMs: z.number().int().min(0).max(20_000).default(0),
+  waitMs: z.number().int().min(0).max(30_000).default(0),
 });
 ```
 
 - 卡片使用 `waitMs=0` 获取当前快照。
-- Codex Agent 使用 `afterRevision + waitMs=20_000` 等待状态变化。
+- Codex Agent 使用 `afterRevision + waitMs=30_000` 等待状态变化。
 - 达到终态后立即返回。
 
 annotations：
@@ -871,9 +868,9 @@ live_test.start
 
 ### 15.6 集成验收
 
-1. 安装开发版插件并初始化独立 `contextId`。
-2. 选择测试租户。
-3. 调用 `tenant.current`，租户卡片正常显示。
+1. 安装开发版插件并完成登录。
+2. 初始化独立 `contextId`，选择测试租户并通过 `context current` 确认。
+3. 使用当前 `contextId` 调用 `tenant.current`，租户卡片正常显示。
 4. 调用 `live_test.start`，生成独立测试卡片。
 5. 卡片逐轮显示 USER 和 ASSISTANT 内容。
 6. Codex Agent 通过 `live_test.status` 等待终态。
@@ -887,7 +884,7 @@ live_test.start
 1. 建立 Vite、React、Radix UI、Tailwind CSS 的 MCP App 前端基座。
 2. 实现共享 MCP bridge、host theme provider 和语义 token。
 3. 整理 MCP server 多 App 目录和共享 session 解析。
-4. 将租户卡片迁移为 React App，补全 Zod Schema，保持业务行为不变。
+4. 将租户卡片迁移为 React App，补全 Zod Schema，并绑定当前会话 `contextId`。
 5. 实现 Live Test contract 和 store。
 6. 实现 `SolveaClient.chatStreamTrace()`。
 7. 实现 Runner 和失败识别。
@@ -901,7 +898,7 @@ live_test.start
 - CXClaw 只启动一个 MCP server。
 - 所有 MCP App 使用 Vite、React、Radix UI 和 Tailwind CSS。
 - 所有 MCP App 首次渲染和运行时切换均跟随 Codex 光暗主题。
-- `tenant.current` 行为和现有插件兼容。
+- `tenant.current` 只接受当前会话的显式 `contextId`，未登录时不自动弹出卡片。
 - `live_test.start` 能创建测试卡片并在 1 秒内返回初始状态。
 - 多轮测试复用同一个 `chatId`。
 - 卡片能持续展示 AI 增量回复和轮次状态。

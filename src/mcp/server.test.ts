@@ -6,6 +6,7 @@ import {
   mcpAppContentHash,
   resolveMcpAppCssFiles,
   TENANT_PANEL_TOOL_META,
+  TenantCurrentInputSchema,
 } from "./server.js";
 
 describe("tenant MCP App HTML", () => {
@@ -41,13 +42,15 @@ describe("tenant MCP App HTML", () => {
   });
 });
 
-describe("tenant MCP App entrypoint", () => {
-  test("registers the tenant panel in the conversation side panel", () => {
+describe("tenant MCP App binding", () => {
+  test("opens only after an explicit tenant.current call", () => {
     expect(TENANT_PANEL_TOOL_META.ui.resourceUri).toMatch(
       /^ui:\/\/cxclaw\/tenant-status\/[a-f0-9]{12}\.html$/,
     );
     expect(TENANT_PANEL_TOOL_META.ui.visibility).toEqual(["model", "app"]);
-    expect(TENANT_PANEL_TOOL_META["openai/ui"].entrypoints).toEqual([{ type: "thread" }]);
+    expect(TENANT_PANEL_TOOL_META).not.toHaveProperty("openai/ui");
+    expect(TenantCurrentInputSchema.safeParse({ contextId: "ctx_current" }).success).toBe(true);
+    expect(TenantCurrentInputSchema.safeParse({}).success).toBe(false);
   });
 
   test("binds only the LiveTest entry tool to its card", () => {

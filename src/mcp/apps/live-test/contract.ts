@@ -41,7 +41,7 @@ export const LiveTestStatusInputSchema = z.object({
   contextId: z.string().min(1),
   testRunId: z.string().min(1),
   afterRevision: z.number().int().min(0).optional(),
-  waitMs: z.number().int().min(0).max(20_000).default(0),
+  waitMs: z.number().int().min(0).max(30_000).default(0),
 });
 
 export const LiveTestRunInputSchema = z.object({

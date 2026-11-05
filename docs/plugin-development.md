@@ -27,7 +27,7 @@ mkdir playground
 
 这些目录由 `.gitignore` 忽略，不会提交到 Git。
 
-首次安装完成后重启一次 ChatGPT desktop app。右侧会话栏会同时出现开发版租户面板，标题为 `CXClaw Dev 当前租户`。
+首次安装完成后重启一次 ChatGPT desktop app。登录并选择租户后，使用当前会话的 `contextId` 调用 `tenant.current`，右侧显示标题为 `CXClaw Dev 当前租户` 的开发版租户面板。
 
 ## 日常开发
 

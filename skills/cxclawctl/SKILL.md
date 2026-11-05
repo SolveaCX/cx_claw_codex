@@ -39,6 +39,8 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" <command>
 - 用户要求切换租户时，使用 `context use <profileId> --context <contextId>`；不要修改其他会话的 context。
 - 需要一次性覆盖租户时，可显式追加 `--profile <profileId>`。解析优先级是命令级 `--profile`，再到 `--context` 的 active profile；无法确定时直接失败。
 - 业务操作前可执行 `context current --context <contextId>`，确认并向用户展示 `contextId`、`profileId`、`accountId`、`environment` 和 `purpose`。
+- 未登录时不得调用 `tenant.current`。完成 `context use` 或 `tenant use` 后，先用 `context current --context <contextId>` 确认目标租户，再调用 `tenant.current({ contextId })` 显示当前会话的租户卡片。
+- 每次切换租户成功后重新调用 `tenant.current({ contextId })`。不得省略 `contextId`，不得复用其他会话创建的租户卡片。
 - 不把 tenant token 写入 `process.env`，不从全局“当前租户”猜测业务归属。
 
 ## 安装后自检

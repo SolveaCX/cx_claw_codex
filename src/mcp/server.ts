@@ -4,7 +4,6 @@ import { readFile } from "node:fs/promises";
 import { McpServer } from "@modelcontextprotocol/server";
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import { OpenAIExtensions } from "@openai/mcp-extensions/server";
-import type { OpenAIUiToolMetadata } from "@openai/mcp-extensions/server";
 import { z } from "zod";
 import { VERSION } from "../version.js";
 import {
@@ -69,7 +68,6 @@ const LIVE_TEST_URI = createMcpAppUri("live-test", resolveMcpAppContentHash("liv
 
 export const TENANT_PANEL_TOOL_META = {
   ui: { resourceUri: TENANT_PANEL_URI, visibility: ["model", "app"] },
-  "openai/ui": { entrypoints: [{ type: "thread" }] } satisfies OpenAIUiToolMetadata,
 };
 export const LIVE_TEST_TOOL_META = {
   ui: { resourceUri: LIVE_TEST_URI, visibility: ["model", "app"] },
@@ -120,6 +118,8 @@ const result = (summary: string, structuredContent: Record<string, unknown>) => 
   structuredContent,
 });
 
+export const TenantCurrentInputSchema = z.object({ contextId: z.string().min(1) });
+
 function buildCxclawMcpServer(service: LiveTestService): McpServer {
   const name = DEVELOPMENT_MODE ? "cxclaw-dev" : "cxclaw";
   const tenantTitle = DEVELOPMENT_MODE ? "CXClaw Dev 当前租户" : "CXClaw 当前租户";
@@ -160,7 +160,7 @@ function buildCxclawMcpServer(service: LiveTestService): McpServer {
     {
       title: tenantTitle,
       description: "读取指定 CXClaw context 当前选择的租户，仅返回非敏感展示字段。",
-      inputSchema: z.object({ contextId: z.string().optional() }),
+      inputSchema: TenantCurrentInputSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -172,11 +172,9 @@ function buildCxclawMcpServer(service: LiveTestService): McpServer {
     async ({ contextId }) => {
       const status = await loadTenantPanelStatus(contextId);
       return result(
-        status.contextRequired
-          ? "需要传入 contextId"
-          : status.configured
-            ? `当前租户：${status.companyName ?? status.accountName ?? status.accountId}`
-            : "当前 context 未选择租户",
+        status.configured
+          ? `当前租户：${status.companyName ?? status.accountName ?? status.accountId}`
+          : "当前 context 未选择租户",
         status as unknown as Record<string, unknown>,
       );
     },

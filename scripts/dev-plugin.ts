@@ -302,7 +302,7 @@ async function watch(): Promise<void> {
   console.log(
     [
       "Watching TypeScript bundles.",
-      "Invoke tenant.current again after tenant panel UI builds.",
+      "After login and tenant selection, invoke tenant.current with the current contextId.",
       "Restart the ChatGPT desktop app after MCP server or tool metadata changes.",
     ].join("\n"),
   );
