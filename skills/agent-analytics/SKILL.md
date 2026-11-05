@@ -22,7 +22,7 @@ description: Shulex 客服智能体（AI Agent）运营数据分析。用于统�
 
 1. **确认分析目标**：明确用户要看的指标、比较维度和期望结论。
 2. **确认时间范围**：缺少时间范围时必须询问用户，不默认查询本月、最近 30 天或前端默认窗口。
-3. **应用时区和过滤条件**：Agent 看板使用 `startDate` / `endDate`（`YYYY-MM-DD`），可选 `botId`、`channel`（或 `touchPoint`）、`intentId`、`agentId`；前端未选择渠道表示全部渠道，不要自动补 `LIVE_CHAT`。Transcript 下钻把同一日期范围换算成 `beginTimestamp` / `endTimestamp` 毫秒边界；旧版 `report <action>` 还需要 `timeOffset`。
+3. **应用时区和过滤条件**：Agent 看板使用 `startDate` / `endDate`（`YYYY-MM-DD`），按 `references/chat-report-fields.md` 中各命令的参数说明查询。前端未选择渠道表示全部渠道，不要自动补 `LIVE_CHAT`。Transcript 下钻把同一日期范围换算成 `beginTimestamp` / `endTimestamp` 毫秒边界；旧版 `report <action>` 还需要 `timeOffset`。
 4. **分别调用接口**：每个统计或 Agent 会话记录请求独立执行。不要使用 `&&` 把整批命令串起来，避免一个接口失败后跳过全部后续数据。
 5. **阶段性输出进展**：每完成一类指标，简要说明已拿到什么、缺少什么、下一步查什么。
 6. **按需下钻 Agent 会话记录**：复用当前查询的日期范围和适用过滤条件；`analytics inbox-scripts` 或 chat ID 可作为下钻入口。分页直到 `hasNext=false` 才能声称明细完整。
@@ -30,7 +30,7 @@ description: Shulex 客服智能体（AI Agent）运营数据分析。用于统�
 
 ## 数据边界
 
-- 某个接口失败时，把对应指标标记为**不可用**，继续请求其他独立指标。
+- 某个接口失败时，根据错误信息和文档修正用法；无法恢复的指标标记为**不可用**，继续请求其他独立指标。
 - 权限问题造成的静默零值、真实业务零值和后端异常必须区分，不能统一解释成“没有工单”。
 - 抽样 Agent 会话记录只能解释具体案例或提供定性线索，不能替代整体统计，也不能用少量样本推导总体比例。
 - 多段时间数据合并时，计数可以求和；比例必须根据合并后的分子和分母重新计算，不能直接平均各段比例。
@@ -48,14 +48,14 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" analytics <action> ... --pretty
 
 | 场景 | 命令 |
 |---|---|
-| 服务能力（工单量、进线解决率、转人工率） | `analytics tickets` |
-| 服务能力（消息量、AI 回复率） | `analytics messages` |
+| 服务能力（未按 Agent / 意图筛选的工单量、进线解决率、转人工率） | `analytics tickets` |
+| 服务能力（未按 Agent / 意图筛选的消息量、AI 回复率） | `analytics messages` |
 | 服务质量（CSAT 满意度、点赞点踩数、满意率） | `analytics satisfaction` |
 | 服务质量（首响时效、AI/人工平均首次响应耗时） | `analytics first-response` |
 | 服务收益（AI 售后挽回率） | `analytics return-retention` |
 | 风险与质检（规则命中与预警） | `analytics inspection-results` |
-| 意图工单分布与趋势 | `analytics intents` |
-| 智能体工单分布与趋势 | `analytics agents` |
+| 意图分布、趋势及指定意图的工单量、解决率、转人工率、消息量、回复率 | `analytics intents` |
+| 智能体分布、趋势及指定 Agent 的工单量、解决率、转人工率、消息量、回复率 | `analytics agents` |
 | 会话下钻查询脚本 | `analytics inbox-scripts` |
 | 旧版报表（仅用户明确指定） | `report <action>` |
 | 旧版知识、LiveChat、质检、自学习等 | `report <action>`（仅用户明确指定旧版） |
