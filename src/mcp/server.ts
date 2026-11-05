@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { McpServer } from "@modelcontextprotocol/server";
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
@@ -16,10 +18,54 @@ import {
 import { LiveTestService } from "./apps/live-test/service.js";
 import { loadTenantPanelStatus } from "./tenant-status.js";
 
-const TENANT_PANEL_URI = "ui://cxclaw/tenant-status";
-const LIVE_TEST_URI = "ui://cxclaw/live-test/v2.html";
 const MCP_APP_MIME_TYPE = "text/html;profile=mcp-app";
 const DEVELOPMENT_MODE = process.env.CXCLAW_PLUGIN_DEV === "1";
+
+export function mcpAppContentHash(content: string): string {
+  return createHash("sha256").update(content).digest("hex").slice(0, 12);
+}
+
+export function createMcpAppUri(appName: string, contentHash: string): string {
+  if (!/^[a-f0-9]{12}$/.test(contentHash)) throw new Error("invalid MCP App content hash");
+  return `ui://cxclaw/${appName}/${contentHash}.html`;
+}
+
+function builtMcpAppDirectory(appName: string): URL | undefined {
+  const candidates = [
+    new URL(`./mcp-apps/${appName}/`, import.meta.url),
+    new URL(`../../dist/mcp-apps/${appName}/`, import.meta.url),
+  ];
+  return candidates.find((directory) => {
+    try {
+      readFileSync(new URL("manifest.json", directory));
+      return true;
+    } catch {
+      return false;
+    }
+  });
+}
+
+function resolveMcpAppContentHash(appName: string): string {
+  const directory = builtMcpAppDirectory(appName);
+  if (!directory) return mcpAppContentHash(`unbuilt:${appName}`);
+  const manifest = JSON.parse(readFileSync(new URL("manifest.json", directory), "utf8")) as Record<
+    string,
+    ViteManifestEntry
+  >;
+  const entry = Object.values(manifest).find((item) => item.isEntry);
+  if (!entry) throw new Error(`Vite manifest has no entry for ${appName}`);
+  const script = readFileSync(new URL(entry.file, directory), "utf8");
+  const styles = resolveMcpAppCssFiles(manifest, entry)
+    .map((file) => readFileSync(new URL(file, directory), "utf8"))
+    .join("\n");
+  return mcpAppContentHash(createMcpAppHtml(script, styles));
+}
+
+const TENANT_PANEL_URI = createMcpAppUri(
+  "tenant-status",
+  resolveMcpAppContentHash("tenant-status"),
+);
+const LIVE_TEST_URI = createMcpAppUri("live-test", resolveMcpAppContentHash("live-test"));
 
 export const TENANT_PANEL_TOOL_META = {
   ui: { resourceUri: TENANT_PANEL_URI, visibility: ["model", "app"] },
@@ -54,7 +100,8 @@ export function createMcpAppHtml(script: string, styles = ""): string {
 }
 
 async function loadMcpAppHtml(appName: string) {
-  const directory = new URL(`./mcp-apps/${appName}/`, import.meta.url);
+  const directory = builtMcpAppDirectory(appName);
+  if (!directory) throw new Error(`MCP App build is missing for ${appName}`);
   const manifest = JSON.parse(
     await readFile(new URL("manifest.json", directory), "utf8"),
   ) as Record<string, ViteManifestEntry>;

@@ -39,7 +39,7 @@ bun run dev:plugin:watch
 
 保存代码后，Node.js 端由 `tsup` 更新，MCP App 前端由 Vite 更新。刷新方式取决于修改内容：
 
-- 只修改 `mcp-apps/`：重新调用对应入口 tool，MCP resource handler 会读取最新 Vite 产物。
+- 修改 `mcp-apps/`：等待 Vite 生成新产物，完全退出并重新打开 ChatGPT desktop app，使 MCP server 用新内容 hash 注册 tool 和 resource，再重新调用入口 tool。
 - 修改 `src/mcp/server.ts`、tool metadata 或其他 MCP server 逻辑：完全退出并重新打开 ChatGPT desktop app，让插件 MCP 进程重新加载 `dist/cli.js`。
 
 插件内置 MCP 当前没有独立的 `Restart` 按钮。无需 npm 发版、Git Marketplace 更新或重新安装稳定插件。
@@ -156,7 +156,11 @@ Tailwind dark variant 绑定 `document.documentElement[data-theme]`：
 - 每个 App 必须独立生成自包含 bundle，不能引用其他 App 的输出文件或跨 App 共享 chunk。
 - resource HTML 使用 `<script type="module">` 加载内联 bundle。
 - UI resource MIME 固定为 `text/html;profile=mcp-app`。
-- UI resource URI 发生不兼容变化时增加版本，例如 `ui://cxclaw/live-test/v2`。
+- UI resource URI 固定使用 `ui://cxclaw/<app-name>/<content-hash>.html`，例如 `ui://cxclaw/live-test/4a16d8c390ef.html`。
+- `content-hash` 取最终内联 HTML 的 SHA-256 前 12 位，覆盖 Vite 生成的 JavaScript、CSS 和 resource HTML 包装逻辑。
+- 构建内容变化时必须生成新的 `content-hash`；内容不变时 URI 必须保持稳定。禁止使用 `v2`、日期或手工递增数字代替内容 hash。
+- tool metadata、resource 注册 URI 和 resource contents URI 必须引用同一个带 hash URI。
+- URI 由 MCP server 根据 `dist/mcp-apps/<app-name>/` 自动计算，开发者不得手工维护 hash。
 - 生产构建不得依赖 Vite dev server。
 
 ### 验证命令

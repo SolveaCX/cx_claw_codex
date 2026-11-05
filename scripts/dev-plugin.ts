@@ -292,8 +292,7 @@ async function sync(skipBuild: boolean): Promise<void> {
     [
       `CXClaw Dev is enabled in: ${playgrounds.join(", ")}`,
       "For the first install, restart the ChatGPT desktop app once.",
-      "After tenant panel UI builds, invoke tenant.current again to reload the panel resource.",
-      "After MCP server or tool metadata changes, restart the ChatGPT desktop app.",
+      "After MCP App, MCP server, or tool metadata changes, restart the ChatGPT desktop app so content-hashed resource URIs are registered.",
     ].join("\n"),
   );
 }

@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import {
+  createMcpAppUri,
   createMcpAppHtml,
   LIVE_TEST_TOOL_META,
+  mcpAppContentHash,
   resolveMcpAppCssFiles,
   TENANT_PANEL_TOOL_META,
 } from "./server.js";
@@ -29,15 +31,28 @@ describe("tenant MCP App HTML", () => {
       ),
     ).toEqual(["shared.css", "live-test.css"]);
   });
+
+  test("uses a stable content hash that changes with the final app HTML", () => {
+    expect(mcpAppContentHash("same")).toBe(mcpAppContentHash("same"));
+    expect(mcpAppContentHash("same")).not.toBe(mcpAppContentHash("changed"));
+    expect(createMcpAppUri("live-test", "0123456789ab")).toBe(
+      "ui://cxclaw/live-test/0123456789ab.html",
+    );
+  });
 });
 
 describe("tenant MCP App entrypoint", () => {
   test("registers the tenant panel in the conversation side panel", () => {
+    expect(TENANT_PANEL_TOOL_META.ui.resourceUri).toMatch(
+      /^ui:\/\/cxclaw\/tenant-status\/[a-f0-9]{12}\.html$/,
+    );
     expect(TENANT_PANEL_TOOL_META.ui.visibility).toEqual(["model", "app"]);
     expect(TENANT_PANEL_TOOL_META["openai/ui"].entrypoints).toEqual([{ type: "thread" }]);
   });
 
   test("binds only the LiveTest entry tool to its card", () => {
-    expect(LIVE_TEST_TOOL_META.ui.resourceUri).toBe("ui://cxclaw/live-test/v2.html");
+    expect(LIVE_TEST_TOOL_META.ui.resourceUri).toMatch(
+      /^ui:\/\/cxclaw\/live-test\/[a-f0-9]{12}\.html$/,
+    );
   });
 });

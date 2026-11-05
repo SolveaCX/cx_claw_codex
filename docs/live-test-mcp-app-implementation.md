@@ -23,11 +23,11 @@ CXClaw 只启动一个 MCP server。MCP server 按业务域注册多个 MCP App�
 ```text
 CXClaw MCP Server
 ├── Tenant Status App
-│   ├── ui://cxclaw/tenant-status
+│   ├── ui://cxclaw/tenant-status/<content-hash>.html
 │   └── tenant.current
 │
 ├── Live Test App
-│   ├── ui://cxclaw/live-test
+│   ├── ui://cxclaw/live-test/<content-hash>.html
 │   ├── live_test.start
 │   ├── live_test.status
 │   ├── live_test.cancel
@@ -159,8 +159,8 @@ export function bindHostTheme(app: App): () => void {
 
 | App | 入口 tool | UI resource | 展示方式 |
 |---|---|---|---|
-| Tenant Status | `tenant.current` | `ui://cxclaw/tenant-status` | thread entrypoint |
-| Live Test | `live_test.start` | `ui://cxclaw/live-test` | tool result card |
+| Tenant Status | `tenant.current` | `ui://cxclaw/tenant-status/<content-hash>.html` | thread entrypoint |
+| Live Test | `live_test.start` | `ui://cxclaw/live-test/<content-hash>.html` | tool result card |
 
 Live Test 辅助 tools 不绑定 UI resource：
 
@@ -244,7 +244,7 @@ tool metadata：
 ```ts
 {
   ui: {
-    resourceUri: "ui://cxclaw/tenant-status",
+    resourceUri: "ui://cxclaw/tenant-status/<content-hash>.html",
     visibility: ["model", "app"],
   },
   "openai/ui": {
@@ -318,7 +318,7 @@ const LiveTestStartInputSchema = z
 ```ts
 {
   ui: {
-    resourceUri: "ui://cxclaw/live-test",
+    resourceUri: "ui://cxclaw/live-test/<content-hash>.html",
     visibility: ["model", "app"],
   },
 }
@@ -734,7 +734,7 @@ MCP resource 返回：
 
 ```ts
 {
-  uri: "ui://cxclaw/live-test",
+  uri: "ui://cxclaw/live-test/<content-hash>.html",
   mimeType: "text/html;profile=mcp-app",
   text: await loadMcpAppHtml("live-test"),
 }
