@@ -89,7 +89,7 @@ npx --yes @shulex/cxclawctl@latest context use <profileId> --context <contextId>
 npx --yes @shulex/cxclawctl@latest context clear --context <contextId>
 ```
 
-切换到生产环境时，重新执行 `tenant search` 和 `tenant use`；可以省略 `--env`，也可以显式传 `--env prod`。
+用户只知道租户 ID、租户 code、公司全名、简称或部分名称时，先把原始线索传给 `tenant search`，再从候选中确认 `accountId` 后执行 `tenant use`。切换到生产环境时重新执行 `tenant search` 和 `tenant use`；可以省略 `--env`，也可以显式传 `--env prod`。
 
 Codex 桌面端可从会话右侧面板打开“CXClaw 当前租户”。调用 `tenant.current` 时传入当前对话的 `contextId`；面板只展示 context、profile、`accountId`、`accountCode`、`accountName`、环境、用途和到期时间，不展示任何 token。一个会话切换 profile 不会改变其他会话的 context。
 

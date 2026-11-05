@@ -36,7 +36,13 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" <command>
 ## context 与租户隔离
 
 - 每个会话维护自己的 `contextId`。后续每条需要租户的命令都追加 `--context <contextId>`。
-- 用户要求切换租户时，使用 `context use <profileId> --context <contextId>`；不要修改其他会话的 context。
+- 用户给出的租户线索可能是以下任一种结构：
+  - `accountId`：纯数字正整数，例如 `488592`。
+  - `accountCode`：短标识，通常由字母和数字组成，例如 `V75400`、`R53308`。
+  - 公司名：自然语言名称，可能只给出部分名称、简称或中英文名称，不要求与搜索结果完全一致。
+- 收到租户线索后，先将用户原文传给 `tenant search`。结合输入结构和候选的 `accountId`、`accountCode`、`accountName` 判断：ID 和 code 优先精确对应；公司名允许按语义、简称和包含关系判断。只选择 `status=1` 的租户。
+- 只有一个候选与用户意图明确一致时，才把该候选的 `accountId` 传给 `tenant use`。多个候选都合理时，向用户展示候选的 `accountId`、`accountCode`、`accountName` 并要求选择，不得默认使用第一条。
+- 已有目标 `profileId` 时使用 `context use <profileId> --context <contextId>`；用户只给出租户线索时完成上述搜索，再用 `tenant use <accountId>` 创建或刷新 profile 并绑定当前 context。不要修改其他会话的 context。
 - 需要一次性覆盖租户时，可显式追加 `--profile <profileId>`。解析优先级是命令级 `--profile`，再到 `--context` 的 active profile；无法确定时直接失败。
 - 业务操作前可执行 `context current --context <contextId>`，确认并向用户展示 `contextId`、`profileId`、`accountId`、`environment` 和 `purpose`。
 - 未登录时不得调用 `tenant.current`。完成 `context use` 或 `tenant use` 后，先用 `context current --context <contextId>` 确认目标租户，再调用 `tenant.current({ contextId })` 显示当前会话的租户卡片。
