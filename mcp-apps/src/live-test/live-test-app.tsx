@@ -490,16 +490,6 @@ export function LiveTestApp() {
     });
     setTranscript(output?.transcript);
   };
-  const analyze = () =>
-    app.sendMessage({
-      role: "user",
-      content: [
-        {
-          type: "text",
-          text: `请读取并分析 LiveTest ${snapshot.testRunId}（chatId=${snapshot.chatId ?? "pending"}）的 AgentAction。`,
-        },
-      ],
-    });
   const openInBrowser = (url: string) => {
     void app.openLink({ url }).catch((cause) => {
       setError(cause instanceof Error ? cause.message : String(cause));
@@ -638,11 +628,6 @@ export function LiveTestApp() {
                   {snapshot.chatId ? (
                     <button type="button" onClick={() => void loadTranscript()}>
                       执行详情
-                    </button>
-                  ) : null}
-                  {snapshot.chatId ? (
-                    <button type="button" onClick={analyze}>
-                      让 Codex 分析
                     </button>
                   ) : null}
                   {snapshot.chatId ? (
