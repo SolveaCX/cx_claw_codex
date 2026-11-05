@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { normalizeTrace } from "./trace.js";
+import { extractTracePresentation, normalizeTrace } from "./trace.js";
 
 describe("LiveTest trace presentation", () => {
   test("groups Chatflow start and finish events into readable steps", () => {
@@ -69,5 +69,51 @@ describe("LiveTest trace presentation", () => {
         },
       }).map((step) => step.title),
     ).toEqual(["工具调用 · search", "工具响应"]);
+  });
+
+  test("builds the same four-section data model used by the online generation panel", () => {
+    const presentation = extractTracePresentation(
+      {
+        messages: [
+          { id: "u-1", role: "USER", content: "How can you help?" },
+          {
+            id: "a-1",
+            role: "ASSISTANT",
+            content: "I can help with orders.",
+            reasonsDescList: ["Agent Has Finished"],
+            context: {
+              metadata: {
+                ai_fields: [{ name: "Language", values: ["ENGLISH"], aiExtract: true }],
+              },
+            },
+            contextComparison: {
+              chatContext: {
+                query: "How can you help?",
+                intentI18n: "Default",
+                language: "ENGLISH",
+                strategyAction: { type: "AGENT", agentId: 33382 },
+                metadata: { __chat_id: "chat-1", test: "YES" },
+                ext: { chatflow_run_info: [] },
+              },
+            },
+          },
+        ],
+      },
+      "a-1",
+    );
+    expect(presentation).toMatchObject({
+      incoming: {
+        intent: "Default",
+        summary: "How can you help?",
+        fields: [{ name: "Language", value: ["ENGLISH"], aiExtract: true }],
+      },
+      execution: { actionType: "AGENT", agentId: "33382" },
+      chatId: "chat-1",
+      result: {
+        reasons: ["Agent Has Finished"],
+        content: "I can help with orders.",
+        language: "ENGLISH",
+      },
+    });
   });
 });

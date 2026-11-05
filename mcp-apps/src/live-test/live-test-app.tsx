@@ -2,7 +2,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { app, callTool, useBridgeState } from "../shared/bridge.js";
-import { normalizeTrace, type TraceStep } from "./trace.js";
+import { extractTracePresentation, type TraceStep } from "./trace.js";
 
 type Outcome = {
   actionType?: string;
@@ -227,7 +227,8 @@ function MessageRow({
 
 function TraceStepView({ step }: { step: TraceStep }) {
   const [open, setOpen] = useState(step.status === "failed");
-  const status = step.status === "failed" ? "失败" : step.status === "running" ? "运行中" : "完成";
+  const marker = step.id === "prepare" ? "⚙" : step.status === "failed" ? "!" : "◇";
+  const status = step.status === "failed" ? "!" : step.status === "running" ? "…" : "✓";
   return (
     <div className={`lt-trace-step lt-trace-${step.status}`}>
       <button
@@ -235,9 +236,7 @@ function TraceStepView({ step }: { step: TraceStep }) {
         type="button"
         onClick={() => setOpen((value) => !value)}
       >
-        <span className="lt-trace-step-marker">
-          {step.status === "failed" ? "!" : step.status === "running" ? "…" : "✓"}
-        </span>
+        <span className="lt-trace-step-marker">{marker}</span>
         <span className="lt-trace-step-title">{step.title}</span>
         {step.elapsed ? (
           <span className="lt-trace-step-time">{(step.elapsed / 1000).toFixed(1)}s</span>
@@ -286,12 +285,60 @@ function TraceStepView({ step }: { step: TraceStep }) {
   );
 }
 
+function TraceSection({
+  title,
+  tag,
+  children,
+}: {
+  title: string;
+  tag?: string;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(true);
+  return (
+    <section className="lt-generation-section">
+      <button
+        className="lt-generation-section-header"
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <ChevronIcon open={open} />
+        <span>{title}</span>
+        {tag ? <strong>{tag}</strong> : null}
+      </button>
+      {open ? <div className="lt-generation-section-body">{children}</div> : null}
+    </section>
+  );
+}
+
+function TraceBlock({
+  label,
+  icon,
+  children,
+}: {
+  label: string;
+  icon: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="lt-generation-block">
+      <div className="lt-generation-label">
+        <i>{icon}</i>
+        <span>{label}</span>
+      </div>
+      <div className="lt-generation-value">{children}</div>
+    </div>
+  );
+}
+
 export function LiveTestApp() {
   const bridge = useBridgeState();
   const initial = (bridge.output?.snapshot ?? bridge.output) as Snapshot | undefined;
   const [snapshot, setSnapshot] = useState<Snapshot>();
   const [error, setError] = useState<string>();
   const [transcript, setTranscript] = useState<unknown>();
+  const [traceMessageId, setTraceMessageId] = useState<string>();
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [metadataOpen, setMetadataOpen] = useState(false);
   const [expanded, setExpanded] = useState(true);
@@ -350,7 +397,10 @@ export function LiveTestApp() {
     () => snapshot?.turns.filter((turn) => completedTurn.has(turn.status)).length ?? 0,
     [snapshot?.turns],
   );
-  const traceSteps = useMemo(() => normalizeTrace(transcript), [transcript]);
+  const trace = useMemo(
+    () => extractTracePresentation(transcript, traceMessageId),
+    [transcript, traceMessageId],
+  );
 
   if (!snapshot)
     return (
@@ -382,7 +432,8 @@ export function LiveTestApp() {
     });
     if (output?.snapshot) setSnapshot(output.snapshot as Snapshot);
   };
-  const loadTranscript = async () => {
+  const loadTranscript = async (messageId?: string) => {
+    setTraceMessageId(messageId);
     setDetailsOpen(true);
     if (transcript) return;
     const output = await callTool("live_test.transcript", {
@@ -401,6 +452,15 @@ export function LiveTestApp() {
         },
       ],
     });
+  const finalAction = trace.result.handoff
+    ? "转人工"
+    : trace.result.type === "HUMAN_REVIEW"
+      ? "人工审核"
+      : trace.execution.agentId
+        ? `Agent: ${snapshot.agentName ?? `#${trace.execution.agentId}`}`
+        : trace.result.type === "NOTHING"
+          ? "不执行操作"
+          : "AI 回复";
 
   return (
     <Tooltip.Provider>
@@ -498,7 +558,7 @@ export function LiveTestApp() {
                       role="assistant"
                       turn={turn}
                       failedNodeTitle={snapshot.failedNodeTitle}
-                      onExecution={() => void loadTranscript()}
+                      onExecution={() => void loadTranscript(turn.messageId)}
                     />
                   </div>
                 ))}
@@ -545,20 +605,101 @@ export function LiveTestApp() {
       <Modal open={metadataOpen} onOpenChange={setMetadataOpen} title="Metadata">
         <pre className="lt-json">{JSON.stringify(metadata, null, 2)}</pre>
       </Modal>
-      <Modal open={detailsOpen} onOpenChange={setDetailsOpen} title="LiveTest 执行详情">
+      <Modal open={detailsOpen} onOpenChange={setDetailsOpen} title="生成过程">
         {transcript ? (
-          <div className="lt-trace-panel">
-            <div className="lt-trace-summary">
-              <strong>Agent 执行过程</strong>
-              <span>
-                {traceSteps.length ? `${traceSteps.length} 个执行步骤` : "未发现可视化执行节点"}
-              </span>
-            </div>
-            {traceSteps.length ? (
-              traceSteps.map((step) => <TraceStepView key={step.id} step={step} />)
-            ) : (
-              <div className="lt-trace-empty">当前 transcript 没有返回 Chatflow 节点事件。</div>
-            )}
+          <div className="lt-trace-panel lt-generation-panel">
+            <TraceSection title="用户来信" tag={trace.incoming.intent ?? "Default"}>
+              {trace.incoming.content ? (
+                <div className="lt-generation-value">{trace.incoming.content}</div>
+              ) : null}
+              {trace.incoming.summary ? (
+                <TraceBlock label="AI 总结" icon="◉">
+                  {trace.incoming.summary}
+                </TraceBlock>
+              ) : null}
+              {trace.incoming.fields.length ? (
+                <div className="lt-generation-block">
+                  <div className="lt-generation-label">
+                    <i>▤</i>
+                    <span>关键信息</span>
+                  </div>
+                  <div className="lt-generation-fields">
+                    {trace.incoming.fields.map((field, index) => (
+                      <div key={`${field.name}-${index}`}>
+                        {field.aiExtract ? <b>✦</b> : null}
+                        {field.name}: {displayJson(field.value)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </TraceSection>
+
+            <TraceSection title="执行过程">
+              {trace.execution.strategyName ? (
+                <TraceBlock label="处理策略" icon="⌁">
+                  {trace.execution.strategyName}
+                </TraceBlock>
+              ) : null}
+              <TraceBlock label="处理方式" icon="➤">
+                {trace.execution.actionType}
+                {trace.execution.agentId
+                  ? `: ${snapshot.agentName ?? `#${trace.execution.agentId}`}`
+                  : ""}
+              </TraceBlock>
+            </TraceSection>
+
+            <TraceSection title="技能执行过程">
+              {trace.chatId || snapshot.chatId ? (
+                <div className="lt-generation-chat-id">
+                  CHAT_ID: {trace.chatId ?? snapshot.chatId}
+                </div>
+              ) : null}
+              {trace.metadata ? (
+                <details className="lt-generation-metadata">
+                  <summary>
+                    <span>▱</span> Metadata
+                  </summary>
+                  <pre>{displayJson(trace.metadata)}</pre>
+                </details>
+              ) : null}
+              {trace.steps.length ? (
+                trace.steps.map((step) => <TraceStepView key={step.id} step={step} />)
+              ) : (
+                <div className="lt-trace-empty">当前消息没有返回技能执行节点。</div>
+              )}
+            </TraceSection>
+
+            <TraceSection title="生成结果">
+              <div className="lt-generation-result-row">
+                <span>最终动作</span>
+                <strong className="lt-result-action">{finalAction}</strong>
+              </div>
+              {trace.result.reasons.length ? (
+                <div className="lt-generation-result-row">
+                  <span>执行原因</span>
+                  <div className="lt-result-reasons">
+                    {trace.result.reasons.map((reason) => (
+                      <strong key={reason}>{reason}</strong>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {trace.result.explain ? (
+                <TraceBlock label="原因说明" icon="!">
+                  {trace.result.explain}
+                </TraceBlock>
+              ) : null}
+              {trace.result.content ? (
+                <TraceBlock label="生成内容" icon="◌">
+                  <div className="lt-generation-response-head">
+                    {trace.result.language ? <span>{trace.result.language}</span> : null}
+                  </div>
+                  {trace.result.content}
+                </TraceBlock>
+              ) : null}
+            </TraceSection>
+
             <details className="lt-raw-details">
               <summary>查看原始 transcript JSON</summary>
               <pre className="lt-json">{JSON.stringify(transcript, null, 2)}</pre>
