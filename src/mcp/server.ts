@@ -184,7 +184,8 @@ function buildCxclawMcpServer(service: LiveTestService): McpServer {
     "live_test.start",
     {
       title: "开始 Agent LiveTest",
-      description: "在当前 CXClaw 租户中启动指定 Agent 的单轮或多轮真实链路测试。",
+      description:
+        "在当前 CXClaw 租户中启动 CHAT_FLOW 或 SINGLE_AGENT 的单轮或多轮真实链路测试。CHAT_FLOW 自动解析版本，SINGLE_AGENT 不接受 flowVersion。",
       inputSchema: LiveTestStartInputSchema,
       outputSchema: LiveTestStartOutputSchema,
       annotations: {

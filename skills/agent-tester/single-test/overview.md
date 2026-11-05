@@ -28,7 +28,7 @@
 |---|---|---|
 | `agentId` | 是 | 目标 Agent ID。不要传名称。 |
 | `botId` | 否 | 默认使用当前 CXClaw 请求携带的 Bot ID；只有当前请求没有 Bot ID 时才向用户确认。 |
-| `flowVersion` | 否 | 工具入参默认省略；`live_test.start` 会调用 `chatflow/queryGraph/latest`，取得当前用户草稿或最新发布版本，再将实际版本明确写入测试请求。 |
+| `flowVersion` | 否 | 仅 `CHAT_FLOW` 支持。默认省略，`live_test.start` 会调用 `chatflow/queryGraph/latest` 取得当前用户草稿或最新发布版本。`SINGLE_AGENT` 不得传入。 |
 | `touchPoint` | 否 | 默认 `LIVE_CHAT`，传入时统一使用大写值。 |
 | `case` | 二选一 | `{ "caseId"?: string, "turns": [{ "message": string }] }`。至少一轮。 |
 | `message` | 二选一 | 灵活探索模式的一条用户问题。 |
@@ -57,6 +57,20 @@
 }
 ```
 
+`SINGLE_AGENT` 调用时省略 `flowVersion`：
+
+```json
+{
+  "contextId": "<currentContextId>",
+  "agentId": 2584,
+  "case": {
+    "turns": [
+      {"message": "你好，请介绍一下你可以帮助我处理哪些问题？"}
+    ]
+  }
+}
+```
+
 ## 工具固定字段
 
 不要在外部传入或覆盖以下字段：
@@ -67,7 +81,7 @@
 - `metadata.specified_flow_version`
 - `metadata.show_chat_flow`
 
-`live_test.start` 会固定注入 `debug=true`、`verbose=true` 和三个路由 metadata。外部同名字段会被忽略，不能用它们改变测试目标。
+`live_test.start` 会固定注入 `debug=true`、`verbose=true` 和 `metadata.specified_agent_id`。`CHAT_FLOW` 额外注入 `metadata.specified_flow_version` 和 `metadata.show_chat_flow`；`SINGLE_AGENT` 不注入这两个字段。外部同名字段会被忽略，不能用它们改变测试目标。
 
 CHAT_FLOW 草稿按当前用户隔离，版本号为 `-userId`。保存草稿不会递增 `meta.chatFlowVersion`；只有发布才生成新的正版本并更新该字段。因此 Agent 刚修改并保存草稿后，调用 `live_test.start` 时不用自行计算 `flowVersion`：工具会查询当前登录用户的草稿版本，并把该负数版本明确写入测试请求。若已发布且草稿已删除，工具会改用最新发布版本。只有明确回放某个历史或已发布版本时才在工具入参中显式传正版本号。
 
@@ -114,6 +128,7 @@ live_test.start
   "status": "succeeded",
   "chatId": "new-test-chat-id",
   "agentId": 2584,
+  "agentType": "CHAT_FLOW",
   "flowVersion": -11302,
   "revision": 8,
   "turns": [
@@ -121,6 +136,8 @@ live_test.start
   ]
 }
 ```
+
+`SINGLE_AGENT` 结果中 `agentType=SINGLE_AGENT`，不包含 `flowVersion`。
 
 失败时 `status=failed` 并包含 `error`。结果过大时可能出现 `truncated=true`，但 `chatId`、轮次和消息 ID 必须保留。
 
@@ -136,10 +153,10 @@ live_test.start
 2. AgentAction 类型、handoff、原因。
 3. 实际 Agent、意图和策略。
 4. 工具调用、工具错误和关键结果。
-5. Chatflow 节点路径、图状态和耗时。
+5. `CHAT_FLOW` 的节点路径、图状态和耗时。
 6. 与原 badcase 有基线时，指出路由、工具、节点和回复业务语义的显著变化。
 7. 当前轮是成功、失败还是需要人工判断。
 
 显著变化不自动等于失败，但必须明确指出。不要生成单测报告、过程文件或内部状态文件，直接在聊天回复中给出结构化结论。
 
-当测试出现 `SYSTEM_ERROR`、图状态失败、工具报错或没有最终 AgentAction 时，展示当前测试 ChatId，并引导用户使用该 ChatId 进入 `shulex-support` 的 Agent 会话诊断场景。用户已经要求排查根因时可直接衔接，不要再次询问 ChatId。
+当测试出现 `STOPPED`、`SYSTEM_ERROR`、ChatFlow 图状态失败、工具报错或没有最终 AgentAction 时，展示当前测试 ChatId，并引导用户使用该 ChatId 进入 `shulex-support` 的 Agent 会话诊断场景。用户已经要求排查根因时可直接衔接，不要再次询问 ChatId。

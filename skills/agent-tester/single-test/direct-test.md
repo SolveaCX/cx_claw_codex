@@ -6,7 +6,7 @@
 node "<PLUGIN_ROOT>/plugin-cli.mjs" agent list --pretty
 ```
 
-默认使用定位的 `agentId`、当前 Bot ID、`LIVE_CHAT` 和当前用户草稿。用户说“随便测一下”但未给问题时，使用“你好，请介绍一下你可以帮助我处理哪些问题？”。
+默认使用定位的 `agentId`、当前 Bot ID 和 `LIVE_CHAT`。`CHAT_FLOW` 使用当前用户草稿或最新发布版本；`SINGLE_AGENT` 直接使用当前 Agent 配置。用户说“随便测一下”但未给问题时，使用“你好，请介绍一下你可以帮助我处理哪些问题？”。
 
 无论问题看起来是否简单，只要用户没有明确 metadata 策略，开始测试前都要询问一次：是否需要固定 metadata（例如订单号、用户邮箱、商品或渠道）？用户明确“不需要”才省略；不得默认空 metadata 或自行编造业务值。
 

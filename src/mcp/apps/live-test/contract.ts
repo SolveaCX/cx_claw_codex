@@ -77,6 +77,7 @@ export const LiveTestSnapshotSchema = z.object({
   environment: z.string(),
   agentId: z.number().int(),
   agentName: z.string().optional(),
+  agentType: z.enum(["CHAT_FLOW", "SINGLE_AGENT"]).optional(),
   botId: z.number().int().optional(),
   flowVersion: z.number().int().optional(),
   chatId: z.string().optional(),

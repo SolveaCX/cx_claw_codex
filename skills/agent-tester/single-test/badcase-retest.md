@@ -26,7 +26,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
 
 - `agentId`：用户显式指定的目标 Agent优先，否则使用原 AgentAction 实际调用的 Agent。
 - `botId`：当前 CXClaw 请求携带的 Bot ID 优先；没有时使用原会话 Bot ID；仍无法确定才询问。
-- `flowVersion`：用户显式版本优先，否则工具入参省略；`live_test.start` 会通过 `chatflow/queryGraph/latest` 取得当前用户草稿或最新发布版本，再将实际版本明确写入测试请求。复测修复时不要默认使用历史旧版本。
+- `flowVersion`：仅 `CHAT_FLOW` 使用。用户显式版本优先，否则工具入参省略；`live_test.start` 会通过 `chatflow/queryGraph/latest` 取得当前用户草稿或最新发布版本。`SINGLE_AGENT` 省略该参数。
 - `touchPoint`：用户显式值优先，其次使用原会话 touchPoint，仍缺失时默认 `LIVE_CHAT`。
 - `metadata`：经用户确认后，只复制完成测试确实需要的业务字段。
 
