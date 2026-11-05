@@ -580,6 +580,8 @@ Live Test 卡片使用 React 组件实现。进度、详情弹层、Tooltip 和 
 - `刷新`：立即调用 `live_test.status`。
 - `停止测试`：调用 `live_test.cancel`。
 - `查看执行详情`：调用 `live_test.transcript` 并在卡片中展示详情。
+- 执行节点仅在包含输入、输出、工具明细或错误时显示展开入口。
+- 处理方式中的 Agent/Chatflow 和真实 Chatflow 节点通过 `ui/open-link` 在系统浏览器打开对应租户环境的详情页。
 - `让 Codex 分析`：发送包含 `testRunId` 和 `chatId` 的 follow-up message，由 Codex 读取 transcript 后分析。
 
 ### 10.3 状态刷新

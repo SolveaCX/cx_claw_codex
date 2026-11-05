@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { extractTracePresentation, normalizeTrace } from "./trace.js";
+import {
+  buildAgentDetailUrl,
+  extractTracePresentation,
+  hasTraceStepDetails,
+  normalizeTrace,
+} from "./trace.js";
 
 describe("LiveTest trace presentation", () => {
   test("groups Chatflow start and finish events into readable steps", () => {
@@ -47,6 +52,7 @@ describe("LiveTest trace presentation", () => {
     });
     expect(steps).toHaveLength(1);
     expect(steps[0]).toMatchObject({
+      nodeId: "intent",
       title: "意图识别",
       status: "success",
       elapsed: 480,
@@ -54,6 +60,35 @@ describe("LiveTest trace presentation", () => {
       output: { intent: "support" },
       tools: [{ name: "classify" }],
     });
+  });
+
+  test("shows expand controls only for steps with visible details", () => {
+    expect(
+      hasTraceStepDetails({
+        id: "prepare",
+        title: "预处理",
+        status: "success",
+        tools: [],
+      }),
+    ).toBe(false);
+    expect(
+      hasTraceStepDetails({
+        id: "condition",
+        title: "条件节点",
+        status: "success",
+        output: { matched: true },
+        tools: [],
+      }),
+    ).toBe(true);
+  });
+
+  test("builds browser links for the current tenant environment", () => {
+    expect(buildAgentDetailUrl("prod", 33382, "CHAT_FLOW")).toBe(
+      "https://ai.solvea.cx/chatflow/detail?id=33382",
+    );
+    expect(buildAgentDetailUrl("staging", 7, "MULTI_AGENT")).toBe(
+      "https://ai-staging.solvea.cx/multiAgent/detail?id=7",
+    );
   });
 
   test("falls back to agent tool history when Chatflow events are absent", () => {

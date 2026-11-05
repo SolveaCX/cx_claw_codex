@@ -2,7 +2,12 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { app, callTool, useBridgeState } from "../shared/bridge.js";
-import { extractTracePresentation, type TraceStep } from "./trace.js";
+import {
+  buildAgentDetailUrl,
+  extractTracePresentation,
+  hasTraceStepDetails,
+  type TraceStep,
+} from "./trace.js";
 
 type Outcome = {
   actionType?: string;
@@ -25,6 +30,7 @@ type Turn = {
 type Snapshot = {
   testRunId: string;
   contextId: string;
+  environment: string;
   status: string;
   revision: number;
   agentName?: string;
@@ -225,26 +231,68 @@ function MessageRow({
   );
 }
 
-function TraceStepView({ step }: { step: TraceStep }) {
+function ExternalLinkIcon() {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M9 2h5v5M14 2 7.5 8.5M12 9.5V14H2V4h4.5" />
+    </svg>
+  );
+}
+
+function TraceStepView({
+  step,
+  href,
+  onOpenLink,
+}: {
+  step: TraceStep;
+  href?: string;
+  onOpenLink: (url: string) => void;
+}) {
   const [open, setOpen] = useState(step.status === "failed");
+  const expandable = hasTraceStepDetails(step);
   const marker = step.id === "prepare" ? "⚙" : step.status === "failed" ? "!" : "◇";
   const status = step.status === "failed" ? "!" : step.status === "running" ? "…" : "✓";
+  const headerContent = (
+    <>
+      {expandable ? <ChevronIcon open={open} /> : null}
+      <span className="lt-trace-step-marker">{marker}</span>
+      <span className="lt-trace-step-title">{step.title}</span>
+      {step.elapsed ? (
+        <span className="lt-trace-step-time">{(step.elapsed / 1000).toFixed(1)}s</span>
+      ) : null}
+      <span className="lt-trace-step-status">{status}</span>
+    </>
+  );
   return (
     <div className={`lt-trace-step lt-trace-${step.status}`}>
-      <button
-        className="lt-trace-step-header"
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-      >
-        <span className="lt-trace-step-marker">{marker}</span>
-        <span className="lt-trace-step-title">{step.title}</span>
-        {step.elapsed ? (
-          <span className="lt-trace-step-time">{(step.elapsed / 1000).toFixed(1)}s</span>
-        ) : null}
-        <span className="lt-trace-step-status">{status}</span>
-        <ChevronIcon open={open} />
-      </button>
-      {open ? (
+      {expandable ? (
+        <button
+          className={`lt-trace-step-header${href ? " lt-trace-step-header-linked" : ""}`}
+          type="button"
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+        >
+          {headerContent}
+        </button>
+      ) : (
+        <div
+          className={`lt-trace-step-header lt-trace-step-header-static${href ? " lt-trace-step-header-linked" : ""}`}
+        >
+          {headerContent}
+        </div>
+      )}
+      {href ? (
+        <button
+          className="lt-trace-step-link"
+          type="button"
+          aria-label={`在浏览器中打开 ${step.title}`}
+          title="在浏览器中打开对应 Chatflow"
+          onClick={() => onOpenLink(href)}
+        >
+          <ExternalLinkIcon />
+        </button>
+      ) : null}
+      {expandable && open ? (
         <div className="lt-trace-step-body">
           {step.input != null ? (
             <div>
@@ -452,6 +500,11 @@ export function LiveTestApp() {
         },
       ],
     });
+  const openInBrowser = (url: string) => {
+    void app.openLink({ url }).catch((cause) => {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    });
+  };
   const finalAction = trace.result.handoff
     ? "转人工"
     : trace.result.type === "HUMAN_REVIEW"
@@ -461,6 +514,7 @@ export function LiveTestApp() {
         : trace.result.type === "NOTHING"
           ? "不执行操作"
           : "AI 回复";
+  const chatflowUrl = buildAgentDetailUrl(snapshot.environment, snapshot.agentId, "CHAT_FLOW");
 
   return (
     <Tooltip.Provider>
@@ -643,9 +697,25 @@ export function LiveTestApp() {
               ) : null}
               <TraceBlock label="处理方式" icon="➤">
                 {trace.execution.actionType}
-                {trace.execution.agentId
-                  ? `: ${snapshot.agentName ?? `#${trace.execution.agentId}`}`
-                  : ""}
+                {trace.execution.agentId ? ": " : ""}
+                {trace.execution.agentId ? (
+                  <button
+                    className="lt-inline-link"
+                    type="button"
+                    onClick={() =>
+                      openInBrowser(
+                        buildAgentDetailUrl(
+                          snapshot.environment,
+                          trace.execution.agentId!,
+                          "CHAT_FLOW",
+                        ),
+                      )
+                    }
+                  >
+                    {snapshot.agentName ?? `#${trace.execution.agentId}`}
+                    <ExternalLinkIcon />
+                  </button>
+                ) : null}
               </TraceBlock>
             </TraceSection>
 
@@ -664,7 +734,14 @@ export function LiveTestApp() {
                 </details>
               ) : null}
               {trace.steps.length ? (
-                trace.steps.map((step) => <TraceStepView key={step.id} step={step} />)
+                trace.steps.map((step) => (
+                  <TraceStepView
+                    key={step.id}
+                    step={step}
+                    href={step.nodeId ? chatflowUrl : undefined}
+                    onOpenLink={openInBrowser}
+                  />
+                ))
               ) : (
                 <div className="lt-trace-empty">当前消息没有返回技能执行节点。</div>
               )}

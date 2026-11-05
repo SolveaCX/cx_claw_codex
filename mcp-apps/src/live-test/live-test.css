@@ -4,6 +4,7 @@
   --lt-header: color-mix(in srgb, var(--color-background-primary, #fff) 94%, transparent);
   --lt-surface: var(--color-background-primary, #fff);
   --lt-surface-soft: color-mix(in srgb, var(--color-background-secondary, #f7f9fc) 92%, #edf2ff);
+  --lt-surface-hover: color-mix(in srgb, var(--color-background-tertiary, #edf1f7) 88%, #dce5ff);
   --lt-border: color-mix(in srgb, var(--color-border-secondary, #dfe5ef) 78%, #6f8cff);
   --lt-border-soft: color-mix(in srgb, var(--color-border-secondary, #e8ebf0) 86%, transparent);
   --lt-text: var(--color-text-primary, #1c1f23);
@@ -645,8 +646,48 @@
   text-align: left;
   cursor: pointer;
 }
+.lt-trace-step-header-static {
+  cursor: default;
+}
+.lt-trace-step-header-linked {
+  padding-right: 42px !important;
+}
 .lt-trace-step-header:hover {
   background: var(--lt-surface-soft);
+}
+.lt-trace-step-header-static:hover {
+  background: transparent;
+}
+.lt-trace-step-link {
+  position: absolute;
+  z-index: 1;
+  top: 9px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  padding: 5px;
+  border: 0;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--lt-text-muted);
+  cursor: pointer;
+}
+.lt-trace-step-link:hover {
+  background: var(--lt-surface-hover);
+  color: var(--lt-blue);
+}
+.lt-trace-step-link svg,
+.lt-inline-link svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
 }
 .lt-trace-step-marker {
   position: absolute;
@@ -838,6 +879,23 @@
   white-space: pre-wrap;
   word-break: break-word;
 }
+.lt-inline-link {
+  margin: -3px 0;
+  padding: 3px 5px;
+  border: 0;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  color: var(--lt-blue);
+  font: inherit;
+  cursor: pointer;
+}
+.lt-inline-link:hover {
+  background: var(--lt-surface-hover);
+  text-decoration: underline;
+}
 .lt-generation-fields {
   display: grid;
   gap: 7px;
@@ -905,6 +963,9 @@
   border-radius: 8px;
   background: var(--lt-surface-soft);
   box-shadow: 0 1px 3px color-mix(in srgb, #0e1934 5%, transparent);
+}
+.lt-generation-panel .lt-trace-step-header-static:hover {
+  background: var(--lt-surface-soft);
 }
 .lt-generation-panel .lt-trace-step-header .lt-chevron {
   order: -2;

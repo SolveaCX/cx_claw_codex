@@ -1,5 +1,6 @@
 export type TraceStep = {
   id: string;
+  nodeId?: string;
   title: string;
   status: "running" | "success" | "failed";
   elapsed?: number;
@@ -8,6 +9,32 @@ export type TraceStep = {
   error?: unknown;
   tools: { name: string; input?: unknown; result?: unknown }[];
 };
+
+export function hasTraceStepDetails(step: TraceStep): boolean {
+  return step.input != null || step.output != null || step.error != null || step.tools.length > 0;
+}
+
+export function buildPortalUrl(environment: string, path: string): string {
+  const origin = environment === "prod" ? "https://ai.solvea.cx" : "https://ai-staging.solvea.cx";
+  return new URL(path, origin).toString();
+}
+
+export function buildAgentDetailUrl(
+  environment: string,
+  agentId: string | number,
+  type = "CHAT_FLOW",
+): string {
+  const normalized = type.toUpperCase();
+  const path =
+    normalized === "MULTI_AGENT"
+      ? "/multiAgent/detail"
+      : normalized === "CHAT_FLOW"
+        ? "/chatflow/detail"
+        : "/agent/detail";
+  const url = new URL(buildPortalUrl(environment, path));
+  url.searchParams.set("id", String(agentId));
+  return url.toString();
+}
 export type TracePresentation = {
   incoming: {
     intent?: string;
@@ -194,6 +221,7 @@ export function normalizeTrace(transcript: unknown): TraceStep[] {
     const finishData = record(finish?.eventData) ?? {};
     return {
       id: `${nodeId}-${start.timestamp ?? index}`,
+      nodeId,
       title: String(finishData.node_title ?? data.node_title ?? `Node ${nodeId}`),
       status: finishData.status === "failed" ? "failed" : finish ? "success" : "running",
       elapsed: Number(finishData.elapsed_time ?? finishData.total_elapsed_time ?? 0) || undefined,
