@@ -89,6 +89,9 @@ describe("LiveTest trace presentation", () => {
     expect(buildAgentDetailUrl("staging", 7, "MULTI_AGENT")).toBe(
       "https://ai-staging.solvea.cx/multiAgent/detail?id=7",
     );
+    expect(buildAgentDetailUrl("prod", 2584, "SINGLE_AGENT")).toBe(
+      "https://ai.solvea.cx/agent/detail?id=2584",
+    );
   });
 
   test("falls back to agent tool history when Chatflow events are absent", () => {

@@ -60,9 +60,10 @@ describe("LiveTest runner", () => {
       if (url.endsWith("/api_v2/gpt/bots"))
         return new Response(JSON.stringify([{ projectId: 302, id: 723 }]), { status: 200 });
       if (url.endsWith("/api_v2/gpt/ap/queryAgent"))
-        return new Response(JSON.stringify([{ id: 9, name: "Test Agent", meta: {} }]), {
-          status: 200,
-        });
+        return new Response(
+          JSON.stringify([{ id: 9, name: "Test Agent", type: "CHAT_FLOW", meta: {} }]),
+          { status: 200 },
+        );
       if (url.endsWith("/api_v2/gpt/chatflow/queryGraph/latest"))
         return new Response(JSON.stringify({ flowVersion: -101 }), { status: 200 });
       if (url.endsWith("/chat/stream")) {
@@ -117,5 +118,181 @@ describe("LiveTest runner", () => {
     });
     expect(chatBodies[0]?.option).toEqual({ debug: true, verbose: true });
     expect(chatBodies[1]?.chatId).toBe("chat-1");
+  });
+
+  test("runs SINGLE_AGENT without querying or injecting Chatflow fields", async () => {
+    process.env.CXCLAW_LIVE_TEST_STATE_DIR = stateRoot;
+    const chatBodies: Record<string, unknown>[] = [];
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input);
+      if (url.endsWith("/api_v2/gpt/bots"))
+        return new Response(JSON.stringify([{ projectId: 302, id: 723 }]), { status: 200 });
+      if (url.endsWith("/api_v2/gpt/ap/queryAgent"))
+        return new Response(
+          JSON.stringify([{ id: 2584, name: "Single Agent", type: "SINGLE_AGENT", meta: {} }]),
+          { status: 200 },
+        );
+      if (url.endsWith("/api_v2/gpt/chatflow/queryGraph/latest"))
+        throw new Error("SINGLE_AGENT must not query Chatflow versions");
+      if (url.endsWith("/chat/stream")) {
+        chatBodies.push(JSON.parse(String(init?.body)));
+        return new Response(
+          'data: {"content":"single answer"}\n\ndata: {"isEnd":true,"data":{"chatId":"chat-single","type":"AI_REPLY","message":{"id":"ai-single","content":"single answer"}}}\n\n',
+          { status: 200 },
+        );
+      }
+      throw new Error(`unexpected request ${url}`);
+    }) as typeof fetch;
+
+    const store = new LiveTestStore();
+    const snapshot = await store.create(
+      {
+        contextId: "ctx_test",
+        profileId: "profile-test",
+        accountId: 12,
+        environment: "staging",
+        agentId: 2584,
+      },
+      ["hello"],
+    );
+    const runner = new LiveTestRunner(store, async () => structuredClone(session));
+    await runner.run(
+      snapshot,
+      {
+        contextId: "ctx_test",
+        agentId: 2584,
+        botId: 723,
+        touchPoint: "LIVE_CHAT",
+        case: { turns: [{ message: "hello" }] },
+        metadata: {
+          order_id: "A-1",
+          specified_flow_version: 17,
+          show_chat_flow: true,
+        },
+        option: {},
+      },
+      new AbortController().signal,
+    );
+
+    const completed = await store.read("profile-test", snapshot.testRunId);
+    expect(completed).toMatchObject({
+      status: "succeeded",
+      agentType: "SINGLE_AGENT",
+      chatId: "chat-single",
+    });
+    expect(completed.flowVersion).toBeUndefined();
+    expect(completed.turns[0]).toMatchObject({
+      assistant: "single answer",
+      messageId: "ai-single",
+      outcome: { actionType: "AI_REPLY" },
+    });
+    expect(chatBodies[0]?.metadata).toEqual({ order_id: "A-1", specified_agent_id: 2584 });
+  });
+
+  test("rejects flowVersion for SINGLE_AGENT", async () => {
+    process.env.CXCLAW_LIVE_TEST_STATE_DIR = stateRoot;
+    globalThis.fetch = (async (input) => {
+      const url = String(input);
+      if (url.endsWith("/api_v2/gpt/bots"))
+        return new Response(JSON.stringify([{ projectId: 302, id: 723 }]), { status: 200 });
+      if (url.endsWith("/api_v2/gpt/ap/queryAgent"))
+        return new Response(
+          JSON.stringify([{ id: 2584, name: "Single Agent", type: "SINGLE_AGENT", meta: {} }]),
+          { status: 200 },
+        );
+      throw new Error(`unexpected request ${url}`);
+    }) as typeof fetch;
+
+    const store = new LiveTestStore();
+    const snapshot = await store.create(
+      {
+        contextId: "ctx_test",
+        profileId: "profile-test",
+        accountId: 12,
+        environment: "staging",
+        agentId: 2584,
+      },
+      ["hello"],
+    );
+    const runner = new LiveTestRunner(store, async () => structuredClone(session));
+    await runner.run(
+      snapshot,
+      {
+        contextId: "ctx_test",
+        agentId: 2584,
+        botId: 723,
+        flowVersion: 17,
+        touchPoint: "LIVE_CHAT",
+        case: { turns: [{ message: "hello" }] },
+        metadata: {},
+        option: {},
+      },
+      new AbortController().signal,
+    );
+
+    const completed = await store.read("profile-test", snapshot.testRunId);
+    expect(completed.status).toBe("failed");
+    expect(completed.error).toBe(
+      "SINGLE_AGENT does not support flowVersion; remove this parameter",
+    );
+  });
+
+  test("marks a stopped SINGLE_AGENT action as failed", async () => {
+    process.env.CXCLAW_LIVE_TEST_STATE_DIR = stateRoot;
+    globalThis.fetch = (async (input) => {
+      const url = String(input);
+      if (url.endsWith("/api_v2/gpt/bots"))
+        return new Response(JSON.stringify([{ projectId: 302, id: 723 }]), { status: 200 });
+      if (url.endsWith("/api_v2/gpt/ap/queryAgent"))
+        return new Response(
+          JSON.stringify([{ id: 2584, name: "Single Agent", type: "SINGLE_AGENT", meta: {} }]),
+          { status: 200 },
+        );
+      if (url.endsWith("/chat/stream"))
+        return new Response(
+          'data: {"isEnd":true,"data":{"chatId":"chat-timeout","type":"STOPPED","reason":"AGENT_TIMEOUT","message":{"id":"ai-timeout","content":""}}}\n\n',
+          { status: 200 },
+        );
+      throw new Error(`unexpected request ${url}`);
+    }) as typeof fetch;
+
+    const store = new LiveTestStore();
+    const snapshot = await store.create(
+      {
+        contextId: "ctx_test",
+        profileId: "profile-test",
+        accountId: 12,
+        environment: "staging",
+        agentId: 2584,
+      },
+      ["hello"],
+    );
+    const runner = new LiveTestRunner(store, async () => structuredClone(session));
+    await runner.run(
+      snapshot,
+      {
+        contextId: "ctx_test",
+        agentId: 2584,
+        botId: 723,
+        touchPoint: "LIVE_CHAT",
+        case: { turns: [{ message: "hello" }] },
+        metadata: {},
+        option: {},
+      },
+      new AbortController().signal,
+    );
+
+    const completed = await store.read("profile-test", snapshot.testRunId);
+    expect(completed).toMatchObject({
+      status: "failed",
+      chatId: "chat-timeout",
+      error: "AGENT_TIMEOUT",
+    });
+    expect(completed.turns[0]).toMatchObject({
+      status: "failed",
+      messageId: "ai-timeout",
+      error: "AGENT_TIMEOUT",
+      outcome: { actionType: "STOPPED", reason: "AGENT_TIMEOUT" },
+    });
   });
 });

@@ -58,22 +58,25 @@ function failedNode(action: JsonObject) {
 
 function actionResult(action: JsonObject) {
   const data = object(action.data);
+  const message = object(action.message);
   const reasonList = Array.isArray(action.reasonList) ? action.reasonList.map(String) : [];
   const node = failedNode(action);
+  const actionType = stringValue(action.type, action.actionType, data?.type, data?.actionType);
   const failed =
-    action.reason === "SYSTEM_ERROR" || reasonList.includes("SYSTEM_ERROR") || Boolean(node);
+    actionType?.toUpperCase() === "STOPPED" ||
+    action.reason === "SYSTEM_ERROR" ||
+    reasonList.includes("SYSTEM_ERROR") ||
+    Boolean(node);
   return {
     chatId: stringValue(action.chatId, object(action.chat)?.id),
-    messageId: stringValue(action.messageId, action.id),
-    content: stringValue(action.content, action.message, data?.content) ?? "",
+    messageId: stringValue(message?.id, action.messageId, action.id),
+    content: stringValue(message?.content, action.content, data?.content) ?? "",
     outcome: {
-      actionType: stringValue(action.actionType, data?.actionType),
+      actionType,
       handoff:
         action.handoff === true ||
         data?.handoff === true ||
-        ["TO_AGENT", "TRANSFER_TO_AGENT"].includes(
-          stringValue(action.actionType, data?.actionType)?.toUpperCase() ?? "",
-        ),
+        ["TO_AGENT", "TRANSFER_TO_AGENT"].includes(actionType?.toUpperCase() ?? ""),
       reason: stringValue(action.reason, data?.reason),
       reasonDesc: stringValue(action.reasonDesc, data?.reasonDesc),
       explain: stringValue(action.explain, data?.explain),
@@ -83,7 +86,13 @@ function actionResult(action: JsonObject) {
     error:
       node?.error ??
       (failed
-        ? (stringValue(action.message, action.error) ?? "Agent execution failed")
+        ? (stringValue(
+            message?.content,
+            action.error,
+            action.explain,
+            action.reasonDesc,
+            action.reason,
+          ) ?? "Agent execution failed")
         : undefined),
   };
 }
@@ -123,14 +132,24 @@ export class LiveTestRunner {
       const initialClient = new SolveaClient(initialSession);
       const agent = firstObject(await initialClient.getAgent(String(input.agentId)));
       if (!agent) throw new Error(`Agent ${input.agentId} not found`);
+      const agentType = stringValue(agent.type)?.toUpperCase();
+      if (agentType !== "CHAT_FLOW" && agentType !== "SINGLE_AGENT")
+        throw new Error(`LiveTest does not support Agent type: ${agentType ?? "UNKNOWN"}`);
       const botId = input.botId ?? Number(await initialClient.botId());
-      const flowVersion =
-        input.flowVersion ??
-        resolveFlowVersion(await initialClient.getChatflowGraph(String(input.agentId)), agent);
-      if (!Number.isSafeInteger(flowVersion)) throw new Error("unable to resolve Chatflow version");
+      let flowVersion: number | undefined;
+      if (agentType === "CHAT_FLOW") {
+        flowVersion =
+          input.flowVersion ??
+          resolveFlowVersion(await initialClient.getChatflowGraph(String(input.agentId)), agent);
+        if (!Number.isSafeInteger(flowVersion))
+          throw new Error("unable to resolve Chatflow version");
+      } else if (input.flowVersion !== undefined) {
+        throw new Error("SINGLE_AGENT does not support flowVersion; remove this parameter");
+      }
       await this.store.update(profileId, testRunId, (value) => {
         value.status = "running";
         value.agentName = stringValue(agent.name, agent.title);
+        value.agentType = agentType;
         value.botId = botId;
         value.flowVersion = flowVersion;
       });
@@ -143,17 +162,20 @@ export class LiveTestRunner {
           value.turns[index]!.status = "running";
           value.turns[index]!.startedAt = Date.now();
         });
+        const metadata: JsonObject = {
+          ...filtered(input.metadata, protectedMetadata),
+          specified_agent_id: input.agentId,
+        };
+        if (agentType === "CHAT_FLOW") {
+          metadata.specified_flow_version = flowVersion;
+          metadata.show_chat_flow = true;
+        }
         const payload: JsonObject = {
           botId,
           chatId,
           touchPoint: input.touchPoint,
           message: turn.user,
-          metadata: {
-            ...filtered(input.metadata, protectedMetadata),
-            specified_agent_id: input.agentId,
-            specified_flow_version: flowVersion,
-            show_chat_flow: true,
-          },
+          metadata,
           option: { ...filtered(input.option, protectedOptions), debug: true, verbose: true },
         };
         let pending = "";

@@ -35,6 +35,7 @@ type Snapshot = {
   revision: number;
   agentName?: string;
   agentId: number;
+  agentType?: "CHAT_FLOW" | "SINGLE_AGENT";
   botId?: number;
   flowVersion?: number;
   chatId?: string;
@@ -466,11 +467,13 @@ export function LiveTestApp() {
     .toUpperCase();
   const metadata = bridge.input.metadata ?? {};
   const version =
-    snapshot.flowVersion == null
-      ? "—"
-      : snapshot.flowVersion < 0
-        ? `草稿 v${snapshot.flowVersion}`
-        : `发布 v${snapshot.flowVersion}`;
+    snapshot.agentType === "SINGLE_AGENT"
+      ? "Single Agent"
+      : snapshot.flowVersion == null
+        ? "—"
+        : snapshot.flowVersion < 0
+          ? `草稿 v${snapshot.flowVersion}`
+          : `发布 v${snapshot.flowVersion}`;
   const visibleTurns = snapshot.turns.filter((turn) => turn.status !== "queued");
 
   const cancel = async () => {
@@ -504,7 +507,7 @@ export function LiveTestApp() {
         : trace.result.type === "NOTHING"
           ? "不执行操作"
           : "AI 回复";
-  const chatflowUrl = buildAgentDetailUrl(snapshot.environment, snapshot.agentId, "CHAT_FLOW");
+  const agentUrl = buildAgentDetailUrl(snapshot.environment, snapshot.agentId, snapshot.agentType);
 
   return (
     <Tooltip.Provider>
@@ -589,7 +592,7 @@ export function LiveTestApp() {
                   </span>
                   <span>
                     <strong>正在准备测试</strong>
-                    <small>正在解析 Agent、Bot 和 Chatflow 版本</small>
+                    <small>正在解析 Agent、Bot 和版本信息</small>
                   </span>
                 </div>
               ) : null}
@@ -692,7 +695,7 @@ export function LiveTestApp() {
                         buildAgentDetailUrl(
                           snapshot.environment,
                           trace.execution.agentId!,
-                          "CHAT_FLOW",
+                          snapshot.agentType,
                         ),
                       )
                     }
@@ -723,7 +726,7 @@ export function LiveTestApp() {
                   <TraceStepView
                     key={step.id}
                     step={step}
-                    href={step.nodeId ? chatflowUrl : undefined}
+                    href={step.nodeId && snapshot.agentType === "CHAT_FLOW" ? agentUrl : undefined}
                     onOpenLink={openInBrowser}
                   />
                 ))
