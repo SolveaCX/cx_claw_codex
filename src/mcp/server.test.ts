@@ -10,7 +10,8 @@ describe("tenant MCP App HTML", () => {
   test("embeds the bundled app without allowing a closing script tag", () => {
     const html = createMcpAppHtml('console.log("ok");</script><p>escaped</p>', "body{}");
     expect(html).toContain('<div id="root"></div>');
-    expect(html).toContain("body{}");
+    expect(html).toContain('cxclawStyle.textContent="body{}"');
+    expect(html).toContain("document.head.appendChild(cxclawStyle)");
     expect(html).toContain("<\\/script><p>escaped</p>");
     expect(html.match(/<\/script>/g)).toHaveLength(1);
   });
@@ -37,6 +38,6 @@ describe("tenant MCP App entrypoint", () => {
   });
 
   test("binds only the LiveTest entry tool to its card", () => {
-    expect(LIVE_TEST_TOOL_META.ui.resourceUri).toBe("ui://cxclaw/live-test");
+    expect(LIVE_TEST_TOOL_META.ui.resourceUri).toBe("ui://cxclaw/live-test/v2.html");
   });
 });

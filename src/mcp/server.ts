@@ -17,7 +17,7 @@ import { LiveTestService } from "./apps/live-test/service.js";
 import { loadTenantPanelStatus } from "./tenant-status.js";
 
 const TENANT_PANEL_URI = "ui://cxclaw/tenant-status";
-const LIVE_TEST_URI = "ui://cxclaw/live-test";
+const LIVE_TEST_URI = "ui://cxclaw/live-test/v2.html";
 const MCP_APP_MIME_TYPE = "text/html;profile=mcp-app";
 const DEVELOPMENT_MODE = process.env.CXCLAW_PLUGIN_DEV === "1";
 
@@ -46,9 +46,11 @@ export function resolveMcpAppCssFiles(
 }
 
 export function createMcpAppHtml(script: string, styles = ""): string {
-  const safeStyle = styles.replace(/<\/style/gi, "<\\/style");
-  const safeScript = script.replace(/<\/script/gi, "<\\/script");
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${safeStyle}</style></head><body><div id="root"></div><script type="module">${safeScript}</script></body></html>`;
+  const installStyles = styles
+    ? `const cxclawStyle=document.createElement("style");cxclawStyle.textContent=${JSON.stringify(styles)};document.head.appendChild(cxclawStyle);`
+    : "";
+  const safeScript = `${installStyles}${script}`.replace(/<\/script/gi, "<\\/script");
+  return `<div id="root"></div><script type="module">${safeScript}</script>`;
 }
 
 async function loadMcpAppHtml(appName: string) {
