@@ -1,95 +1,155 @@
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { McpServer } from "@modelcontextprotocol/server";
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import { OpenAIExtensions } from "@openai/mcp-extensions/server";
-import type { OpenAIUiToolMetadata } from "@openai/mcp-extensions/server";
 import { z } from "zod";
 import { VERSION } from "../version.js";
+import {
+  LiveTestRunInputSchema,
+  LiveTestSnapshotOutputSchema,
+  LiveTestStartInputSchema,
+  LiveTestStartOutputSchema,
+  LiveTestStatusInputSchema,
+  LiveTestTranscriptOutputSchema,
+} from "./apps/live-test/contract.js";
+import { LiveTestService } from "./apps/live-test/service.js";
 import { loadTenantPanelStatus } from "./tenant-status.js";
 
-const TENANT_PANEL_URI = "ui://cxclaw/tenant-status";
 const MCP_APP_MIME_TYPE = "text/html;profile=mcp-app";
 const DEVELOPMENT_MODE = process.env.CXCLAW_PLUGIN_DEV === "1";
+
+export function mcpAppContentHash(content: string): string {
+  return createHash("sha256").update(content).digest("hex").slice(0, 12);
+}
+
+export function createMcpAppUri(appName: string, contentHash: string): string {
+  if (!/^[a-f0-9]{12}$/.test(contentHash)) throw new Error("invalid MCP App content hash");
+  return `ui://cxclaw/${appName}/${contentHash}.html`;
+}
+
+function builtMcpAppDirectory(appName: string): URL | undefined {
+  const candidates = [
+    new URL(`./mcp-apps/${appName}/`, import.meta.url),
+    new URL(`../../dist/mcp-apps/${appName}/`, import.meta.url),
+  ];
+  return candidates.find((directory) => {
+    try {
+      readFileSync(new URL("manifest.json", directory));
+      return true;
+    } catch {
+      return false;
+    }
+  });
+}
+
+function resolveMcpAppContentHash(appName: string): string {
+  const directory = builtMcpAppDirectory(appName);
+  if (!directory) return mcpAppContentHash(`unbuilt:${appName}`);
+  const manifest = JSON.parse(readFileSync(new URL("manifest.json", directory), "utf8")) as Record<
+    string,
+    ViteManifestEntry
+  >;
+  const entry = Object.values(manifest).find((item) => item.isEntry);
+  if (!entry) throw new Error(`Vite manifest has no entry for ${appName}`);
+  const script = readFileSync(new URL(entry.file, directory), "utf8");
+  const styles = resolveMcpAppCssFiles(manifest, entry)
+    .map((file) => readFileSync(new URL(file, directory), "utf8"))
+    .join("\n");
+  return mcpAppContentHash(createMcpAppHtml(script, styles));
+}
+
+const TENANT_PANEL_URI = createMcpAppUri(
+  "tenant-status",
+  resolveMcpAppContentHash("tenant-status"),
+);
+const LIVE_TEST_URI = createMcpAppUri("live-test", resolveMcpAppContentHash("live-test"));
+
 export const TENANT_PANEL_TOOL_META = {
   ui: { resourceUri: TENANT_PANEL_URI, visibility: ["model", "app"] },
-  "openai/ui": { entrypoints: [{ type: "thread" }] } satisfies OpenAIUiToolMetadata,
 };
+export const LIVE_TEST_TOOL_META = {
+  ui: { resourceUri: LIVE_TEST_URI, visibility: ["model", "app"] },
+};
+const LIVE_TEST_HELPER_META = { ui: { visibility: ["model", "app"] } };
 
-export function createTenantPanelHtml(script: string): string {
-  const safeScript = script.replace(/<\/script/gi, "<\\/script");
-  return `<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root { color-scheme: light dark; font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 32px 16px 16px; color: var(--color-text-primary, CanvasText); background: transparent; }
-    .header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-    .eyebrow { margin: 0 0 6px; color: var(--color-text-secondary, GrayText); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
-    h1 { margin: 0; font-size: 18px; line-height: 1.35; }
-    .summary { min-height: 40px; margin: 8px 0 18px; color: var(--color-text-secondary, GrayText); font-size: 13px; line-height: 1.5; }
-    button { border: 1px solid var(--color-border-secondary, ButtonBorder); border-radius: 8px; padding: 7px 10px; color: inherit; background: var(--color-background-secondary, ButtonFace); cursor: pointer; }
-    button:disabled { cursor: wait; opacity: .55; }
-    .environment { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 8px; font-size: 11px; font-weight: 700; }
-    .environment[data-environment="prod"] { color: #b42318; background: #fee4e2; }
-    .environment[data-environment="staging"] { color: #93370d; background: #fef0c7; }
-    .environment[data-environment="none"] { color: var(--color-text-secondary, GrayText); background: var(--color-background-secondary, ButtonFace); }
-    dl { display: grid; grid-template-columns: minmax(88px, auto) 1fr; gap: 0; margin: 0; border-top: 1px solid var(--color-border-secondary, rgba(127,127,127,.25)); }
-    dt, dd { margin: 0; padding: 11px 0; border-bottom: 1px solid var(--color-border-secondary, rgba(127,127,127,.25)); font-size: 13px; }
-    dt { color: var(--color-text-secondary, GrayText); }
-    dd { min-width: 0; text-align: right; overflow-wrap: anywhere; font-weight: 550; }
-    .footer { margin: 12px 0 0; color: var(--color-text-secondary, GrayText); font-size: 11px; text-align: right; }
-    body[data-state="expired"] h1, body[data-state="unavailable"] h1 { color: #b42318; }
-  </style>
-</head>
-<body data-state="loading">
-  <div class="header">
-    <div>
-      <p class="eyebrow">CXClaw${DEVELOPMENT_MODE ? " Dev" : ""} · 当前会话租户</p>
-      <h1 id="headline">正在读取租户信息…</h1>
-    </div>
-    <button id="refresh" class="cursor-interaction" type="button">刷新</button>
-  </div>
-  <p id="summary" class="summary">租户切换后，面板会自动更新。</p>
-  <dl>
-    <dt>环境</dt><dd><span id="environment" class="environment" data-environment="none">未选择</span></dd>
-    <dt>Context</dt><dd id="context-id">—</dd>
-    <dt>Profile</dt><dd id="profile-id">—</dd>
-    <dt>Account ID</dt><dd id="account-id">—</dd>
-    <dt>Account Code</dt><dd id="account-code">—</dd>
-    <dt>公司名</dt><dd id="company-name">—</dd>
-    <dt>用途</dt><dd id="purpose">—</dd>
-    <dt>凭据到期</dt><dd id="expires-at">—</dd>
-  </dl>
-  <p id="checked-at" class="footer">尚未更新</p>
-  <script>${safeScript}</script>
-</body>
-</html>`;
+type ViteManifestEntry = { file: string; css?: string[]; isEntry?: boolean };
+export function resolveMcpAppCssFiles(
+  manifest: Record<string, ViteManifestEntry>,
+  entry: ViteManifestEntry,
+): string[] {
+  return [
+    ...new Set([
+      ...(entry.css ?? []),
+      ...Object.values(manifest)
+        .map((item) => item.file)
+        .filter((file) => file.endsWith(".css")),
+    ]),
+  ];
 }
 
-async function tenantPanelHtml(): Promise<string> {
-  const script = await readFile(new URL("./tenant-panel.js", import.meta.url), "utf8");
-  return createTenantPanelHtml(script);
+export function createMcpAppHtml(script: string, styles = ""): string {
+  const installStyles = styles
+    ? `const cxclawStyle=document.createElement("style");cxclawStyle.textContent=${JSON.stringify(styles)};document.head.appendChild(cxclawStyle);`
+    : "";
+  const safeScript = `${installStyles}${script}`.replace(/<\/script/gi, "<\\/script");
+  return `<div id="root"></div><script type="module">${safeScript}</script>`;
 }
 
-export function createTenantMcpServer(): McpServer {
+async function loadMcpAppHtml(appName: string) {
+  const directory = builtMcpAppDirectory(appName);
+  if (!directory) throw new Error(`MCP App build is missing for ${appName}`);
+  const manifest = JSON.parse(
+    await readFile(new URL("manifest.json", directory), "utf8"),
+  ) as Record<string, ViteManifestEntry>;
+  const entry = Object.values(manifest).find((item) => item.isEntry);
+  if (!entry) throw new Error(`Vite manifest has no entry for ${appName}`);
+  const script = await readFile(new URL(entry.file, directory), "utf8");
+  const cssFiles = resolveMcpAppCssFiles(manifest, entry);
+  const styles = (
+    await Promise.all(cssFiles.map((file) => readFile(new URL(file, directory), "utf8")))
+  ).join("\n");
+  return createMcpAppHtml(script, styles);
+}
+
+const result = (summary: string, structuredContent: Record<string, unknown>) => ({
+  content: [{ type: "text" as const, text: summary }],
+  structuredContent,
+});
+
+export const TenantCurrentInputSchema = z.object({ contextId: z.string().min(1) });
+
+function buildCxclawMcpServer(service: LiveTestService): McpServer {
   const name = DEVELOPMENT_MODE ? "cxclaw-dev" : "cxclaw";
-  const title = DEVELOPMENT_MODE ? "CXClaw Dev 当前租户" : "CXClaw 当前租户";
+  const tenantTitle = DEVELOPMENT_MODE ? "CXClaw Dev 当前租户" : "CXClaw 当前租户";
   const server = new McpServer({ name, version: VERSION });
   new OpenAIExtensions(server);
 
   server.registerResource(
     "CXClaw current tenant panel",
     TENANT_PANEL_URI,
-    { title, mimeType: MCP_APP_MIME_TYPE },
+    { title: tenantTitle, mimeType: MCP_APP_MIME_TYPE },
     async () => ({
       contents: [
         {
           uri: TENANT_PANEL_URI,
           mimeType: MCP_APP_MIME_TYPE,
-          text: await tenantPanelHtml(),
+          text: await loadMcpAppHtml("tenant-status"),
+        },
+      ],
+    }),
+  );
+  server.registerResource(
+    "CXClaw LiveTest",
+    LIVE_TEST_URI,
+    { title: "Agent LiveTest", mimeType: MCP_APP_MIME_TYPE },
+    async () => ({
+      contents: [
+        {
+          uri: LIVE_TEST_URI,
+          mimeType: MCP_APP_MIME_TYPE,
+          text: await loadMcpAppHtml("live-test"),
         },
       ],
     }),
@@ -98,11 +158,9 @@ export function createTenantMcpServer(): McpServer {
   server.registerTool(
     "tenant.current",
     {
-      title,
+      title: tenantTitle,
       description: "读取指定 CXClaw context 当前选择的租户，仅返回非敏感展示字段。",
-      inputSchema: {
-        contextId: z.string().optional().describe("由 cxclawctl context init 生成的 contextId"),
-      },
+      inputSchema: TenantCurrentInputSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -113,25 +171,102 @@ export function createTenantMcpServer(): McpServer {
     },
     async ({ contextId }) => {
       const status = await loadTenantPanelStatus(contextId);
-      return {
-        content: [
-          {
-            type: "text",
-            text: status.contextRequired
-              ? "需要传入 contextId"
-              : status.configured
-                ? `当前租户：${status.companyName ?? status.accountName ?? status.accountId}`
-                : "当前 context 未选择租户",
-          },
-        ],
-        structuredContent: status,
-      };
+      return result(
+        status.configured
+          ? `当前租户：${status.companyName ?? status.accountName ?? status.accountId}`
+          : "当前 context 未选择租户",
+        status as unknown as Record<string, unknown>,
+      );
     },
   );
 
+  server.registerTool(
+    "live_test.start",
+    {
+      title: "开始 Agent LiveTest",
+      description: "在当前 CXClaw 租户中启动指定 Agent 的单轮或多轮真实链路测试。",
+      inputSchema: LiveTestStartInputSchema,
+      outputSchema: LiveTestStartOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+      _meta: LIVE_TEST_TOOL_META,
+    },
+    async (input) => {
+      const output = await service.start(input);
+      return result(`LiveTest ${output.testRunId} 已启动`, output);
+    },
+  );
+  server.registerTool(
+    "live_test.status",
+    {
+      title: "读取 Agent LiveTest 状态",
+      description: "读取 LiveTest 当前快照，可等待 revision 变化。",
+      inputSchema: LiveTestStatusInputSchema,
+      outputSchema: LiveTestSnapshotOutputSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+      _meta: LIVE_TEST_HELPER_META,
+    },
+    async ({ contextId, testRunId, afterRevision, waitMs }) => {
+      const output = await service.status(contextId, testRunId, afterRevision, waitMs);
+      return result(`LiveTest 状态：${output.snapshot.status}`, output);
+    },
+  );
+  server.registerTool(
+    "live_test.cancel",
+    {
+      title: "取消 Agent LiveTest",
+      description: "取消当前租户上下文中的 LiveTest。",
+      inputSchema: LiveTestRunInputSchema,
+      outputSchema: LiveTestSnapshotOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+      _meta: LIVE_TEST_HELPER_META,
+    },
+    async ({ contextId, testRunId }) => {
+      const output = await service.cancel(contextId, testRunId);
+      return result(`LiveTest 状态：${output.snapshot.status}`, output);
+    },
+  );
+  server.registerTool(
+    "live_test.transcript",
+    {
+      title: "读取 Agent LiveTest 执行详情",
+      description: "读取属于当前租户 LiveTest 的完整 transcript。",
+      inputSchema: LiveTestRunInputSchema,
+      outputSchema: LiveTestTranscriptOutputSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+      _meta: LIVE_TEST_HELPER_META,
+    },
+    async ({ contextId, testRunId }) => {
+      const output = await service.transcript(contextId, testRunId);
+      return result(`已读取 LiveTest ${testRunId} 的执行详情`, output);
+    },
+  );
   return server;
 }
 
+export function createCxclawMcpServer(): McpServer {
+  return buildCxclawMcpServer(new LiveTestService());
+}
+export const createTenantMcpServer = createCxclawMcpServer;
 export function serveTenantMcp(): void {
-  serveStdio(createTenantMcpServer);
+  serveStdio(createCxclawMcpServer);
 }

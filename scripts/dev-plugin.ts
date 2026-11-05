@@ -292,8 +292,7 @@ async function sync(skipBuild: boolean): Promise<void> {
     [
       `CXClaw Dev is enabled in: ${playgrounds.join(", ")}`,
       "For the first install, restart the ChatGPT desktop app once.",
-      "After tenant panel UI builds, invoke tenant.current again to reload the panel resource.",
-      "After MCP server or tool metadata changes, restart the ChatGPT desktop app.",
+      "After MCP App, MCP server, or tool metadata changes, restart the ChatGPT desktop app so content-hashed resource URIs are registered.",
     ].join("\n"),
   );
 }
@@ -303,18 +302,28 @@ async function watch(): Promise<void> {
   console.log(
     [
       "Watching TypeScript bundles.",
-      "Invoke tenant.current again after tenant panel UI builds.",
+      "After login and tenant selection, invoke tenant.current with the current contextId.",
       "Restart the ChatGPT desktop app after MCP server or tool metadata changes.",
     ].join("\n"),
   );
-  const child = spawn("bun", ["x", "tsup", "--watch"], { cwd: root, stdio: "inherit" });
-  process.on("SIGINT", () => child.kill("SIGINT"));
-  process.on("SIGTERM", () => child.kill("SIGTERM"));
+  const children = [
+    spawn("bun", ["x", "tsup", "--watch"], { cwd: root, stdio: "inherit" }),
+    spawn("bun", ["run", "dev:mcp-apps"], { cwd: root, stdio: "inherit" }),
+  ];
+  process.on("SIGINT", () => children.forEach((child) => child.kill("SIGINT")));
+  process.on("SIGTERM", () => children.forEach((child) => child.kill("SIGTERM")));
   await new Promise<void>((resolve, reject) => {
-    child.on("error", reject);
-    child.on("exit", (code) =>
-      code === 0 || code === null ? resolve() : reject(new Error(`tsup watch exited with ${code}`)),
-    );
+    for (const child of children) {
+      child.on("error", reject);
+      child.on("exit", (code) => {
+        children
+          .filter((candidate) => candidate !== child)
+          .forEach((candidate) => candidate.kill());
+        code === 0 || code === null
+          ? resolve()
+          : reject(new Error(`development watcher exited with ${code}`));
+      });
+    }
   });
 }
 

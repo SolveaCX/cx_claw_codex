@@ -1,6 +1,6 @@
 # 单 case 测试
 
-这里的“单测”指一次测试一个 Agent。执行测试必须调用 `live_test`，不要通过脚本、临时 JSON 或本地状态文件自行调用 Chat 接口。
+这里的“单测”指一次测试一个 Agent。执行测试必须调用 `live_test.start`，不要通过脚本、临时 JSON 或本地状态文件自行调用 Chat 接口。
 
 ## 场景路由
 
@@ -20,7 +20,7 @@
 
 ## metadata 确认（单测必做）
 
-用户没有明确说明 metadata 策略时，调用 `live_test` 前必须先提醒并确认：本次是否需要固定 metadata（例如订单号、用户邮箱、商品或渠道），以保证路由和工具上下文符合预期。用户确认不需要后，才省略 metadata；不要默认为空，也不要自行编造值。
+用户没有明确说明 metadata 策略时，调用 `live_test.start` 前必须先提醒并确认：本次是否需要固定 metadata（例如订单号、用户邮箱、商品或渠道），以保证路由和工具上下文符合预期。用户确认不需要后，才省略 metadata；不要默认为空，也不要自行编造值。
 
 ## 参数契约
 
@@ -28,7 +28,7 @@
 |---|---|---|
 | `agentId` | 是 | 目标 Agent ID。不要传名称。 |
 | `botId` | 否 | 默认使用当前 CXClaw 请求携带的 Bot ID；只有当前请求没有 Bot ID 时才向用户确认。 |
-| `flowVersion` | 否 | 工具入参默认省略；`live_test` 会调用 `chatflow/queryGraph/latest`，取得当前用户草稿或最新发布版本，再将实际版本明确写入测试请求。 |
+| `flowVersion` | 否 | 工具入参默认省略；`live_test.start` 会调用 `chatflow/queryGraph/latest`，取得当前用户草稿或最新发布版本，再将实际版本明确写入测试请求。 |
 | `touchPoint` | 否 | 默认 `LIVE_CHAT`，传入时统一使用大写值。 |
 | `case` | 二选一 | `{ "caseId"?: string, "turns": [{ "message": string }] }`。至少一轮。 |
 | `message` | 二选一 | 灵活探索模式的一条用户问题。 |
@@ -40,6 +40,7 @@
 
 ```json
 {
+  "contextId": "<currentContextId>",
   "agentId": 2584,
   "botId": 80,
   "flowVersion": 17,
@@ -66,64 +67,66 @@
 - `metadata.specified_flow_version`
 - `metadata.show_chat_flow`
 
-`live_test` 会固定注入 `debug=true`、`verbose=true` 和三个路由 metadata。外部同名字段会被忽略，不能用它们改变测试目标。
+`live_test.start` 会固定注入 `debug=true`、`verbose=true` 和三个路由 metadata。外部同名字段会被忽略，不能用它们改变测试目标。
 
-CHAT_FLOW 草稿按当前用户隔离，版本号为 `-userId`。保存草稿不会递增 `meta.chatFlowVersion`；只有发布才生成新的正版本并更新该字段。因此 Agent 刚修改并保存草稿后，调用 `live_test` 时不用自行计算 `flowVersion`：工具会查询当前登录用户的草稿版本，并把该负数版本明确写入测试请求。若已发布且草稿已删除，工具会改用最新发布版本。只有明确回放某个历史或已发布版本时才在工具入参中显式传正版本号。
+CHAT_FLOW 草稿按当前用户隔离，版本号为 `-userId`。保存草稿不会递增 `meta.chatFlowVersion`；只有发布才生成新的正版本并更新该字段。因此 Agent 刚修改并保存草稿后，调用 `live_test.start` 时不用自行计算 `flowVersion`：工具会查询当前登录用户的草稿版本，并把该负数版本明确写入测试请求。若已发布且草稿已删除，工具会改用最新发布版本。只有明确回放某个历史或已发布版本时才在工具入参中显式传正版本号。
 
 ## 接口与进度
 
 - `touchPoint=LIVE_CHAT` 时，工具内部只调用 `/api_v2/gpt/bot/{botId}/chat/stream`。
 - 其它 touchPoint 只调用同步 `/api_v2/gpt/bot/{botId}/chat`。
-- 两条路径不允许 fallback。流式路径只取最终 AgentAction，不把完整 SSE events 放入工具结果。
-- 工具通过 `tool_progress_delta` 展示用户问题和 AI 流式回复，通过持久化的 `turn_completed` 记录每轮成功、失败、耗时和总进度。
+- 两条路径不允许 fallback。流式路径提取 AI 增量和最终 AgentAction，不把完整 SSE events 放入工具结果。
+- Live Test 卡片通过 `live_test.status` 的持久化快照展示用户问题、AI 流式回复、每轮状态和总进度。
 - 不要因为工具已经展示实时进度而额外创建过程文件。
+
+## 独立 case 串行约束
+
+同一个 `contextId` 同时只允许一个 LiveTest。多个独立 case 即使都已确定，也必须逐个执行；禁止在同一批工具调用中发出多个 `live_test.start`。
+
+每个独立 case 固定执行完整链路后再进入下一个：
+
+```text
+live_test.start
+  → live_test.status，等待终态
+  → live_test.transcript
+  → 下一个 case 的 live_test.start
+```
+
+需要新 ChatId 隔离变量或上下文的场景分别执行独立 case。只有各轮属于同一段连续对话、需要复用 ChatId 时，才合并到一个 `case.turns`；不能为了减少调用而把互相独立的覆盖场景合并成多轮对话。
 
 ## 执行顺序与阶段反馈
 
-1. 参数确定后，先用一句话说明目标 Agent、测试轮数和即将开始测试，再调用 `live_test`。
-2. `live_test` 内部的逐轮问题、回复和状态已经由 Live Test 组件展示，不要在工具执行期间重复输出相同进度。
-3. 必须等待 `live_test` 完整结束并取得新测试 `chatId`。完成后先输出一句阶段进展，说明完成轮数、成功或失败状态以及新 ChatId。
-4. 阶段进展之后，再执行一次 `get-transcript` 获取完整会话并分析 AgentAction。不要把读取会话命令放到 Live Test 之前，也不要与 Live Test 并行执行。
-5. `get-transcript` 完成后再输出逐轮结论；不要把读取会话动作描述成新的测试轮次。
+1. 参数确定后，先用一句话说明目标 Agent、测试轮数和即将开始测试，再调用 `live_test.start`。
+2. 使用 `live_test.status` 的 `afterRevision + waitMs` 等待终态；逐轮问题、回复和状态已经由 Live Test 组件展示，不要重复输出相同进度。
+3. 测试结束后调用 `live_test.transcript` 获取完整执行详情。完成后说明完成轮数、成功或失败状态以及新 ChatId。
+4. `live_test.transcript` 完成后再输出逐轮结论；不要把读取会话动作描述成新的测试轮次。
+5. 有多个独立 case 时，完成当前 case 的第 1～4 步后再启动下一个；不得并发或抢先调用下一次 `live_test.start`。
 
-`live_test` 入参会提供给用户查看，因此只传本次测试真正需要的 Agent、case/message、渠道和业务 metadata。不要把 baseline、原会话全文、分析草稿或内部固定字段塞入工具参数。
+`live_test.start` 入参会提供给用户查看，因此只传本次测试真正需要的 Agent、case/message、渠道和业务 metadata。不要把 baseline、原会话全文、分析草稿或内部固定字段塞入工具参数。
 
 ## 工具结果
 
-`live_test` 的 `content` 是可供当前 Agent 继续分析的 JSON 字符串，结构化 `payload` 同时提供给前端：
+`live_test.start` 返回 `testRunId` 和初始 `snapshot`；`live_test.status` 返回最新快照：
 
 ```json
 {
-  "type": "live_test",
-  "version": 1,
-  "status": "completed",
-  "mode": "case",
+  "testRunId": "ltr_xxx",
+  "status": "succeeded",
   "chatId": "new-test-chat-id",
-  "botId": 80,
   "agentId": 2584,
   "flowVersion": -11302,
-  "totalTurns": 2,
-  "completedTurns": 2,
-  "messages": [
-    {"turn": 1, "role": "USER", "content": "..."},
-    {"turn": 1, "role": "ASSISTANT", "id": "...", "content": "..."}
+  "revision": 8,
+  "turns": [
+    {"index": 0, "user": "...", "assistant": "...", "status": "succeeded"}
   ]
 }
 ```
 
-失败时 `status=failed`，并包含 `error`；工具整体错误状态以 `is_error` 为准。结果过大时可能出现 `truncated=true`，但 `chatId`、轮次和消息 ID 必须保留。
+失败时 `status=failed` 并包含 `error`。结果过大时可能出现 `truncated=true`，但 `chatId`、轮次和消息 ID 必须保留。
 
 ## 获取 AgentAction
 
-工具完成后，使用返回的新测试 `chatId` 获取一次完整会话记录：
-
-```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
-  --chat-id <newTestChatId> \
-  --pretty
-```
-
-staging 环境按公共 `solvea-api` 规则追加 `--env staging`。不要为每一轮分别请求；一次完整会话已经包含所有消息及其执行过程。
+工具完成后使用 `contextId + testRunId` 调用一次 `live_test.transcript`。不要为每一轮分别请求；一次完整会话已经包含所有消息及其执行过程。
 
 ## 输出结论
 

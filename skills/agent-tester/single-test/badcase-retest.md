@@ -16,7 +16,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
 
 - 只提取客户 `USER` 消息，保持原顺序。
 - 不重放原 AI、人工客服、系统或流程消息。
-- 为每轮 USER 消息保留紧随其后的原 AgentAction，作为本地 baseline，仅用于测试后比较，不传入 `live_test`。
+- 为每轮 USER 消息保留紧随其后的原 AgentAction，作为本地 baseline，仅用于测试后比较，不传入 `live_test.start`。
 - 原会话发生转人工，或 AgentAction 为 `TO_AGENT`、`STOPPED`、`HUMAN_REVIEW` 后停止提取后续轮次。
 - 记录原回复、Agent、意图、策略、工具调用、节点路径、图状态和 handoff 信息。
 
@@ -26,7 +26,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
 
 - `agentId`：用户显式指定的目标 Agent优先，否则使用原 AgentAction 实际调用的 Agent。
 - `botId`：当前 CXClaw 请求携带的 Bot ID 优先；没有时使用原会话 Bot ID；仍无法确定才询问。
-- `flowVersion`：用户显式版本优先，否则工具入参省略；`live_test` 会通过 `chatflow/queryGraph/latest` 取得当前用户草稿或最新发布版本，再将实际版本明确写入测试请求。复测修复时不要默认使用历史旧版本。
+- `flowVersion`：用户显式版本优先，否则工具入参省略；`live_test.start` 会通过 `chatflow/queryGraph/latest` 取得当前用户草稿或最新发布版本，再将实际版本明确写入测试请求。复测修复时不要默认使用历史旧版本。
 - `touchPoint`：用户显式值优先，其次使用原会话 touchPoint，仍缺失时默认 `LIVE_CHAT`。
 - `metadata`：经用户确认后，只复制完成测试确实需要的业务字段。
 
@@ -34,12 +34,13 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
 
 开始复测前，若用户未明确 metadata 策略，必须提醒并确认：是否固定复用原会话 metadata（例如订单号、用户邮箱、商品或渠道），还是不带 metadata 验证默认路由。只复制用户确认需要的字段，不能默认带入或自行补值。
 
-## 调用 live_test
+## 调用 LiveTest
 
-将提取出的全部客户问题组成一个固定 `case`，一次调用 `live_test`：
+将提取出的全部客户问题组成一个固定 `case`，一次调用 `live_test.start`：
 
 ```json
 {
+  "contextId": "<currentContextId>",
   "agentId": 2584,
   "touchPoint": "LIVE_CHAT",
   "case": {
@@ -59,15 +60,9 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
 
 ## 读取新会话
 
-工具完成后，获取结果中的新 ChatId，再执行一次：
+工具完成后，使用 `contextId + testRunId` 调用一次 `live_test.transcript`。
 
-```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
-  --chat-id <newTestChatId> \
-  --pretty
-```
-
-按 USER 消息顺序将新 AgentAction 与原 baseline 对齐。不要仅根据 `live_test.messages` 的回复文本判断是否修复，因为完整路由、工具和节点信息在会话记录中。
+按 USER 消息顺序将新 AgentAction 与原 baseline 对齐。不要仅根据快照回复文本判断是否修复，因为完整路由、工具和节点信息在会话记录中。
 
 ## 对比结论
 
