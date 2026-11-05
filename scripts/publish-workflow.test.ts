@@ -24,6 +24,11 @@ describe("publish workflow", () => {
     expect(workflow).toContain('npm dist-tag add "@shulex/cxclawctl@${VERSION}"');
   });
 
+  test("runs only release checks that exist in package scripts", () => {
+    expect(workflow).not.toContain("check:capabilities");
+    expect(workflow).toContain("bun run check:release");
+  });
+
   test("advances Marketplace only after npm and GitHub Release", () => {
     const npm = workflow.indexOf("name: Publish npm package");
     const release = workflow.indexOf("name: Create or update GitHub Release");
