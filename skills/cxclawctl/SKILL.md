@@ -75,3 +75,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" tenant use <accountId> --env prod --purpose 
 ## 输出与失败处理
 
 完成业务操作时，在不泄露凭据的前提下说明当前 `contextId` 和租户摘要。遇到 `not_selected`、`expired`、`unavailable` 或 context 缺失时，停止业务请求并先修复 context/profile；不得静默选择其他租户。
+
+- 根据错误信息、skill/reference 或 CLI help 修正参数或调整公开方法，继续完成任务；没有可行路径时如实说明，继续不受影响的部分。
+- 不要无依据地反复重试、猜测接口或编写调试脚本绕过失败。调整方法仍须保持用户目标、查询范围和授权边界。
+- 不要翻阅插件实现源码或调用私有方法探究业务命令用法；不要为排查业务命令探测环境变量、系统目录或凭证。登录、context 修复和安装自检使用上文的公开命令。
