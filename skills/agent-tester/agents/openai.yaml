@@ -1,0 +1,15 @@
+interface:
+  display_name: "Agent Tester"
+  short_description: "测试和回归 Shulex Agent"
+  default_prompt: "测试指定的 Shulex Agent，并分析执行结果。"
+
+policy:
+  products: [CODEX]
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - "live_test.start"
+    - "live_test.status"
+    - "live_test.cancel"
+    - "live_test.transcript"

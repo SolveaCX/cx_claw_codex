@@ -201,14 +201,21 @@ async function withCrossProcessProfileLock(
   throw new Error(`timed out waiting for tenant profile refresh: ${profileId}`);
 }
 
-async function ensureProfile(auth: AuthSession, profileId: string): Promise<TenantProfile> {
+async function ensureProfile(
+  auth: AuthSession,
+  profileId: string,
+  options: { forceRefresh?: boolean; minValiditySeconds?: number } = {},
+): Promise<TenantProfile> {
+  const minValiditySeconds = options.minValiditySeconds ?? 30;
   const initial = await loadProfile(profileId);
-  if (Date.now() / 1000 + 30 < initial.expiresAt) return initial;
+  if (!options.forceRefresh && Date.now() / 1000 + minValiditySeconds < initial.expiresAt)
+    return initial;
   const existing = profileLocks.get(profileId);
   if (existing) return existing;
   const refresh = withCrossProcessProfileLock(profileId, async () => {
     const latest = await loadProfile(profileId);
-    if (Date.now() / 1000 + 30 < latest.expiresAt) return latest;
+    if (!options.forceRefresh && Date.now() / 1000 + minValiditySeconds < latest.expiresAt)
+      return latest;
     return issueProfile(
       auth,
       latest.accountId,
@@ -229,7 +236,13 @@ async function ensureProfile(auth: AuthSession, profileId: string): Promise<Tena
 
 export async function resolveTenantSession(
   auth: AuthSession,
-  options: { contextId?: string; profileId?: string; allowLegacy?: boolean } = {},
+  options: {
+    contextId?: string;
+    profileId?: string;
+    allowLegacy?: boolean;
+    forceProfileRefresh?: boolean;
+    minValiditySeconds?: number;
+  } = {},
   dependencies: {
     loadContext?: (contextId: string) => Promise<SessionContext>;
     tryLoadContext?: (contextId: string) => Promise<SessionContext | undefined>;
@@ -259,7 +272,10 @@ export async function resolveTenantSession(
   // Keep the resolved profile on the request session instead of mutating global state.
   const profile = profileLoader
     ? await profileLoader(profileId)
-    : await ensureProfile(auth, profileId);
+    : await ensureProfile(auth, profileId, {
+        forceRefresh: options.forceProfileRefresh,
+        minValiditySeconds: options.minValiditySeconds,
+      });
   return requestSession(auth, profile, contextId ?? `profile-override:${profileId}`);
 }
 

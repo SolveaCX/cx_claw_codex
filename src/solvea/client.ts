@@ -7,6 +7,25 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 type JsonObject = Record<string, unknown>;
 
+export class SolveaHttpError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly method: string,
+    public readonly path: string,
+    public readonly responseBody: string,
+  ) {
+    super(`HTTP ${status} ${method} ${path}: ${responseBody}`);
+    this.name = "SolveaHttpError";
+  }
+}
+
+export class SolveaApiError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "SolveaApiError";
+  }
+}
+
 const KNOWLEDGE_TYPES = new Set(["QA", "LEARN_SELF", "FILE", "WEBSITE", "PRODUCT"]);
 const asObject = (value: unknown, message: string): JsonObject => {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(message);
@@ -118,7 +137,7 @@ export class SolveaClient {
         } catch {
           value = { raw: text };
         }
-        if (!response.ok) throw new Error(`HTTP ${response.status} ${method} ${path}: ${text}`);
+        if (!response.ok) throw new SolveaHttpError(response.status, method, path, text);
         if (value && typeof value === "object" && !Array.isArray(value)) {
           const object = value as JsonObject;
           const code = object.code ?? object.errno;
@@ -126,20 +145,24 @@ export class SolveaClient {
             code !== undefined &&
             ![0, "0", 200, "200", "OK", "SUCCESS"].includes(code as never)
           ) {
-            throw new Error(
+            throw new SolveaApiError(
               `API error ${method} ${path}: ${String(object.msg ?? object.message ?? object.error ?? code)}`,
             );
           }
           if (object.success === false)
-            throw new Error(
+            throw new SolveaApiError(
               `API error ${method} ${path}: ${String(object.msg ?? object.message ?? object.error ?? "request failed")}`,
             );
         }
         return value as T;
       } catch (error) {
         last = error;
-        if (attempt + 1 < maxAttempts)
+        const retryable =
+          !(error instanceof SolveaApiError) &&
+          (!(error instanceof SolveaHttpError) || error.status === 429 || error.status >= 500);
+        if (retryable && attempt + 1 < maxAttempts)
           await new Promise((resolve) => setTimeout(resolve, 200 * 2 ** attempt));
+        else break;
       }
     }
     throw last;
@@ -357,6 +380,16 @@ export class SolveaClient {
     });
   }
   async chatStream(data: JsonObject) {
+    return this.chatStreamTrace(data);
+  }
+  async chatStreamTrace(
+    data: JsonObject,
+    callbacks: {
+      onDelta?: (text: string) => void | Promise<void>;
+      onEvent?: (event: JsonObject) => void | Promise<void>;
+    } = {},
+    signal?: AbortSignal,
+  ) {
     const bot = String(data.botId ?? (await this.botId()));
     const body = {
       ...data,
@@ -365,49 +398,99 @@ export class SolveaClient {
       option: data.option ?? { debug: true },
     };
     const cookie = this.env === "prod" ? "_token" : "_token_staging";
-    const response = await fetch(
-      `${this.baseUrl}/api_v2/gpt/bot/${encodeURIComponent(bot)}/chat/stream`,
-      {
-        method: "POST",
-        headers: {
-          accept: "text/event-stream",
-          "content-type": "application/json",
-          origin: this.baseUrl,
-          referer: `${this.baseUrl}/chatbot`,
-          cookie: `${cookie}=${this.session.tenant!.businessToken}`,
-          "x-cxclaw-client-version": process.env.CXCLAW_PLUGIN_VERSION ?? "unknown",
-        },
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(30_000),
+    const path = `/api_v2/gpt/bot/${bot}/chat/stream`;
+    const overall = AbortSignal.timeout(120_000);
+    const requestSignal = signal ? AbortSignal.any([signal, overall]) : overall;
+    const response = await fetch(`${this.baseUrl}${path}`, {
+      method: "POST",
+      headers: {
+        accept: "text/event-stream",
+        "content-type": "application/json",
+        origin: this.baseUrl,
+        referer: `${this.baseUrl}/chatbot`,
+        cookie: `${cookie}=${this.session.tenant!.businessToken}`,
+        "x-cxclaw-client-version": process.env.CXCLAW_PLUGIN_VERSION ?? "unknown",
       },
-    );
-    const text = await response.text();
-    if (!response.ok)
-      throw new Error(`HTTP ${response.status} POST /api_v2/gpt/bot/${bot}/chat/stream: ${text}`);
+      body: JSON.stringify(body),
+      signal: requestSignal,
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new SolveaHttpError(response.status, "POST", path, text);
+    }
+    if (!response.body) throw new Error("stream response body is missing");
+
     let finalAction: JsonObject | undefined;
     const content: string[] = [];
-    for (const line of text.split(/\r?\n/)) {
-      if (!line.startsWith("data:")) continue;
-      const raw = line.slice(5).trim();
-      if (!raw) continue;
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    const readWithIdleTimeout = async () => {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        return await Promise.race([
+          reader.read(),
+          new Promise<never>((_, reject) => {
+            timer = setTimeout(
+              () => reject(new Error("stream idle timeout after 30000ms")),
+              30_000,
+            );
+          }),
+        ]);
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+    };
+    const processEvent = async (block: string) => {
+      const raw = block
+        .split(/\r?\n/)
+        .filter((line) => line.startsWith("data:"))
+        .map((line) => line.slice(5).trimStart())
+        .join("\n")
+        .trim();
+      if (!raw) return;
       let event: JsonObject;
       try {
         event = asObject(JSON.parse(raw), "stream event must be an object");
       } catch {
-        continue;
+        return;
       }
+      await callbacks.onEvent?.(event);
       if (event.errno !== undefined && ![0, "0"].includes(event.errno as never))
-        throw new Error(
+        throw new SolveaApiError(
           `API error POST /api_v2/gpt/bot/${bot}/chat/stream: ${String(event.errmsg ?? event.message ?? event.errno)}`,
         );
-      if (event.content) content.push(String(event.content));
-      if (event.isEnd)
-        finalAction =
-          event.data && typeof event.data === "object" && !Array.isArray(event.data)
-            ? (event.data as JsonObject)
-            : event;
+      const eventData =
+        event.data && typeof event.data === "object" && !Array.isArray(event.data)
+          ? (event.data as JsonObject)
+          : undefined;
+      const delta = event.isEnd
+        ? undefined
+        : typeof event.data === "string"
+          ? event.data
+          : (eventData?.delta ?? eventData?.text ?? eventData?.content ?? event.content);
+      if (typeof delta === "string" && delta) {
+        content.push(delta);
+        await callbacks.onDelta?.(delta);
+      }
+      if (event.isEnd) finalAction = eventData ?? event;
+    };
+    try {
+      while (true) {
+        const { done, value } = await readWithIdleTimeout();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const blocks = buffer.split(/\r?\n\r?\n/);
+        buffer = blocks.pop() ?? "";
+        for (const block of blocks) await processEvent(block);
+      }
+      buffer += decoder.decode();
+      if (buffer.trim()) await processEvent(buffer);
+    } finally {
+      await reader.cancel().catch(() => undefined);
     }
-    return finalAction ?? { content: content.join(""), isEnd: true };
+    if (!finalAction) throw new Error("stream chat returned no final AgentAction");
+    return finalAction;
   }
   async chatAsync(data: JsonObject) {
     const bot = String(data.botId ?? (await this.botId()));

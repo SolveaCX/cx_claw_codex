@@ -10,10 +10,11 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent list --pretty
 
 无论问题看起来是否简单，只要用户没有明确 metadata 策略，开始测试前都要询问一次：是否需要固定 metadata（例如订单号、用户邮箱、商品或渠道）？用户明确“不需要”才省略；不得默认空 metadata 或自行编造业务值。
 
-明确的问题使用固定 `case`；一轮也使用 `case.turns`，多个已确定的问题放进同一次 `live_test` 调用：
+明确的问题使用固定 `case`；一轮也使用 `case.turns`，多个已确定的问题放进同一次 `live_test.start` 调用：
 
 ```json
 {
+  "contextId": "<currentContextId>",
   "agentId": 2584,
   "case": {"turns": [{"message": "我的订单什么时候发货？"}]}
 }

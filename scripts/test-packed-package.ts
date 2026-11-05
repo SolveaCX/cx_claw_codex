@@ -27,8 +27,9 @@ try {
     throw new Error("npm package must not contain Skill documentation");
   }
   if (!existsSync(join(packageRoot, "dist", "cli.js"))) throw new Error("missing compiled CLI");
-  if (!existsSync(join(packageRoot, "dist", "tenant-panel.js")))
-    throw new Error("missing tenant panel MCP App bundle");
+  for (const app of ["tenant-status", "live-test"])
+    if (!existsSync(join(packageRoot, "dist", "mcp-apps", app, "manifest.json")))
+      throw new Error(`missing ${app} MCP App bundle`);
   if (existsSync(join(packageRoot, "runtime")))
     throw new Error("obsolete hook runtime was packaged");
 

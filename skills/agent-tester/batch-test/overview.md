@@ -15,8 +15,8 @@
 
 ### case 数量建议
 
-- 1-10 个 case：如果需要即时查看每轮回复、节点和调试信息，可使用 `live_test`。
-- **超过 10 个 case：优先生成系统模板并提交下载中心批测任务**，不要把每个 case 拆成多个 `live_test`。
+- 1-10 个 case：如果需要即时查看每轮回复、节点和调试信息，可使用 `live_test.start`。
+- **超过 10 个 case：优先生成系统模板并提交下载中心批测任务**，不要把每个 case 拆成多个 LiveTest。
 - Chatflow 批测使用 `MULTI_TURN_REPLY`；普通 Agent 批测使用 `REPLY`。
 
 ## 创建测试表

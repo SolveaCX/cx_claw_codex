@@ -144,6 +144,49 @@ describe("cross-module API migration contracts", () => {
     expect(result).toEqual({ chatId: "c1", content: "done" });
   });
 
+  test("parses SSE events split across transport chunks", async () => {
+    const deltas: string[] = [];
+    globalThis.fetch = (async (input) => {
+      if (String(input).endsWith("/api_v2/gpt/bots"))
+        return new Response(JSON.stringify([{ projectId: 302, id: 723 }]), { status: 200 });
+      const encoder = new TextEncoder();
+      return new Response(
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(encoder.encode('data: {"cont'));
+            controller.enqueue(
+              encoder.encode(
+                'ent":"partial"}\n\ndata: {"isEnd":true,"data":{"chatId":"c2","content":"done"}}\n\n',
+              ),
+            );
+            controller.close();
+          },
+        }),
+        { status: 200 },
+      );
+    }) as typeof fetch;
+    const result = await new SolveaClient(session).chatStreamTrace(
+      { message: "hello" },
+      { onDelta: (delta) => void deltas.push(delta) },
+    );
+    expect(deltas).toEqual(["partial"]);
+    expect(result).toEqual({ chatId: "c2", content: "done" });
+  });
+
+  test("does not retry an expired business token", async () => {
+    let attempts = 0;
+    globalThis.fetch = (async (input) => {
+      if (String(input).endsWith("/api_v2/gpt/bots"))
+        return new Response(JSON.stringify([{ projectId: 302, id: 723 }]), { status: 200 });
+      attempts += 1;
+      return new Response("expired", { status: 401 });
+    }) as typeof fetch;
+    await expect(new SolveaClient(session).chatStream({ message: "hello" })).rejects.toMatchObject({
+      status: 401,
+    });
+    expect(attempts).toBe(1);
+  });
+
   test("downloads label workbooks as binary files", async () => {
     await mkdir("_tmp_/cross-module-contracts", { recursive: true });
     const target = `_tmp_/cross-module-contracts/labels-${Date.now()}.xlsx`;
