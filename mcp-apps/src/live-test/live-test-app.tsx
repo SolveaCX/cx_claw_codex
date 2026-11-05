@@ -2,6 +2,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { app, callTool, useBridgeState } from "../shared/bridge.js";
+import { normalizeTrace, type TraceStep } from "./trace.js";
 
 type Outcome = {
   actionType?: string;
@@ -36,7 +37,6 @@ type Snapshot = {
   truncated?: boolean;
   turns: Turn[];
 };
-
 const terminal = new Set(["succeeded", "failed", "cancelled", "interrupted"]);
 const completedTurn = new Set(["succeeded", "failed", "cancelled"]);
 const statusLabel: Record<string, string> = {
@@ -88,6 +88,22 @@ function terminalOutcome(outcome?: Outcome) {
   if (actionType === "NOTHING" || actionType === "DO_NOTHING")
     return { title: "无需执行操作", detail, tone: "terminal" };
   return undefined;
+}
+
+function displayJson(value: unknown) {
+  if (value == null || value === "") return "—";
+  if (typeof value === "string") {
+    try {
+      return JSON.stringify(JSON.parse(value), null, 2);
+    } catch {
+      return value;
+    }
+  }
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value);
+  }
 }
 
 function Modal({
@@ -209,6 +225,67 @@ function MessageRow({
   );
 }
 
+function TraceStepView({ step }: { step: TraceStep }) {
+  const [open, setOpen] = useState(step.status === "failed");
+  const status = step.status === "failed" ? "失败" : step.status === "running" ? "运行中" : "完成";
+  return (
+    <div className={`lt-trace-step lt-trace-${step.status}`}>
+      <button
+        className="lt-trace-step-header"
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span className="lt-trace-step-marker">
+          {step.status === "failed" ? "!" : step.status === "running" ? "…" : "✓"}
+        </span>
+        <span className="lt-trace-step-title">{step.title}</span>
+        {step.elapsed ? (
+          <span className="lt-trace-step-time">{(step.elapsed / 1000).toFixed(1)}s</span>
+        ) : null}
+        <span className="lt-trace-step-status">{status}</span>
+        <ChevronIcon open={open} />
+      </button>
+      {open ? (
+        <div className="lt-trace-step-body">
+          {step.input != null ? (
+            <div>
+              <span>输入</span>
+              <pre>{displayJson(step.input)}</pre>
+            </div>
+          ) : null}
+          {step.tools.map((tool, index) => (
+            <div className="lt-trace-tool" key={`${tool.name}-${index}`}>
+              <div className="lt-trace-tool-heading">
+                <span>工具调用</span>
+                <strong>{tool.name}</strong>
+              </div>
+              {tool.input != null ? <pre>{displayJson(tool.input)}</pre> : null}
+              {tool.result != null ? (
+                <>
+                  <span>工具响应</span>
+                  <pre>{displayJson(tool.result)}</pre>
+                </>
+              ) : null}
+            </div>
+          ))}
+          {step.output != null ? (
+            <div>
+              <span>输出</span>
+              <pre>{displayJson(step.output)}</pre>
+            </div>
+          ) : null}
+          {step.error != null ? (
+            <div className="lt-trace-error">
+              <span>错误</span>
+              <pre>{displayJson(step.error)}</pre>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function LiveTestApp() {
   const bridge = useBridgeState();
   const initial = (bridge.output?.snapshot ?? bridge.output) as Snapshot | undefined;
@@ -273,6 +350,7 @@ export function LiveTestApp() {
     () => snapshot?.turns.filter((turn) => completedTurn.has(turn.status)).length ?? 0,
     [snapshot?.turns],
   );
+  const traceSteps = useMemo(() => normalizeTrace(transcript), [transcript]);
 
   if (!snapshot)
     return (
@@ -468,9 +546,27 @@ export function LiveTestApp() {
         <pre className="lt-json">{JSON.stringify(metadata, null, 2)}</pre>
       </Modal>
       <Modal open={detailsOpen} onOpenChange={setDetailsOpen} title="LiveTest 执行详情">
-        <pre className="lt-json">
-          {transcript ? JSON.stringify(transcript, null, 2) : "加载中…"}
-        </pre>
+        {transcript ? (
+          <div className="lt-trace-panel">
+            <div className="lt-trace-summary">
+              <strong>Agent 执行过程</strong>
+              <span>
+                {traceSteps.length ? `${traceSteps.length} 个执行步骤` : "未发现可视化执行节点"}
+              </span>
+            </div>
+            {traceSteps.length ? (
+              traceSteps.map((step) => <TraceStepView key={step.id} step={step} />)
+            ) : (
+              <div className="lt-trace-empty">当前 transcript 没有返回 Chatflow 节点事件。</div>
+            )}
+            <details className="lt-raw-details">
+              <summary>查看原始 transcript JSON</summary>
+              <pre className="lt-json">{JSON.stringify(transcript, null, 2)}</pre>
+            </details>
+          </div>
+        ) : (
+          <div className="lt-trace-loading">正在加载执行过程…</div>
+        )}
       </Modal>
     </Tooltip.Provider>
   );
