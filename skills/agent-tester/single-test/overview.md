@@ -79,12 +79,28 @@ CHAT_FLOW 草稿按当前用户隔离，版本号为 `-userId`。保存草稿不
 - Live Test 卡片通过 `live_test.status` 的持久化快照展示用户问题、AI 流式回复、每轮状态和总进度。
 - 不要因为工具已经展示实时进度而额外创建过程文件。
 
+## 独立 case 串行约束
+
+同一个 `contextId` 同时只允许一个 LiveTest。多个独立 case 即使都已确定，也必须逐个执行；禁止在同一批工具调用中发出多个 `live_test.start`。
+
+每个独立 case 固定执行完整链路后再进入下一个：
+
+```text
+live_test.start
+  → live_test.status，等待终态
+  → live_test.transcript
+  → 下一个 case 的 live_test.start
+```
+
+需要新 ChatId 隔离变量或上下文的场景分别执行独立 case。只有各轮属于同一段连续对话、需要复用 ChatId 时，才合并到一个 `case.turns`；不能为了减少调用而把互相独立的覆盖场景合并成多轮对话。
+
 ## 执行顺序与阶段反馈
 
 1. 参数确定后，先用一句话说明目标 Agent、测试轮数和即将开始测试，再调用 `live_test.start`。
 2. 使用 `live_test.status` 的 `afterRevision + waitMs` 等待终态；逐轮问题、回复和状态已经由 Live Test 组件展示，不要重复输出相同进度。
 3. 测试结束后调用 `live_test.transcript` 获取完整执行详情。完成后说明完成轮数、成功或失败状态以及新 ChatId。
 4. `live_test.transcript` 完成后再输出逐轮结论；不要把读取会话动作描述成新的测试轮次。
+5. 有多个独立 case 时，完成当前 case 的第 1～4 步后再启动下一个；不得并发或抢先调用下一次 `live_test.start`。
 
 `live_test.start` 入参会提供给用户查看，因此只传本次测试真正需要的 Agent、case/message、渠道和业务 metadata。不要把 baseline、原会话全文、分析草稿或内部固定字段塞入工具参数。
 
