@@ -69,7 +69,7 @@ describe("LiveTest runner", () => {
         chatBodies.push(JSON.parse(String(init?.body)));
         turn += 1;
         return new Response(
-          `data: {"content":"reply-${turn}"}\n\ndata: {"isEnd":true,"data":{"chatId":"chat-1","messageId":"m-${turn}","content":"reply-${turn}"}}\n\n`,
+          `data: {"content":"reply-${turn}"}\n\ndata: {"isEnd":true,"data":{"chatId":"chat-1","messageId":"m-${turn}","content":"reply-${turn}","actionType":"TO_AGENT","reasonDesc":"handoff"}}\n\n`,
           { status: 200 },
         );
       }
@@ -104,6 +104,11 @@ describe("LiveTest runner", () => {
     expect(completed.status).toBe("succeeded");
     expect(completed.chatId).toBe("chat-1");
     expect(completed.turns.map((item) => item.status)).toEqual(["succeeded", "succeeded"]);
+    expect(completed.turns[0]?.outcome).toMatchObject({
+      actionType: "TO_AGENT",
+      handoff: true,
+      reasonDesc: "handoff",
+    });
     expect(chatBodies[0]?.metadata).toMatchObject({
       custom: "ok",
       specified_agent_id: 9,

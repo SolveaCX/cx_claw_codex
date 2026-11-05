@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { createMcpAppHtml, LIVE_TEST_TOOL_META, TENANT_PANEL_TOOL_META } from "./server.js";
+import {
+  createMcpAppHtml,
+  LIVE_TEST_TOOL_META,
+  resolveMcpAppCssFiles,
+  TENANT_PANEL_TOOL_META,
+} from "./server.js";
 
 describe("tenant MCP App HTML", () => {
   test("embeds the bundled app without allowing a closing script tag", () => {
@@ -8,6 +13,20 @@ describe("tenant MCP App HTML", () => {
     expect(html).toContain("body{}");
     expect(html).toContain("<\\/script><p>escaped</p>");
     expect(html.match(/<\/script>/g)).toHaveLength(1);
+  });
+
+  test("includes standalone CSS manifest assets", () => {
+    const entry = { file: "live-test.js", css: ["shared.css"], isEntry: true };
+    expect(
+      resolveMcpAppCssFiles(
+        {
+          "src/live-test/main.tsx": entry,
+          "style.css": { file: "live-test.css" },
+          "duplicate.css": { file: "shared.css" },
+        },
+        entry,
+      ),
+    ).toEqual(["shared.css", "live-test.css"]);
   });
 });
 

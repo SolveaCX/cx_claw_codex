@@ -31,6 +31,20 @@ export const LIVE_TEST_TOOL_META = {
 const LIVE_TEST_HELPER_META = { ui: { visibility: ["model", "app"] } };
 
 type ViteManifestEntry = { file: string; css?: string[]; isEntry?: boolean };
+export function resolveMcpAppCssFiles(
+  manifest: Record<string, ViteManifestEntry>,
+  entry: ViteManifestEntry,
+): string[] {
+  return [
+    ...new Set([
+      ...(entry.css ?? []),
+      ...Object.values(manifest)
+        .map((item) => item.file)
+        .filter((file) => file.endsWith(".css")),
+    ]),
+  ];
+}
+
 export function createMcpAppHtml(script: string, styles = ""): string {
   const safeStyle = styles.replace(/<\/style/gi, "<\\/style");
   const safeScript = script.replace(/<\/script/gi, "<\\/script");
@@ -45,8 +59,9 @@ async function loadMcpAppHtml(appName: string) {
   const entry = Object.values(manifest).find((item) => item.isEntry);
   if (!entry) throw new Error(`Vite manifest has no entry for ${appName}`);
   const script = await readFile(new URL(entry.file, directory), "utf8");
+  const cssFiles = resolveMcpAppCssFiles(manifest, entry);
   const styles = (
-    await Promise.all((entry.css ?? []).map((file) => readFile(new URL(file, directory), "utf8")))
+    await Promise.all(cssFiles.map((file) => readFile(new URL(file, directory), "utf8")))
   ).join("\n");
   return createMcpAppHtml(script, styles);
 }

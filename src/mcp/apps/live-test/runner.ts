@@ -57,6 +57,7 @@ function failedNode(action: JsonObject) {
 }
 
 function actionResult(action: JsonObject) {
+  const data = object(action.data);
   const reasonList = Array.isArray(action.reasonList) ? action.reasonList.map(String) : [];
   const node = failedNode(action);
   const failed =
@@ -64,7 +65,19 @@ function actionResult(action: JsonObject) {
   return {
     chatId: stringValue(action.chatId, object(action.chat)?.id),
     messageId: stringValue(action.messageId, action.id),
-    content: stringValue(action.content, action.message, object(action.data)?.content) ?? "",
+    content: stringValue(action.content, action.message, data?.content) ?? "",
+    outcome: {
+      actionType: stringValue(action.actionType, data?.actionType),
+      handoff:
+        action.handoff === true ||
+        data?.handoff === true ||
+        ["TO_AGENT", "TRANSFER_TO_AGENT"].includes(
+          stringValue(action.actionType, data?.actionType)?.toUpperCase() ?? "",
+        ),
+      reason: stringValue(action.reason, data?.reason),
+      reasonDesc: stringValue(action.reasonDesc, data?.reasonDesc),
+      explain: stringValue(action.explain, data?.explain),
+    },
     failed,
     node,
     error:
@@ -193,6 +206,7 @@ export class LiveTestRunner {
           const current = value.turns[index]!;
           if (!current.assistant && result.content) current.assistant = result.content;
           current.messageId = result.messageId;
+          current.outcome = result.outcome;
           current.completedAt = Date.now();
           current.status = result.failed ? "failed" : "succeeded";
           current.error = result.error;

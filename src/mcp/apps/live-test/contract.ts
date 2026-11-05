@@ -58,6 +58,15 @@ export const LiveTestTurnSchema = z.object({
   completedAt: z.number().optional(),
   messageId: z.string().optional(),
   error: z.string().optional(),
+  outcome: z
+    .object({
+      actionType: z.string().optional(),
+      handoff: z.boolean().optional(),
+      reason: z.string().optional(),
+      reasonDesc: z.string().optional(),
+      explain: z.string().optional(),
+    })
+    .optional(),
 });
 
 export const LiveTestSnapshotSchema = z.object({
