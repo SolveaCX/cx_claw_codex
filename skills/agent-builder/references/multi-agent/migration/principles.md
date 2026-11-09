@@ -72,10 +72,9 @@ analyzer 的每个 `migration_contracts.prompt_reviews[]` 至少输出：
 - 模板语义输出具体整数 `template_id`；合并器动态派生标准 Template LibraryBlock、
   `required_used_plugins=[]` 和 `required_plugin_types=["TEMPLATE_REPLY"]`；实际插件 ID 由目标项目的
   Chatflow 专用插件目录在联网 compile 时解析；
-- 转人工语义输出原文精确 `transfer_reason`；合并器动态派生标准 transferHuman LibraryBlock、
-  唯一稳定的块实例 `tool_id`、`required_used_plugins=[]`、
-  `required_plugin_types=["TRANSFER_TO_HUMAN"]` 和 `transfer_to_humans=[]`；块实例 ID 不是插件 ID，
-  实际插件 ID 同样由目标 Chatflow 项目按类型解析；
+- 转人工语义输出原文精确 `transfer_reason`；合并器只允许映射到 `TRANSFER_NODE`。由 AGENT 根据
+  对话决定转人工时，目标 AGENT 配置 handoff `next_steps` 并连接该节点；节点 `explain` 必须保留
+  原始 `transfer_reason`，不生成 `transferHuman` LibraryBlock，也不绑定转人工插件；
 - 普通工具语义输出已绑定的整数 `tool_id` / `tool_name`；合并器动态派生 Tool LibraryBlock 和对应
   plugin id。无法确定绑定时输出 `decision=open_question`，禁止猜 id；
 - 固定话术使用 `kind=FIXED_WORDING` 并输出完整 `content`；合并器派生 `content_sha256` 和
@@ -357,7 +356,8 @@ batch worker 必须从 `coverage_required` 逐项原样回写稳定标识：agen
 
 - 保留业务目标、判断标准、话术边界、工具结果解释方式。
 - 删除旧引擎的普通文字工具指令：`template_reply tool`、`transfer_to_agent tool`、`finish_agent`、
-  `call <agent> agent`；需留在目标 AGENT 内的模板/转人工/普通工具改为标准 LibraryBlock。
+  `call <agent> agent`；需留在目标 AGENT 内的模板/普通工具改为标准 LibraryBlock，转人工改为
+  handoff nextStep 连接独立 `TRANSFER_TO_HUMAN` 节点。
 - 删除 `{{Template_Reply}}`、`{{Transfer_To_Agent}}`、`<span style=...>` 等旧编辑器展示壳；壳内的工具名先提取到 `tool_references`，再与 plugin/action 对账。
 - 把真实工具调用、流程内流转、模板、转人工和结束分别记录为结构化业务职责；模板、转人工、普通工具、
   固定完整话术和等待点还必须进入完整 PE 的 `prompt_reviews.discovered_blocks` coverage。
@@ -424,7 +424,7 @@ Templates:
 - <template id> -> AGENT LibraryBlock | REPLY(TEMPLATE), rendered/read back status
 
 Transfers:
-- <exact reason> -> AGENT LibraryBlock | TRANSFER_TO_HUMAN, rendered/read back status
+- <exact reason> -> TRANSFER_TO_HUMAN node explain, rendered/read back status
 
 Business tools:
 - <tool id/name> -> AGENT LibraryBlock | TOOL, binding status
@@ -433,7 +433,7 @@ Fixed wording and waits:
 - <contract id> -> <target node + render_path>, verbatim/hash check, wait target
 
 Bindings:
-- usedPlugins: <target Chatflow plugin ids>; TEMPLATE_REPLY / TRANSFER_TO_HUMAN are resolved by type
+- usedPlugins: <target Chatflow plugin ids>; TEMPLATE_REPLY is resolved by type; human handoff uses a node
 - transferToHumans: []
 
 Verification:

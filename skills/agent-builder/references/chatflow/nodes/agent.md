@@ -70,7 +70,7 @@ AGENT 是运行时 LLM 节点，不是通用流程容器，也不是给每个简
 | max_rounds_exceeded_action | `TRANSFER_TO_HUMAN`（默认）或 `FORCE_NEXT_STEP`；后者仅在存在可用的流程内分支工具时有意义 |
 | use_long_memory | 是否把长记忆注入模型上下文，默认 false |
 | disable_prev_node_results | 是否不注入前序节点结果，默认 false |
-| next_steps | 仅在 AGENT 需要由模型决定是否/何时交接给明确下游职责时配置；只生成内部流转工具，不是业务工具或转人工工具；source JSON 必须写对象数组，不使用字符串简写 |
+| next_steps | 仅在 AGENT 需要由模型决定是否/何时交接给明确下游职责时配置；可连接普通流程节点或 `TRANSFER_TO_HUMAN`；source JSON 必须写对象数组，不使用字符串简写 |
 | next_steps[].id | 必填，出边 handle，edges 的 `on` 使用该值 |
 | next_steps[].title | 必填，分支名；推荐使用小写字母、数字和下划线，例如 `accept_wait` |
 | next_steps[].prompt | 必填，内部流转工具描述，用来告诉 LLM 何时选择该分支 |
@@ -98,7 +98,7 @@ AGENT 的提示词必须写成可执行指令，不写成普通客服话术。�
 # Tools And Routing
 - <何时调用哪个真实工具；工具必须已绑定在 plugins 中>
 - <何时调用 transfer_to_<step>_node 进入 next_steps 分支>
-- <何时调用真实转人工工具；不要把转人工写成 next_steps 分支>
+- <需要转人工时，何时调用对应 handoff next step>
 ```
 ## 变量引用优先级
 
@@ -113,7 +113,7 @@ AGENT 的提示词必须写成可执行指令，不写成普通客服话术。�
 finish、字段判断或工具 status 路由，不要创建 AGENT；改用 REPLY、TRANSFER_TO_HUMAN、IF_ELSE、
 TOOL、INTENT 或 QUESTION。
 
-### next_steps And Transfer Tools
+### next_steps And Human Handoff
 
 `next_steps` 只表达 AGENT 可以选择的**流程内职责交接**。运行时会把每个 next step 生成为
 `transfer_to_<step>_node` 内部流转工具；语义是“结束当前 AGENT，并让另一个节点开始执行一个明确的
@@ -124,7 +124,7 @@ TOOL、INTENT 或 QUESTION。
 
 1. 当前职责本身符合 AGENT 的准入条件，而不是可由 INTENT、QUESTION、REPLY、TOOL、IF_ELSE 或 LLM 表达；
 2. AGENT 在当前节点内可能经历多轮回复或自主工具调用，交接时机需要由模型判断；
-3. 选择该 step 后确实有另一个节点要执行独立动作，例如开始收集 replacement 信息、进入退款处理子流程或结束已解决会话；
+3. 选择该 step 后确实有另一个节点要执行独立动作，例如开始收集 replacement 信息、进入退款处理子流程、结束已解决会话或执行人工接管；
 4. step 的选择条件来自非结构化上下文；若由工具 status、布尔值、枚举或固定顺序唯一决定，应在图上结构化路由。
 
 若 AGENT 合理存在，但完成后永远进入同一个确定下游，使用一个 `SOURCE` 出边，不创建单个 next step。
@@ -140,27 +140,26 @@ TOOL、INTENT 或 QUESTION。
 | 发送政策说明后进入确定下游 | `REPLY -> SOURCE` | `AGENT 发送话术 + continue next_step` |
 | 调工具后按明确状态分支 | `TOOL -> actionStatus` 或 `TOOL -> IF_ELSE` | `AGENT 调工具 + success/fail next_steps` |
 | 多轮排障后，由模型确认应开始 replacement | `AGENT -> start_replacement next_step` | 把排障中的每个小步骤都拆成 next step |
+| 多轮对话中由模型确认必须人工处理 | `AGENT -> handoff next_step -> TRANSFER_TO_HUMAN` | 在新流程中调用转人工工具 |
 
-真正的转人工是 AGENT 可调用的 `TRANSFER_TO_HUMAN` 系统动作。需要模型结合上下文决定是否升级时，
-在 `displayPrompt` 中插入 `transferHuman` LibraryBlock；该块会转换成运行时转人工指令，联网 compile
-再从 Chatflow 专用插件目录按 `type=TRANSFER_TO_HUMAN` 找到当前项目的真实 ID 并放入 `usedPlugins`。
-`transferToHumans` 仍保持空数组。模型执行后，AGENT 节点结束并输出 `TRANSFER` / handoff
-状态，不再按 `next_steps` 选择下游节点。达到 `max_rounds` 后仍未完成时，AGENT 也会按超轮兜底转人工
-结束，不会自动选择某个 next step。
+新建和迁移流程不再生成转人工工具。需要模型结合上下文决定是否升级时，为 AGENT 创建语义明确的 handoff
+`next_steps[]`，并把该分支边连接到独立 `TRANSFER_TO_HUMAN` 节点。模型调用生成的
+`transfer_to_<step>_node` 后，当前 AGENT 结束，Chatflow 进入转人工节点并输出 handoff 状态。
+转人工原因写入节点 `explain`；是否回复由节点的 `transfer_type` 决定。已有 `transferHuman`
+LibraryBlock 和 plugin 绑定继续兼容。
 
 因此有三种出口，必须分清：
 
 | 出口 | 配置位置 | 运行语义 |
 |---|---|---|
 | 流程内分支 | `next_steps` + 对应边 | 生成 `transfer_to_<step>_node` 内部工具，进入下游节点 |
-| AGENT 自主转人工 | `displayPrompt` 中的 `transferHuman` LibraryBlock + `usedPlugins` 中真实 `TRANSFER_TO_HUMAN` 插件 ID | AGENT 输出 transfer / handoff，流程结束到人工 |
+| AGENT 判断后转人工 | handoff `next_steps` + `TRANSFER_TO_HUMAN` 节点 | AGENT 选择分支后进入转人工节点 |
 | 确定性转人工 | 独立 `TRANSFER_TO_HUMAN` 节点或 `$transfer` | 上游结构化分支直接转人工 |
 
 只有“模型完成当前开放式职责后，需要触发某个明确的后续业务动作，且交接条件必须由模型判断”才放进 `next_steps`。
-如果分支结果是转人工，优先让 AGENT
-调用真实转人工工具；如果转人工条件是确定性的，直接在画布上接 `TRANSFER_TO_HUMAN` 或 `$transfer`。
-判断标准不是名字里有没有 `transfer`：`transfer_to_<step>_node` 是 nextStep 内部跳转工具；
-`TRANSFER_TO_HUMAN` 才是人工接管工具。
+如果分支结果是转人工，`transfer_to_<step>_node` 只负责从 AGENT 跳到
+`TRANSFER_TO_HUMAN`；真正的人工接管仍由目标节点执行。如果转人工条件是确定性的，直接在画布上接
+`TRANSFER_TO_HUMAN` 或 `$transfer`。
 
 AGENT 提示词里不能只写“根据上下文处理问题”“你是客服”这类泛化指令。每个 AGENT 都必须说明：
 输入来源、可调用工具、何时回复用户、何时等待用户、何时选择哪个 `next_steps`。选择 AGENT
@@ -183,7 +182,7 @@ source JSON 阶段只维护一个 `prompt` 字段，减少上下文和双写错�
 
 ### 可执行 LibraryBlock
 
-模型需要结合上下文决定是否执行模板、转人工或普通工具，且该职责需要留在多轮 AGENT 内时，必须在
+模型需要结合上下文决定是否执行模板或普通工具，且该职责需要留在多轮 AGENT 内时，必须在
 source `prompt` 中插入以下块，不能只写“调用 xxx”的普通文字。
 
 变量块：
@@ -204,15 +203,8 @@ source `prompt` 中插入以下块，不能只写“调用 xxx”的普通文字
 {#LibraryBlock id=31893 type=tool name=Logistics_Anomaly_Register tool=Logistics_Anomaly_Register #}
 ```
 
-转人工块；`name` 必须是业务要求的精确 reason，`tool_id` 是当前块的唯一数字实例 ID，不是插件 ID。
-同一 AGENT 内每个转人工块都必须不同，不要复制示例 ID：
-
-```text
-{#LibraryBlock tool_id=1790057523341 type=transferHuman name="want refund" transferType=INSTRUCTION action=NOT_REPLY templateContent="" templateId= #}
-```
-
-块前后仍要写完整执行过程：触发条件、首次调用、调用后是否等待、客户下一轮接受/坚持时分别做什么，
-不能只把块孤立地贴进 prompt。例如：
+新建流程不生成 `transferHuman` LibraryBlock；已有块和插件绑定继续兼容读取、编译和校验。
+AGENT 的 prompt 必须写清转人工分支的触发条件，并引用 `next_steps[].title` 生成的内部跳转工具。例如：
 
 ```text
 ## Refund request
@@ -223,9 +215,8 @@ If the customer requests a refund and no longer wants a replacement, first call:
 After the template is sent, wait for the customer's next reply.
 
 - If the customer accepts continuing with replacement, continue the replacement flow.
-- If the customer still insists on a refund, use:
-
-{#LibraryBlock tool_id=1790057523342 type=transferHuman name="want refund" transferType=INSTRUCTION action=NOT_REPLY templateContent="" templateId= #}
+- If the customer still insists on a refund, call transfer_to_handoff_refund_node.
+- Do not send another reply or continue troubleshooting after calling it.
 ```
 
 builder 会解析并严格校验这些块：
@@ -233,35 +224,32 @@ builder 会解析并严格校验这些块：
 - 模板块的 `id` 保持具体模板内容 ID；联网 compile 从 `/api_v2/gpt/chatflow/queryPlugin`
   (`forAgentNode=true`) 按 `type=TEMPLATE_REPLY` 解析真实系统插件 ID，并追加到 `usedPlugins`。
 - 普通工具块自动把块内工具 ID 追加到 `usedPlugins`，保留已有工具并去重。
-- 转人工块的 `tool_id` 只标识 PE 块实例；联网 compile 按 `type=TRANSFER_TO_HUMAN` 解析真实插件 ID
-  并追加到 `usedPlugins`，`transferToHumans` 仍为空数组。
 - 编译后的 `displayPrompt` 保留 LibraryBlock；runtime `prompt` 自动转换成可执行文字，两者必须同步。
-- 转人工 runtime 名称固定为 `Transfer_To_Agent`，大小写与前端 `formatChatflowAgentPrompt` 一致。
 - LibraryBlock 必须保持单行；PE 的 `/\{#LibraryBlock\s+(.+?)\s*#\}/g` 不会解析跨行属性。
 - 普通工具块的 `id` 必须存在于 `usedPlugins` 和当前 Chatflow 插件目录，`name` / `tool` 必须与该
-  plugin 的真实名称一致。模板回复和转人工则按系统 plugin type 双向对账：有块必须有对应
-  `usedPlugins`，绑定了对应系统 plugin 也必须有块，避免 PE chip 与运行时工具能力只保留一边。
+  plugin 的真实名称一致。模板回复按系统 plugin type 双向对账：有块必须有对应 `usedPlugins`，
+  绑定了对应系统 plugin 也必须有块，避免 PE chip 与运行时工具能力只保留一边。
 - 联网 compile 新建这些系统动作时必须从 Chatflow 插件目录取得真实类型绑定，目录不可用或缺少类型都会
   失败；普通 validate / update / publish 的模板或插件元数据查询暂时不可用时只告警并跳过该项远端校验，
   查询成功后确认资源不存在、模板状态不是 `ENABLED` 或对应系统插件类型未绑定时才校验失败。
 - PE 的 LibraryBlock 属性没有通用转义/解码合同。自动迁移不得把包含 `#}`、双引号、反斜杠、换行/
-  控制字符，或形如 `key=` 的独立属性 token 写进 `name` / reason；这些值无法在 PE 中无损表达，必须改用
-  独立节点或先调整值。普通空格、Unicode 和不构成 `#}` 的单独 `#` 可以保留。
+  控制字符，或形如 `key=` 的独立属性 token 写进 `name`；这些值无法在 PE 中无损表达。普通空格、
+  Unicode 和不构成 `#}` 的单独 `#` 可以保留。
 
 提示词正文渲染和运行时绑定是两层，不要混为一谈：
 
 | 层 | 字段/格式 | 作用 |
 |---|---|---|
-| 提示词正文渲染 | variable / tool / template_reply / transferHuman LibraryBlock | 让前端显示可执行块，并让 builder 派生 runtime prompt |
+| 提示词正文渲染 | variable / tool / template_reply LibraryBlock | 让前端显示可执行块，并让 builder 派生 runtime prompt |
 | 运行时绑定 | `ai_field_ids` / `plugins`，完整 graph 为 `aiFieldIds` / `usedPlugins` | 让 AGENT 运行时能读取变量、调用工具 |
 
 因此，提示词正文插入变量块后仍应检查对应 `ai_field_ids`；工具和模板的 plugin 绑定由 builder 自动补齐，
-validate 会再次对账。模型决定提示词正文需要显示变量/工具/模板/转人工引用时，不要只写纯文本名称；
-纯文本描述不会变成可执行动作。
+validate 会再次对账。模型决定提示词正文需要显示变量、业务工具或模板引用时，不要只写纯文本名称；
+转人工则必须配置 handoff `next_steps` 和对应边。
 
 只有在提示词正文确实需要引用某个变量或可执行动作时，才用 `{#LibraryBlock ... #}` 表达；如果不需要
-在提示词正文中引用，只做运行时上下文注入，可只保留 `ai_field_ids` 变量绑定。找不到具体模板内容 ID、
-工具 ID 或转人工 reason 时，记录缺口并判断是否补绑定、改写为独立节点或提问；禁止把任何猜测或系统
+在提示词正文中引用，只做运行时上下文注入，可只保留 `ai_field_ids` 变量绑定。找不到具体模板内容 ID 或
+工具 ID 时，记录缺口并判断是否补绑定或提问；禁止把任何猜测或系统
 插件 ID 写成模板块的 `id`。
 
 用户明确给出必须逐字保留的固定完整话术时，没有模板 ID 也不得概括或删段。节点选择先由整体流程决定；
@@ -272,7 +260,7 @@ validate 会再次对账。模型决定提示词正文需要显示变量/工具/
 
 - 无 `next_steps`：仅 `SOURCE`。
 - 有 `next_steps`：每个 step id 一条边；运行时 LLM 调用对应内部流转工具后，按 step id 路由。
-- `next_steps` 的边必须指向流程内节点；不要把人工接管写成某个 next step 再接转人工。
+- `next_steps` 的边可以指向普通流程节点或 `TRANSFER_TO_HUMAN`；人工接管必须由目标转人工节点执行。
 - `next_steps[].params` 会作为 AGENT 输出参数传给被选中的下游路径；下游用 `["AGENT", "<this_node_id>", "<param_name>"]` 引用。
 - AGENT 没有 `next_steps` 且没有 `SOURCE` 出边时，validator 只给 warning；除非明确设计为终端对话节点，否则应连出 `SOURCE` 或配置 `next_steps`。
 
@@ -290,8 +278,8 @@ next_steps[].title = accept_wait
 3. 模型直接回复文本而没有调用工具时，本轮回复发送给用户，流程停在当前 AGENT 等待下一条用户消息。用户继续回复后仍进入当前 AGENT。
 4. 只有模型调用 `transfer_to_<分支名>_node`，当前 AGENT 才结束并进入对应下游节点。系统根据该 `next_steps[].id` 选择出边，不根据提示词文本猜测分支。
 5. 分支工具带有 `params` 时，模型调用工具时填写的参数会随该分支输出，下游节点可通过 AGENT selector 引用。
-6. 模型调用真实转人工工具时，AGENT 直接输出 transfer/handoff 并结束到人工，不走 `next_steps`。
-7. `max_rounds` 统计 AGENT 回复用户并等待下一轮输入的次数，不统计节点内部连续调用普通业务工具的次数。达到上限时，默认按超轮转人工结束；只有配置 `FORCE_NEXT_STEP` 且运行时可用流程内分支工具时，模型才会被要求选择一个 next step。无 next step 时该配置会退回转人工。
+6. handoff 分支的目标是 `TRANSFER_TO_HUMAN` 时，该节点负责输出 transfer/handoff 并结束流程。
+7. `max_rounds` 统计 AGENT 回复用户并等待下一轮输入的次数，不统计节点内部连续调用普通业务工具的次数。需要超轮后进入指定转人工节点时，配置 `FORCE_NEXT_STEP`，并确保对应 handoff next step 可被选择。
 
 只有工具结果是非结构化的、必须由模型解释，而且 AGENT 本身也符合准入条件时，才把查询工具放入
 `plugins`，并按需要配置 `next_steps`。工具已有明确 actionStatus，或结果字段可确定判断时，使用独立
@@ -318,16 +306,14 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-agent-ai-fields --pretty
 - 完整 graph 中 `prompt` 和 `displayPrompt` 都必须非空；source 阶段只写一个 `prompt`，由 builder 派生完整 graph 的两个字段。
 - 需要上游节点输出稳定进入 prompt 时，先用 VARIABLE_PROCESS 赋值到 SYSTEM 变量系统字段，再在 `ai_field_ids` 引用该字段。
 - 后端会把 `ai_field_ids` 对应字段作为额外系统上下文注入；上游节点结果也可能作为历史节点结果注入，但不要把它当成稳定 prompt 变量。
-- `transferToHumans` 必须为空数组；不要用它配置 AGENT 节点。需要模型结合上下文决定升级时，在
-  `displayPrompt` 使用标准 `transferHuman` LibraryBlock，并让联网 compiler 按类型把隐藏的
-  `TRANSFER_TO_HUMAN` 系统插件真实 ID 绑定到 `usedPlugins`；不要手写或复用旧 Multi-Agent 插件 ID。
-  确定性转人工仍使用独立 `TRANSFER_TO_HUMAN` 节点或 `$transfer`。
+- `transferToHumans` 必须为空数组。新建或迁移流程使用 handoff `next_steps` 并连接独立
+  `TRANSFER_TO_HUMAN` 节点；已有 `transferHuman` LibraryBlock 和 AGENT 转人工插件绑定继续兼容。
 - 不要把多个业务阶段机械映射成多个 AGENT 后再用边串联；每个 AGENT 都必须有不可结构化替代的理由。
 - 迁移或重建时，来源流程中的一个 Agent 节点、一条节点连接或一句“切换到其他 Agent”指令，都不能直接映射为目标 AGENT 或 `next_steps`；必须按目标职责重新通过准入检查。
 - 如果真实外部工具的执行结果有明确 actionStatus 分支，优先拆成独立 TOOL 节点；只有需要 LLM 自主选择是否调用工具时，才放入 `plugins`。
 - 如果 AGENT 后面只是固定流转、模板回复、finish 或转人工，改用结构化节点；不要把这些动作写进 prompt 让模型执行。
 - AGENT 经准入后若确需模型选择多个流程内下游，必须用 `next_steps`，不能多条 `SOURCE` 出边。
-- `next_steps` 只表示流程内下游；转人工不要作为 `next_steps` 项。
+- `next_steps` 表示流程内下游；其中 handoff 分支可以连接 `TRANSFER_TO_HUMAN`。
 - 每个 `next_steps[]` 都必须有非空 `id`、`title`、`prompt`，并且必须连出对应边。
 - `next_steps[].title` 推荐使用小写下划线格式，例如 `accept_wait`；提示词引用该分支时写完整工具名 `transfer_to_<title>_node`。历史流程中已有其他命名格式时，只要前端必填项和分支连线校验通过，也可以保留。
 - `next_steps[].prompt` 应描述选择该分支的业务条件，不要只重复 `title`。
@@ -337,15 +323,16 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-agent-ai-fields --pretty
 ## Common Mistakes
 
 - prompt 里写“调用某工具”，但 `plugins` 没有真实工具 id。
-- 手写或复用旧 Multi-Agent 的 hidden/system 插件 ID；目标 Chatflow 的 `TEMPLATE_REPLY` /
-  `TRANSFER_TO_HUMAN` ID 必须由联网 compiler 通过插件类型解析后写入 `usedPlugins`。
+- 手写或复用旧 Multi-Agent 的 hidden/system 插件 ID；`TEMPLATE_REPLY` ID 必须由联网 compiler
+  通过插件类型解析后写入 `usedPlugins`，新建转人工路径不绑定插件。
 - 用 AGENT 承载本可由 TOOL actionStatus、IF_ELSE、QUESTION、REPLY 或 TRANSFER_TO_HUMAN 表达的确定性流程。
 - 为了复刻已有节点数量，把多个业务阶段一对一迁成 AGENT。
 - 给 AGENT 一个简单的一次性任务，再创建 `success` / `done` / `continue` next step 跳到下一节点。
 - 想在 prompt 稳定使用上游输出，却没有先赋值到变量系统字段。
 - `usedPlugins` 写成对象数组，导致前端调用工具显示 `[object Object]`。
-- 把模板回复、转人工、业务工具只写成普通 prompt 文字，没有插入标准 LibraryBlock；或把本可确定执行的动作藏在 AGENT，而不拆成结构化节点。
-- 把转人工配置成 `next_steps` 分支，例如 `need_human` 后再接 `$transfer`。
+- 把模板回复、业务工具只写成普通 prompt 文字，没有插入标准 LibraryBlock；或把本可确定执行的动作藏在 AGENT，而不拆成结构化节点。
+- 在新建或迁移的 AGENT prompt 中使用 `transferHuman` LibraryBlock 或绑定 `TRANSFER_TO_HUMAN` 插件。
+- prompt 要求调用 `transfer_to_handoff_node`，却没有配置对应 next step 和 `TRANSFER_TO_HUMAN` 目标节点。
 - 已确认需要由 AGENT 选择多个职责交接分支，却没有配置 `next_steps`。
 - `next_steps` 用字符串简写，导致没有 `prompt`，前端发布校验会失败。
 - 下游引用了未定义的 `next_steps[].params[].name`。

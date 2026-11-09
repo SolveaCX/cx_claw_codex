@@ -4,7 +4,7 @@
 
 终止当前流程并转人工。支持直接无回复转人工、节点内模型生成话术后转人工、节点内固定模板后转人工。
 
-TRANSFER_TO_HUMAN 表达的是客服会话接管。一旦执行，当前 chatflow 不再继续走后续节点。它不同于 `HUMAN_REVIEW` 的流程内审核，也不同于 `AGENT.next_steps` 的流程内跳转。
+TRANSFER_TO_HUMAN 表达的是客服会话接管。一旦执行，当前 chatflow 不再继续走后续节点。它不同于 `HUMAN_REVIEW` 的流程内审核；当 AGENT 根据对话决定转人工时，由 `AGENT.next_steps` 跳转到本节点。
 
 ## 创建方式
 
@@ -43,14 +43,15 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-templates --keyword "handoff" --pre
 
 - 不要使用 AGENT `transferToHumans` 字段。
 - 确定性转人工路径应显式节点化为 `TRANSFER_TO_HUMAN` 或 `$transfer`。
-- 如果转人工由 AGENT 在多轮判断中自主决定，按 `agent.md` 在 prompt 中插入标准 `transferHuman`
-  LibraryBlock；联网 compile 会把真实 `TRANSFER_TO_HUMAN` 系统插件 ID 加入该 AGENT 的 `usedPlugins`，
-  但独立 `TRANSFER_TO_HUMAN` 节点本身不写插件，也不要把转人工伪装成 AGENT `next_steps`。
+- 如果转人工由 AGENT 在多轮判断中自主决定，新建或迁移流程按 `agent.md` 配置 handoff
+  `next_steps`，并把对应边连接到独立 `TRANSFER_TO_HUMAN` 节点。已有 `transferHuman`
+  LibraryBlock 和 `TRANSFER_TO_HUMAN` plugin 绑定继续兼容。
 - `NO_REPLY` 不需要 `prompt` 或模板。
 - `PROMPT` 必须有 `prompt`。
 - `PROMPT` 可用 `ai_field_ids` 注入变量系统字段；普通 `[[var:...]]` 模板不在此节点渲染。需要上游节点输出时，先桥接到 SYSTEM 字段，不能默认增加普通 REPLY 节点改变终止语义。
 - `TEMPLATE` 必须有 `template_id`。
 - 有不同回复内容的转人工路径不要合并成同一个 transfer 节点。
+- 有不同 transfer reason 的路径使用不同节点，并把原始 reason 写入各节点 `explain`。
 - 不同业务职责、不同 action status 或不同 transfer reason 不要全部连到同一个 `$transfer`。
 - 如果确实要共享一个 transfer，必须在设计说明中写明相同职责、相同用户轮次、相同回复合同和合并证据。
 - `PROMPT` 表示该转人工节点自身先由模型生成一段对客话术，然后执行转人工；它不是前置分类节点。

@@ -142,6 +142,63 @@ describe("TypeScript workflow migrations", () => {
     ).toThrow("unsupported source node type");
   });
 
+  test("routes new AGENT handoff through a TRANSFER_TO_HUMAN next step", () => {
+    const graph = compileChatflowSource({
+      entry: "agent",
+      nodes: [
+        {
+          key: "agent",
+          type: "agent",
+          prompt: "If the customer insists, use transfer_to_handoff_node.",
+          next_steps: [
+            {
+              id: "HANDOFF",
+              title: "handoff",
+              prompt: "Use when human support is required.",
+            },
+          ],
+        },
+        { key: "handoff", type: "transfer", explain: "customer insists" },
+      ],
+      edges: [{ from: "agent", on: "HANDOFF", to: "handoff" }],
+    });
+    expect(validateGraph(graph)).toMatchObject({ valid: true });
+
+    expect(() =>
+      compileChatflowSource({
+        entry: "agent",
+        nodes: [
+          { key: "agent", type: "agent", prompt: "Handle the request." },
+          { key: "handoff", type: "transfer", explain: "customer insists" },
+        ],
+        edges: [{ from: "agent", to: "handoff" }],
+      }),
+    ).toThrow("must reach TRANSFER_TO_HUMAN through a declared handoff nextStep");
+  });
+
+  test("keeps legacy AGENT transferHuman tools compatible", () => {
+    const graph = compileChatflowSource({
+      entry: "agent",
+      nodes: [
+        {
+          key: "agent",
+          type: "agent",
+          prompt:
+            "Escalate with {#LibraryBlock tool_id=1790057523999 type=transferHuman name=need_specialist action=NOT_REPLY #}.",
+          plugins: [-2],
+        },
+      ],
+      edges: [{ from: "agent", to: "$finish" }],
+    });
+    const agent = graph.nodes.find(
+      (node) => (node.data as { category: string }).category === "AGENT",
+    )!;
+    expect((agent.data as any).config.agentData.usedPlugins).toEqual([-2]);
+    expect((agent.data as any).config.agentData.prompt).toContain(
+      "Transfer_To_Agent (reason: need_specialist)",
+    );
+  });
+
   test("matches solvea-kit contracts for process, selector, code, and subgraph nodes", () => {
     const graph = compileChatflowSource({
       entry: "process",

@@ -212,8 +212,8 @@ PE 还带 `prompt_review`、`prompt_quality` / `prompt_evidence.encoding_quality
 
 `coverage_required.prompt_reviews` 会把完整 PE 原样带进对应 batch，即使 `prompt_evidence` 因预算被截断也不
 截断。worker 输出 `discovered_blocks` 和 `control_semantics`；`merge-batch-plans` 再根据结构化 kind、具体
-模板/工具 id、精确转人工 reason 和完整固定话术派生 LibraryBlock、plugin 绑定与内容 hash。自然语言识别和
-协议渲染因此分层：前者由模型理解流程，后者由脚本确定性生成。固定话术使用通用
+模板/工具 id 和完整固定话术派生 LibraryBlock、plugin 绑定与内容 hash，并把精确转人工 reason 映射到
+`TRANSFER_TO_HUMAN` 节点的 `explain`。自然语言识别和协议渲染因此分层：前者由模型理解流程，后者由脚本确定性生成。固定话术使用通用
 `NODE_PROMPT_FIELD`，最终按已选节点合同填写 `render_path`；analyzer 不把它预设成 REPLY。
 
 索引还包含 `coverage_manifest`，为 agents、tools、resources、explicit edges、action edges 和

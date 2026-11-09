@@ -64,9 +64,10 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow validate \
 
 10. 失败就改同一个 source 后重新 compile + validate。若只出现 `queryAiFields` / `field/internal/list` / `tars: Name does not resolve` 相关 warning，说明变量字段服务不可用；没有字段 id 依赖的图可继续后续确认，不要改图结构绕开。
     含 LibraryBlock 的 AGENT 还要核对：模板块使用具体模板内容 ID、模板状态为 `ENABLED`、`usedPlugins`
-    已包含普通工具 ID，并从 Chatflow 专用插件目录按类型绑定当前项目真实的 `TEMPLATE_REPLY` /
-    `TRANSFER_TO_HUMAN` 系统插件 ID；同时确认 `transferToHumans=[]`、runtime `prompt` 与 `displayPrompt`
-    同步、nextStep 没有被误当成人工接管。
+    已包含普通工具 ID，并从 Chatflow 专用插件目录按类型绑定当前项目真实的 `TEMPLATE_REPLY` 系统插件
+    ID；同时确认 `transferToHumans=[]`、runtime `prompt` 与 `displayPrompt` 同步。新建或迁移的 AGENT
+    转人工使用 handoff nextStep 连接 `TRANSFER_TO_HUMAN` 节点。已有 graph 中的 `transferHuman`
+    LibraryBlock 和 `TRANSFER_TO_HUMAN` plugin 绑定按兼容格式保留并校验。
 11. 校验通过后，对同一份 graph 执行 `deploy --phase preview`，向用户展示环境、租户、Agent 名称和图摘要。
     preview 只生成短时确认凭证，不创建 Agent。
 12. 用户确认后，对同一份 graph 执行 `deploy --phase commit --confirmation-token-stdin --idempotency-key <key>`；

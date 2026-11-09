@@ -124,8 +124,9 @@ explicit edge 的 `mapped_to` 可以写对应职责块或模型可选路由能�
 
 每个完整 PE 都要进入 `coverage.prompt_reviews`，回写全文 hash 和 `reviewed_full_prompt=true`；语义识别出的
 每个块按源顺序进入 `discovered_blocks`，带精确 source span/quote。SOP → 节点类别确认后，再为每个块选择
-`target_type`：上下文决定且需留在多轮 AGENT 内的模板/工具/转人工用 `AGENT_LIBRARY_BLOCK`；确定性动作
-分别选择 `REPLY_TEMPLATE` / `TOOL_NODE` / `TRANSFER_NODE`；等待点选择合同允许的多轮或交互节点承载方式。
+`target_type`：上下文决定且需留在多轮 AGENT 内的模板/工具可用 `AGENT_LIBRARY_BLOCK`；转人工只允许
+`TRANSFER_NODE`，由 AGENT 的 handoff nextStep 连接；其他确定性动作分别选择 `REPLY_TEMPLATE` /
+`TOOL_NODE`；等待点选择合同允许的多轮或交互节点承载方式。
 固定话术先使用通用 `NODE_PROMPT_FIELD`，不把它写死为 REPLY；进入 CHAT_FLOW source 实现并读完所选节点
 合同后，再用 `render_path` 指向该节点的真实 PE/文本字段。LibraryBlock、plugin 绑定和内容 hash 由与 large
 模式相同的合并/渲染规则根据结构化语义派生，不让模型或人工逐 case 拼字符串。未映射完不得转入 CHAT_FLOW
