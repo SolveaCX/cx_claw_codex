@@ -264,10 +264,16 @@ batch plan 是语义合同，不是目标图 schema。以下是单个 batch 的�
         "id": "lookup_order",
         "responsibility": "Call the structured order lookup capability.",
         "candidate_nodes": ["TOOL", "IF_ELSE"]
+      },
+      {
+        "id": "human_handoff",
+        "responsibility": "Transfer the conversation to human support with the preserved reason.",
+        "candidate_nodes": ["TRANSFER_TO_HUMAN"]
       }
     ],
     "relations": [
-      {"from": "collect_order", "to": "lookup_order", "condition": "order information complete"}
+      {"from": "collect_order", "to": "lookup_order", "condition": "order information complete"},
+      {"from": "lookup_order", "to": "human_handoff", "condition": "ORDER_NOT_FOUND"}
     ]
   },
   "coverage_delta": {
@@ -359,9 +365,9 @@ batch plan 是语义合同，不是目标图 schema。以下是单个 batch 的�
             "source_quote": "Escalate with the exact reason want refund if they insist.",
             "transfer_reason": "want refund",
             "decision": "preserved",
-            "target_type": "AGENT_LIBRARY_BLOCK",
-            "mapped_to": ["collect_order"],
-            "reason": "Escalation remains contextual after the waiting turn."
+            "target_type": "TRANSFER_NODE",
+            "mapped_to": ["human_handoff"],
+            "reason": "Preserve the escalation reason in a transfer node selected by the AGENT handoff."
           }
         ]
       }
@@ -521,8 +527,8 @@ plan，也不承担 legacy 规则。
 - 入口、阶段、分支、用户轮次、人工接管和终端的旧图理解；
 - 已确认的全局 SOP → 节点映射 Mermaid；
 - old agents、tools、explicit edges、action edges 的 coverage 数量和明细；
-- semantic prompt reviews / discovered blocks 的总数，以及模板、转人工、普通工具、固定话术、等待点分别映射到 AGENT LibraryBlock
-  还是独立节点；
+- semantic prompt reviews / discovered blocks 的总数，以及模板、普通工具、固定话术、等待点分别映射到
+  AGENT LibraryBlock 还是独立节点；转人工必须映射到独立 `TRANSFER_TO_HUMAN` 节点；
 - 合并、拆分、改写、用户确认删减的原因和影响；
 - 已解决和仍阻塞的 open questions；
 - 从 CHAT_FLOW 阶段返回的实现、校验和发布状态（若已执行）。

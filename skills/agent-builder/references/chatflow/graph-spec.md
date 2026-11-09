@@ -146,7 +146,7 @@ TOOL 单层出参可用 `field`；嵌套出参必须用从顶层开始的 `path`
 
 - CHAT_FLOW 不感知 `metadata` 路径；所有节点都禁止写 `metadata.xxx`、`metadata.ai_fields.xxx` 或类似点号路径。变量系统字段在进入图后只通过 ai-fields 暴露，并由 `SYSTEM` selector 或 `ai_field_ids` 读取。
 - 如果还需要从 `AttachmentSummary` 等已有系统字段中二次提取，或对 TOOL / CODE / AGENT 输出做转换、赋值，使用 `VARIABLE_PROCESS`。
-- AGENT 和 `REPLY(PROMPT)` 的变量入口是变量系统字段：source 写 `ai_field_ids`，完整 graph 写 `agentData.aiFieldIds` 或 `replyContent.aiFieldIds`。AGENT 的 source `prompt` 可使用 `{#LibraryBlock id=<字段id> type=variable name="<字段名>" #}` 表达变量 chip；模板、普通工具和转人工动作按 `nodes/agent.md` 使用各自 LibraryBlock。builder 编译时写入完整 graph 的 `displayPrompt`、派生运行时 `prompt`，并自动补齐普通工具 ID 以及模板/转人工真实系统插件 ID 到 `usedPlugins`。
+- AGENT 和 `REPLY(PROMPT)` 的变量入口是变量系统字段：source 写 `ai_field_ids`，完整 graph 写 `agentData.aiFieldIds` 或 `replyContent.aiFieldIds`。AGENT 的 source `prompt` 可使用 `{#LibraryBlock id=<字段id> type=variable name="<字段名>" #}` 表达变量 chip；模板和普通工具按 `nodes/agent.md` 使用各自 LibraryBlock。builder 编译时写入完整 graph 的 `displayPrompt`、派生运行时 `prompt`，并自动补齐普通工具 ID 和模板系统插件 ID 到 `usedPlugins`。新建转人工路径不绑定插件，使用 `TRANSFER_TO_HUMAN` 节点；已有 AGENT 的转人工插件绑定按兼容格式保留。
 - AGENT / `REPLY(PROMPT)` 不渲染 `[[var:...]]`。如果它们必须稳定使用上游节点输出，先用 `VARIABLE_PROCESS.assignments` 写入 `SYSTEM` 字段，再通过 `ai_field_ids` 引用。
 - `REPLY(DYNAMIC_TEMPLATE)`、LLM `prompt` 和 HUMAN_REVIEW `description` 会渲染 `[[var:<selector>]]`。完整 graph 使用 selector 数组，例如 `[[var:["CODE","<code_node_id>","summary"]]]`。source JSON 可在模板中写 selector 简写，例如 `[[var:{"code":"summarize_case","field":"summary"}]]`，builder 会替换为真实节点 id。
 - RAG_REPLY 用 `query_selector` 指定检索 query，不在 prompt 里插变量。
@@ -201,7 +201,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent list --pretty
 - 图中不能有环；不要用回连表达多轮。
 - 所有运行节点必须从 START 可达；NOTE / CUSTOM_NOTE 是画布注释，不参与运行，不要求连接。
 - 除 START / NOTE 外，节点 title 不能为空、纯空格或重复。
-- AGENT 完整 graph 的 `prompt` 和 `displayPrompt` 必须非空；source 阶段只写一个 `prompt`，由 builder 派生两个完整 graph 字段；LibraryBlock 的 display/runtime 文本和绑定必须通过对账；`transferToHumans` 必须为空数组。
+- AGENT 完整 graph 的 `prompt` 和 `displayPrompt` 必须非空；source 阶段只写一个 `prompt`，由 builder 派生两个完整 graph 字段；LibraryBlock 的 display/runtime 文本和绑定必须通过对账；`transferToHumans` 必须为空数组。新建或迁移的模型判断转人工使用 handoff nextStep 连接 `TRANSFER_TO_HUMAN` 节点；已有 `transferHuman` LibraryBlock 继续兼容读取和校验。
 - LLM `promptTemplate` 必须非空；LLM 不绑定工具、不配置 next_steps。
 - INTENT 节点可选配置全局识别 PE：source 使用 `prompt`，未配置时编译为 `config.prompt: null`；`history_round_limit` 编译为 `config.historyRoundLimit`，默认 `null`（交由后端默认策略）；每条意图仍需要 `name + desc` 或 `intentId`。
 - 即将下线节点默认不新建：`COLLECT_ORDER`、`KNOWLEDGE_REPLY`、`VARIABLE_ASSIGNMENT`、`VARIABLE_EXTRACT`、`AGENT version=1`。

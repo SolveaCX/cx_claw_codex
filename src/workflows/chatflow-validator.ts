@@ -272,9 +272,23 @@ export function validateChatflowGraph(graph: unknown): GraphValidation {
       if (!String(data.displayPrompt ?? "").trim())
         errors.push(`AGENT node '${id}' has empty displayPrompt`);
       const steps = Array.isArray(cfg.nextStep) ? cfg.nextStep : [];
+      const stepIds = new Set(
+        steps.map((step) => String(record(step)?.id ?? "").trim()).filter(Boolean),
+      );
       requireHandles(
         steps.length ? steps.map((step) => String(record(step)?.id ?? "")) : ["SOURCE"],
       );
+      for (const edge of outgoing.get(id) ?? []) {
+        const target = nodeById.get(String(edge.target));
+        if (
+          target &&
+          category(target) === "TRANSFER_TO_HUMAN" &&
+          !stepIds.has(String(edge.sourceHandle))
+        )
+          errors.push(
+            `AGENT '${nodeTitle}' must reach TRANSFER_TO_HUMAN through a declared handoff nextStep`,
+          );
+      }
       if (
         !Array.isArray(data.usedPlugins) ||
         data.usedPlugins.some((item) => !Number.isInteger(item) || typeof item === "boolean")
