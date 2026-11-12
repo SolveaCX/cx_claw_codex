@@ -112,12 +112,42 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow publish \
   --pretty
 ```
 
+## 全局角色背景
+
+CHAT_FLOW 的全局提示词使用 Agent 顶层 `meta.chatFlowGlobalPrompt`。它会影响整张工作流，不属于
+`chatFlowGraph`，也不是 Agent 节点的 `agentData.prompt` / `agentData.displayPrompt`。只修改全局角色背景时，
+保持图、节点和其他 Agent 字段不变。
+
+1. 先执行 `agent get --id <agent_id>`，从 `meta.chatFlowGlobalPrompt` 读取当前值。
+2. 把局部更新写入 `/workspace/state/agent-builder/chatflow/update_agent_<agent_id>.json`：
+
+```json
+{
+  "meta": {
+    "chatFlowGlobalPrompt": "# 角色\n你是售后客服。"
+  }
+}
+```
+
+3. 向用户展示当前值与目标值的 `diff`，确认后通过通用 Agent 更新命令提交：
+
+```bash
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent update \
+  --id <agent_id> \
+  --data-file /workspace/state/agent-builder/chatflow/update_agent_<agent_id>.json \
+  --pretty
+```
+
+`agent update` 会先读取完整 Agent，再深度合并局部字段；清空时把 `chatFlowGlobalPrompt` 设为 `""`。更新后
+再次 `agent get`，确认目标字段一致。用户同时要求发布时，再对 inspect 得到的当前完整 graph 执行 validate
+和 publish；Agent 字段更新不能替代发布确认。
+
 ## 变更方案说明
 
 - 新建图方案，或增量任务涉及新增 / 删除节点、修改边、调整条件分支、改变入口出口或路由关系等结构性修改时，面向用户的说明里应附一段 Mermaid，概括修改后的流程结构，帮助用户确认理解是否一致。
 - 大图不要完整铺开，优先展示受影响子图，并保留这段子图与上游入口、下游出口的连接关系；必要时再补一句未展示区域保持不变。
 - Mermaid 必须根据 inspect 得到的现有图、待写入的 source / graph 以及 validate 结果生成。条件边使用真实出边语义或 handle；代码节点必须明确标成代码节点，并展示它实际连接的上下游，不能因为代码内容复杂就从图中省略。
-- 只修改 prompt、话术、模型参数、工具入参映射或单个节点内部字段，且不改变节点和边时，不强制输出 Mermaid。
+- 只修改 prompt、全局角色背景、话术、模型参数、工具入参映射或单个节点内部字段，且不改变节点和边时，不强制输出 Mermaid。
 - 对已有图、节点配置或提示词提出修改方案时，用户确认前按整体输出规则用 `diff` 展示受影响片段的前后差异；结构性修改可同时提供 Mermaid 和 diff，分别说明流程关系与具体配置变化。
 - 用户确认前展示的是“拟修改结构”；update / deploy 后展示的是实际校验通过的结构。不要把尚未写入的方案描述成已经生效。
 - Mermaid 只用于解释，不能替代 source JSON、graph JSON 或 validate。图示与实际 graph 不一致时，以校验通过的 graph 为准，并立即修正图示。

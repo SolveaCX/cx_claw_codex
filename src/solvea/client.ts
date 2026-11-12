@@ -36,6 +36,22 @@ const asPositiveInt = (value: unknown, message: string) => {
   if (!Number.isSafeInteger(number) || number <= 0) throw new Error(message);
   return number;
 };
+const mergePatch = (base: unknown, patch: unknown): unknown => {
+  if (
+    base &&
+    patch &&
+    typeof base === "object" &&
+    typeof patch === "object" &&
+    !Array.isArray(base) &&
+    !Array.isArray(patch)
+  ) {
+    const merged: JsonObject = { ...(base as JsonObject) };
+    for (const [key, value] of Object.entries(patch as JsonObject))
+      merged[key] = mergePatch(merged[key], value);
+    return merged;
+  }
+  return patch;
+};
 const knowledgeType = (value: unknown) => {
   const normalized = String(value ?? "").toUpperCase();
   if (!KNOWLEDGE_TYPES.has(normalized))
@@ -256,6 +272,18 @@ export class SolveaClient {
     const payload: JsonObject = { ...data, projectId: Number(await this.projectId()) };
     if (payload.agentId === undefined && payload.id !== undefined) payload.agentId = payload.id;
     return this.post("/api_v2/gpt/ap/updateAgent", payload);
+  }
+  async patchAgent(agentId: string, changes: JsonObject) {
+    const current = await this.getAgent(agentId);
+    const agent = Array.isArray(current) ? (current[0] as JsonObject) : (current as JsonObject);
+    if (!agent) throw new Error(`Agent not found: ${agentId}`);
+    for (const field of ["id", "agentId"])
+      if (changes[field] !== undefined && String(changes[field]) !== String(agent.id ?? agentId))
+        throw new Error(`${field} cannot change the target Agent id`);
+    const payload = mergePatch(agent, changes) as JsonObject;
+    payload.id = agent.id ?? Number(agentId);
+    payload.agentId = agent.id ?? Number(agentId);
+    return this.updateAgent(payload);
   }
   async updateChatflow(agentId: string, graph: JsonObject, publish = false) {
     const current = await this.getAgent(agentId);

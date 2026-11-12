@@ -25,19 +25,20 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent create \
 
 ## 更新
 
-更新前先查完整对象：
+更新前先读取当前对象，确认目标字段；提交时只传需要修改的字段：
 
 ```bash
 node "<PLUGIN_ROOT>/plugin-cli.mjs" agent get --id <agent_id> --pretty
 node "<PLUGIN_ROOT>/plugin-cli.mjs" agent update \
+  --id <agent_id> \
   --data-file /workspace/state/agent-builder/update_agent_<agent_id>.json \
   --pretty
 ```
 
 约束：
 
-- `update-agent` 必须提交完整对象。
-- `agentId` 必须等于 `id`。
+- `agent update` 会读取完整对象并深度合并局部 patch，未传字段保持不变。
+- patch 中出现 `id` / `agentId` 时必须与 `--id` 一致。
 - 改 prompt 时同步改 `prompt` 和 `displayPrompt`。
 - 工具只写真实工具 id；先用 `list-plugins` / `get-plugin` 确认。
 

@@ -30,6 +30,7 @@ describe("resource command hierarchy", () => {
     expect(resourceHelp("intent", "create")).toContain("cxclawctl intent create");
     expect(resourceHelp("intent", "create")).toContain("--data-file <path>");
     expect(resourceHelp("intent", "toggle")).toContain("--enable | --disable");
+    expect(resourceHelp("agent", "update")).toContain("--id <agent-id>");
     expect(resourceHelp("analytics", "messages")).toContain("--start-date <YYYY-MM-DD>");
     expect(() => resourceHelp("intent", "remove")).toThrow("unknown intent action");
   });

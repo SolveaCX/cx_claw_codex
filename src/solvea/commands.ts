@@ -98,8 +98,12 @@ export async function runSolveaCommand(
       return client.getChatflowGraph(option(args, "--agent-id", true)!);
     case "create-agent":
       return client.createAgent(await data(args));
-    case "update-agent":
-      return client.updateAgent(await data(args));
+    case "update-agent": {
+      const changes = await data(args);
+      const agentId = option(args, "--id") ?? String(changes.agentId ?? changes.id ?? "");
+      if (!agentId) throw new Error("update-agent requires --id or id/agentId in the patch");
+      return client.patchAgent(agentId, changes);
+    }
     case "list-plugins":
       return client.listPlugins();
     case "get-plugin":

@@ -46,7 +46,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent create \
 
 ### 原则
 
-- 更新前必须先 `get-agent` 获取完整对象，`update-agent` 不支持 partial patch
+- 更新前先 `get-agent` 核对当前对象；`agent update --id` 支持深度合并 partial patch
 - `prompt` 和 `displayPrompt` 必须同步更新，两者不一致导致执行与展示不符
 - `agentId` 字段必须等于 `id`，否则更新失败
 
