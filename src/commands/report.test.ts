@@ -98,4 +98,72 @@ describe("legacy report resource commands", () => {
       "/intelli/inspection/ticket/history",
     ]);
   });
+
+  test("covers tag, knowledge export and inspection detail capabilities", async () => {
+    const requests: Array<{ url: string; body: unknown }> = [];
+    globalThis.fetch = (async (input, init) => {
+      requests.push({
+        url: String(input),
+        body: init?.body ? JSON.parse(String(init.body)) : undefined,
+      });
+      return new Response(JSON.stringify([]), { status: 200 });
+    }) as typeof fetch;
+    console.log = () => {};
+
+    await runReportAction(session, "tag-distribution", [
+      "--begin-ts",
+      "1784736000000",
+      "--end-ts",
+      "1784822399999",
+      "--tree-id",
+      "33",
+      "--level",
+      "2",
+      "--tag",
+      "refund",
+    ]);
+    await runReportAction(session, "knowledge-export", [
+      "--begin-ts",
+      "1784736000000",
+      "--end-ts",
+      "1784822399999",
+    ]);
+    await runReportAction(session, "inspection-tags", [
+      "--start-date",
+      "2026-11-01",
+      "--end-date",
+      "2026-11-12",
+    ]);
+    await runReportAction(session, "inspection-tags-history", [
+      "--start-date",
+      "2026-11-01",
+      "--end-date",
+      "2026-11-12",
+    ]);
+    await runReportAction(session, "inspection-export", [
+      "--start-date",
+      "2026-11-01",
+      "--end-date",
+      "2026-11-12",
+    ]);
+
+    const apiRequests = requests.filter((request) => request.url.includes("/api_v2/"));
+    expect(apiRequests.map((request) => request.url.split("/api_v2")[1])).toEqual([
+      "/gpt/bots",
+      "/qa_bot/label/project/950/report/distribution",
+      "/gpt/bots",
+      "/gpt/label/project/950/download/knowledge",
+      "/intelli/inspection/ticket/tagsList",
+      "/intelli/inspection/ticket/tagsHistory",
+      "/gpt/bots",
+      "/gpt/950/export/async",
+    ]);
+    expect(apiRequests[1]?.body).toEqual({
+      beginTimestamp: 1784736000000,
+      endTimestamp: 1784822399999,
+      treeId: 33,
+      level: 2,
+      tag: "refund",
+    });
+  });
 });

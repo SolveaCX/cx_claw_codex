@@ -1,10 +1,10 @@
-# `/report` 统计接口与字段契约
+# Agent Analytics 模块详情接口与字段契约
 
-本文描述 `/report` 页面使用的统计接口与字段。前端主要通过 `/api_v2/as_bot/statement/*` 请求 analysis-service 的统计数据。
+本文描述当前 `/chatReport` 的标签、知识、自学习、转人工、LiveChat、满意度和质检详情页仍在使用的接口。接口路径包含 `statement/*` 不代表能力已下线。
 
 ## 页面能力与命令
 
-| `/report` 场景 | 前端接口 | CLI 命令 |
+| 详情模块 | 前端接口 | CLI 命令 |
 |---|---|---|
 | 工单量、解决、转人工 | `POST /api_v2/as_bot/statement/transcript` | `report transcript` |
 | 消息量、AI 消息回复 | `POST /api_v2/as_bot/statement/message` | `report message` |
@@ -14,6 +14,8 @@
 | 满意度明细 | `POST /api_v2/as_bot/statement/satisfaction/message` | `report satisfaction-list` |
 | 评分分布 | `POST /api_v2/as_bot/statement/feedback` | `report feedback` |
 | 知识使用 | `POST /api_v2/as_bot/statement/knowledge` | `report knowledge` |
+| 知识使用导出 | `POST /api_v2/gpt/label/project/{projectId}/download/knowledge` | `report knowledge-export` |
+| AI 标签分布 | `POST /api_v2/qa_bot/label/project/{projectId}/report/distribution` | `report tag-distribution` |
 | 转人工原因 | `POST /api_v2/as_bot/statement/transcript/reason2` | `report escalation` |
 | 三级原因下钻 | `POST /api_v2/as_bot/statement/transcript/reason/three/level` | `report escalation-drilldown` |
 | Agent 周趋势图 | `POST /api_v2/as_bot/statement/graph/agent` | `report agent-weekly-graph` |
@@ -22,10 +24,14 @@
 | LiveChat 明细 | `POST /api_v2/as_bot/livechat/report/table` | `report livechat-table` |
 | AI 质检概览 | 质检 count 接口 | `report inspection` |
 | AI 质检趋势 | 质检 history 接口 | `report inspection-history` |
+| AI 质检标签趋势 | `POST /api_v2/intelli/inspection/ticket/tagsHistory` | `report inspection-tags-history` |
+| AI 质检标签分布 | `POST /api_v2/intelli/inspection/ticket/tagsList` | `report inspection-tags` |
+| AI 质检导出 | `POST /api_v2/gpt/{projectId}/export/async` | `report inspection-export` |
+| 满意度明细导出 | `POST /api_v2/gpt/label/project/{projectId}/download/message/satisfaction` | `report satisfaction-export` |
 
 ## 请求参数
 
-Report 通用请求与 analysis-service `FilterRequest` 对齐：
+基于毫秒时间戳的详情请求与 analysis-service `FilterRequest` 对齐：
 
 | 字段 | 规则 |
 |---|---|
@@ -99,10 +105,21 @@ Report 通用请求与 analysis-service `FilterRequest` 对齐：
 
 ### 知识、自学习与 LiveChat
 
-- `report-knowledge` 是分页接口，返回知识使用、转人工数/率等字段；翻页时保留相同时间与过滤条件。
-- `report-self-learning` 返回自学习主题统计与趋势。
-- `report-livechat` / `report-livechat-table` 是 LiveChat 售前漏斗，不应代替通用 Agent 会话记录/消息指标。
-- AI 质检使用 `YYYY-MM-DD` 参数，不使用 Report 毫秒参数；时间范围仍需与用户确认的一致。
+- `report knowledge` 是分页接口。请求支持 `page`、`size`、`source` 和 `sortBy`；排序字段包括 `TOTAL`、`ESCALATION_RATE`，方向为 `ASCEND` / `DESCEND`。响应包含 `data`、`page`、`pageSize`、`total`、`topics`、`selfCount`、`selfTotal`。每条知识记录包含 `id`、`name`、`content`、`source`、`type`、`status`、`total`、`escalation`、`escalationRate`、`script`；点击数量时用该行 `script` 下钻。
+- `report knowledge-export` 提交当前筛选范围的异步导出任务。接口只表示任务已提交；要等下载中心成功后才能声称文件可用。
+- `report self-learning` 返回自学习主题统计与趋势；其中的 `script` 用于周粒度会话下钻。详情页还会用 `report transcript` 并传 `knowledgeType=QA` 获取 QA 知识相关工单。
+- `report livechat` 返回售前漏斗和意图分布；`report livechat-table` 使用 `page: {page, size}` 分页，行内 `script`、`intentRecommendCountScript`、`productShowCardsScript`、`clickAddToCartScript`、`clickCartCheckoutScript` 分别用于会话下钻。
+- AI 质检使用 `YYYY-MM-DD` 参数。`report inspection-tags` 和 `report inspection-tags-history` 的各标签/日期项包含 `chatIds`，可直接下钻对应会话；`report inspection-export` 提交异步导出。
+
+### AI 标签
+
+`report tag-distribution` 使用毫秒 `beginTimestamp` / `endTimestamp`，并支持 `treeId`、`taskId`、`level`、`tag`、`size`。当前页面先选标签组 `treeId`，再以树或列表展示同一响应。
+
+返回节点包含 `id`、`treeId`、`parentId`、`nodeLevel`、`nodeName`、`nodeDescribe`、`path`、`isTag`、`children`、`count`、`rate`、`aiReplyRate`、`chatIds`。`chatIds` 是详情下钻依据；不能从 `count` 反推会话 ID。
+
+### 转人工原因
+
+`report escalation` 返回原因树和 `script`；详情页同时查询 `DAY` 主列表，并可查询周趋势。三级原因点击后调用 `report escalation-drilldown`，传 `reason`、`pageIndex`、`pageSize`。响应中的明细 `script` 继续用于收件箱下钻。
 
 ## 失败与异常数据
 

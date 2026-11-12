@@ -12,6 +12,11 @@ const PATHS = {
   "first-response": "first-response",
   "return-retention": "return-retention",
   "inspection-results": "inspection-results",
+  "inspection-results-by-type": "inspection-results/by-type",
+  "intent-top": "intents/top",
+  "agent-top": "agents/top",
+  "api-calls": "api-calls",
+  "api-calls-summary": "api-calls/summary",
 } as const;
 
 export type AnalyticsAction = keyof typeof PATHS | "inbox-scripts";
@@ -37,7 +42,7 @@ async function requestBody(action: string, args: string[]) {
   if (startDate > endDate) throw new Error("--start-date must not be after --end-date");
 
   const body: Record<string, string | number> = { startDate, endDate };
-  const numeric = (field: "botId" | "intentId" | "agentId", name: string) => {
+  const numeric = (field: "botId" | "intentId" | "agentId" | "topN" | "toolId", name: string) => {
     const raw = option(args, name) ?? supplied[field];
     if (raw === undefined) return;
     const value = Number(raw);
@@ -48,6 +53,8 @@ async function requestBody(action: string, args: string[]) {
   numeric("botId", "--bot-id");
   numeric("intentId", "--intent-id");
   numeric("agentId", "--agent-id");
+  numeric("topN", "--top-n");
+  numeric("toolId", "--tool-id");
 
   const touchPoint =
     option(args, "--channel") ?? option(args, "--touch-point") ?? supplied.touchPoint;
@@ -55,6 +62,12 @@ async function requestBody(action: string, args: string[]) {
     if (typeof touchPoint !== "string" || !touchPoint.trim())
       throw new Error("--channel must be a non-empty string");
     body.touchPoint = touchPoint;
+  }
+  const timeType = option(args, "--time-type") ?? supplied.timeType;
+  if (timeType !== undefined) {
+    if (timeType !== "MESSAGE_CREATED_AT" && timeType !== "TICKET_CREATED_AT")
+      throw new Error("--time-type must be MESSAGE_CREATED_AT or TICKET_CREATED_AT");
+    body.timeType = timeType;
   }
   return body;
 }

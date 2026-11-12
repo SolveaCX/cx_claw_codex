@@ -225,7 +225,7 @@ export const resources = {
     list: action(
       "list-transcripts",
       "List transcripts",
-      "[--page <number>] [--page-size <number>] [--begin-ts <milliseconds>] [--end-ts <milliseconds>] [--data <json> | --data-file <path>]",
+      "[--page <number>] [--page-size <number>] [--begin-ts <milliseconds>] [--end-ts <milliseconds>] [--script <json>] [--chat-ids <id,id,...>] [--data <json> | --data-file <path>]",
     ),
     get: action("get-transcript", "Get one transcript", "--chat-id <chat-id>"),
     context: action(
@@ -284,37 +284,57 @@ export const resources = {
       "Query inspection metrics",
       "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--channel <channel>] [--bot-id <bot-id>]",
     ),
+    "inspection-results-by-type": directAction(
+      "Query inspection metrics grouped by result type",
+      "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD>",
+    ),
+    "intent-top": directAction(
+      "Query top intents",
+      "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--top-n <number>] [--channel <channel>] [--bot-id <bot-id>]",
+    ),
+    "agent-top": directAction(
+      "Query top agents",
+      "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--top-n <number>] [--channel <channel>] [--bot-id <bot-id>]",
+    ),
+    "api-calls": directAction(
+      "Query tool/API call trends and drill-down scripts",
+      "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--tool-id <id>] [--channel <channel>] [--bot-id <bot-id>]",
+    ),
+    "api-calls-summary": directAction(
+      "Query tool/API call summary",
+      "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--top-n <number>] [--channel <channel>] [--bot-id <bot-id>]",
+    ),
     "inbox-scripts": directAction("Get Agent inbox drill-down scripts"),
   },
   report: {
     transcript: reportAction(
       "transcript",
-      "Query legacy report ticket metrics",
+      "Query ticket detail metrics used by Agent Analytics",
       "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--channel <channel>] [--date-unit <DAY|WEEK|TOTAL>]",
     ),
     message: reportAction(
       "message",
-      "Query legacy report message metrics",
+      "Query message detail metrics used by Agent Analytics",
       "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--channel <channel>] [--date-unit <DAY|WEEK|TOTAL>]",
     ),
     agent: reportAction(
       "agent",
-      "Query legacy report agent metrics",
+      "Query agent detail metrics used by Agent Analytics",
       "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--agent-id <id>] [--channel <channel>] [--date-unit <DAY|WEEK|TOTAL>]",
     ),
     intent: reportAction(
       "intent",
-      "Query legacy report intent metrics",
+      "Query intent detail metrics used by Agent Analytics",
       "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--intent-id <id>] [--channel <channel>] [--date-unit <DAY|WEEK|TOTAL>]",
     ),
     satisfaction: reportAction(
       "satisfaction",
-      "Query legacy report satisfaction summary",
+      "Query satisfaction summary",
       "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--channel <channel>]",
     ),
     "satisfaction-list": reportAction(
       "satisfaction-list",
-      "Query legacy report satisfaction details",
+      "Query satisfaction details",
       "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--page <number>] [--page-size <number>] [--assistant-role <ASSISTANT|HUMAN>] [--satisfied <true|false>]",
     ),
     feedback: reportAction(
@@ -324,17 +344,32 @@ export const resources = {
     ),
     knowledge: reportAction(
       "knowledge",
-      "Query legacy report knowledge usage",
+      "Query knowledge usage details",
       "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--page <number>] [--page-size <number>] [--sort-by <json>] [--source <source>]",
+    ),
+    "knowledge-export": reportAction(
+      "knowledge-export",
+      "Submit knowledge usage export",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--channel <channel>]",
+    ),
+    "satisfaction-export": reportAction(
+      "satisfaction-export",
+      "Submit satisfaction detail export",
+      "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--channel <channel>]",
+    ),
+    "tag-distribution": reportAction(
+      "tag-distribution",
+      "Query AI tag tree/list distribution and chatIds",
+      "--begin-ts <ms> --end-ts <ms> [--tree-id <id>] [--task-id <id>] [--level <number>] [--tag <name>] [--page-size <number>]",
     ),
     escalation: reportAction(
       "escalation",
-      "Query legacy report escalation reasons",
+      "Query escalation reasons",
       "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--date-unit <DAY|WEEK>] [--bot-id <id>] [--channel <channel>]",
     ),
     "escalation-drilldown": reportAction(
       "escalation-drilldown",
-      "Query legacy report escalation drilldown",
+      "Query escalation reason drilldown",
       "--begin-ts <ms> --end-ts <ms> --reason <reason> [--time-offset <hours>] [--page <number>] [--page-size <number>]",
     ),
     "agent-weekly-graph": reportAction(
@@ -344,27 +379,42 @@ export const resources = {
     ),
     "self-learning": reportAction(
       "self-learning",
-      "Query legacy report self-learning metrics",
+      "Query self-learning metrics",
       "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--bot-id <id>] [--channel <channel>]",
     ),
     livechat: reportAction(
       "livechat",
-      "Query legacy LiveChat report summary",
+      "Query LiveChat report summary",
       "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>]",
     ),
     "livechat-table": reportAction(
       "livechat-table",
-      "Query legacy LiveChat report details",
+      "Query LiveChat report details",
       "--begin-ts <ms> --end-ts <ms> [--time-offset <hours>] [--page <number>] [--page-size <number>]",
     ),
     inspection: reportAction(
       "inspection",
-      "Query legacy inspection report summary",
+      "Query inspection report summary",
       "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--dimension <dimension>]",
     ),
     "inspection-history": reportAction(
       "inspection-history",
-      "Query legacy inspection report history",
+      "Query inspection report history",
+      "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--dimension <dimension>]",
+    ),
+    "inspection-tags": reportAction(
+      "inspection-tags",
+      "Query inspection tag distribution and chatIds",
+      "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--dimension <dimension>]",
+    ),
+    "inspection-tags-history": reportAction(
+      "inspection-tags-history",
+      "Query inspection tag trend and chatIds",
+      "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--dimension <dimension>]",
+    ),
+    "inspection-export": reportAction(
+      "inspection-export",
+      "Submit inspection report export",
       "--start-date <YYYY-MM-DD> --end-date <YYYY-MM-DD> [--dimension <dimension>]",
     ),
   },

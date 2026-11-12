@@ -12,6 +12,9 @@ const PATHS = {
   "satisfaction-list": "/api_v2/as_bot/statement/satisfaction/message",
   feedback: "/api_v2/as_bot/statement/feedback",
   knowledge: "/api_v2/as_bot/statement/knowledge",
+  "knowledge-export": "/api_v2/gpt/label/project/{projectId}/download/knowledge",
+  "satisfaction-export": "/api_v2/gpt/label/project/{projectId}/download/message/satisfaction",
+  "tag-distribution": "/api_v2/qa_bot/label/project/{projectId}/report/distribution",
   escalation: "/api_v2/as_bot/statement/transcript/reason2",
   "escalation-drilldown": "/api_v2/as_bot/statement/transcript/reason/three/level",
   "agent-weekly-graph": "/api_v2/as_bot/statement/graph/agent",
@@ -20,6 +23,9 @@ const PATHS = {
   "livechat-table": "/api_v2/as_bot/livechat/report/table",
   inspection: "/api_v2/intelli/inspection/ticket/count",
   "inspection-history": "/api_v2/intelli/inspection/ticket/history",
+  "inspection-tags-history": "/api_v2/intelli/inspection/ticket/tagsHistory",
+  "inspection-tags": "/api_v2/intelli/inspection/ticket/tagsList",
+  "inspection-export": "/api_v2/gpt/{projectId}/export/async",
 } as const;
 
 export type ReportAction = keyof typeof PATHS;
@@ -105,6 +111,34 @@ async function inspectionBody(args: string[], action: ReportAction) {
   };
 }
 
+async function tagDistributionBody(args: string[]) {
+  const supplied = await jsonData(args, false);
+  const begin = option(args, "--begin-ts") ?? supplied.beginTimestamp;
+  const end = option(args, "--end-ts") ?? supplied.endTimestamp;
+  if (begin === undefined || end === undefined)
+    throw new Error(
+      "report tag-distribution requires --begin-ts <milliseconds> and --end-ts <milliseconds>",
+    );
+  const body: Record<string, unknown> = {
+    ...supplied,
+    beginTimestamp: Number(begin),
+    endTimestamp: Number(end),
+  };
+  const optionalNumbers: Array<[string, string]> = [
+    ["treeId", "--tree-id"],
+    ["taskId", "--task-id"],
+    ["level", "--level"],
+    ["size", "--page-size"],
+  ];
+  for (const [field, name] of optionalNumbers) {
+    const value = option(args, name);
+    if (value !== undefined) body[field] = Number(value);
+  }
+  const tag = option(args, "--tag");
+  if (tag !== undefined) body.tag = tag;
+  return body;
+}
+
 export async function runReportAction(
   session: Session,
   action: string | undefined,
@@ -112,17 +146,25 @@ export async function runReportAction(
 ) {
   if (!isReportAction(action)) throw new Error(`unknown report action: ${action ?? "<missing>"}`);
   const client = new SolveaClient(session);
+  const inspectionAction = action.startsWith("inspection");
   const body =
-    action === "inspection" || action === "inspection-history"
-      ? await inspectionBody(args, action)
-      : await legacyBody(args, action);
+    action === "tag-distribution"
+      ? await tagDistributionBody(args)
+      : inspectionAction
+        ? await inspectionBody(args, action)
+        : await legacyBody(args, action);
+  const pathTemplate = PATHS[action];
+  const needsProject =
+    pathTemplate.includes("{projectId}") || (!inspectionAction && action !== "tag-distribution");
+  const projectId = needsProject ? Number(await client.projectId()) : undefined;
+  const path = pathTemplate.replace("{projectId}", String(projectId));
   const result = await client.rawCall(
     "POST",
-    PATHS[action],
-    action.startsWith("inspection")
+    path,
+    inspectionAction || action === "tag-distribution"
       ? body
       : {
-          projectId: Number(await client.projectId()),
+          projectId: projectId!,
           ...body,
         },
   );

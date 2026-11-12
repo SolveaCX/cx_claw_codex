@@ -46,6 +46,11 @@ describe("analytics resource commands", () => {
       "first-response": "first-response",
       "return-retention": "return-retention",
       "inspection-results": "inspection-results",
+      "inspection-results-by-type": "inspection-results/by-type",
+      "intent-top": "intents/top",
+      "agent-top": "agents/top",
+      "api-calls": "api-calls",
+      "api-calls-summary": "api-calls/summary",
     };
     for (const [action, endpoint] of Object.entries(actions)) {
       requests.length = 0;
@@ -83,6 +88,37 @@ describe("analytics resource commands", () => {
     expect(request?.url).toEndWith("/api_v2/as_bot/chat-report/inbox-scripts");
     expect(request?.init?.method).toBe("GET");
     expect(request?.init?.body).toBeUndefined();
+  });
+
+  test("forwards ranking, tool and time-field filters", async () => {
+    let request: { url: string; init?: RequestInit } | undefined;
+    globalThis.fetch = (async (input, init) => {
+      request = { url: String(input), init };
+      return new Response(JSON.stringify({}), { status: 200 });
+    }) as typeof fetch;
+    console.log = () => {};
+
+    await runAnalyticsAction(session, "api-calls-summary", [
+      "--start-date",
+      "2026-11-01",
+      "--end-date",
+      "2026-11-12",
+      "--top-n",
+      "5",
+      "--tool-id",
+      "101",
+      "--time-type",
+      "TICKET_CREATED_AT",
+    ]);
+
+    expect(request?.url).toEndWith("/api_v2/as_bot/chat-report/api-calls/summary");
+    expect(JSON.parse(String(request?.init?.body))).toEqual({
+      startDate: "2026-11-01",
+      endDate: "2026-11-12",
+      topN: 5,
+      toolId: 101,
+      timeType: "TICKET_CREATED_AT",
+    });
   });
 
   test("rejects flat and unknown actions", async () => {
