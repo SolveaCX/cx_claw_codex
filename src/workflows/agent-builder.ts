@@ -15,7 +15,11 @@ import { createHash, createHmac, randomUUID } from "node:crypto";
 import { open, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { compileChatflowSource } from "./chatflow-compiler.js";
-import { validateChatflowGraph, validateToolParameters } from "./chatflow-validator.js";
+import {
+  validateChatflowGraph,
+  validateToolEdgeCompatibility,
+  validateToolParameters,
+} from "./chatflow-validator.js";
 
 type JsonObject = Record<string, unknown>;
 
@@ -174,6 +178,9 @@ async function remoteValidation(client: SolveaClient, graph: JsonObject, bind = 
       else warnings.push(`queryPluginDetails: plugin ${result.value.id} detail was not returned`);
     });
     errors.push(...validateToolParameters(graph, resolved));
+    const toolEdges = validateToolEdgeCompatibility(graph, resolved);
+    errors.push(...toolEdges.errors);
+    warnings.push(...toolEdges.warnings);
   }
   if (templates) {
     const byId = new Map(templates.map((item) => [String(item.id ?? item.templateId), item]));
