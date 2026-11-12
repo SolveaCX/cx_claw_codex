@@ -1,8 +1,6 @@
 # 合并 qa_plan 并上传
 
-→ 通用质量规则见 `/skills/kb-builder/references/qa-quality.md`（必读）
-
-各来源（网站 / 帮助中心 / FAQ / PDF / 工单）独立提取出 QA 后，按下面流程上传。
+各来源准备好 QA 计划后，按下面流程校验、预览并上传；本阶段不重新提炼、改写或按业务话题过滤内容。
 
 ## 工作流：分批写 tmp，脚本自动合并
 
@@ -62,6 +60,8 @@
 
 4. **被截的兜底**：如果某次 `write_file` 报 `content: Field required` 或日志出现
    `output truncated by max_tokens`，**立刻把这批数量减半重写**。这是 max_tokens 截断信号。
+
+   **单条正文超过 4 KB**：4 KB 是单次模型写入建议，不是单条 QA 或接口的长度上限。可从完整正文文件读取并通过 JSON 序列化生成计划，不为满足分批大小而拆条或截短答案。接口实际返回长度限制时，报告具体错误并确认处理方式。
 
 5. **合并 + dry-run**（脚本会把合并结果写到 `/workspace/outputs/kb-builder/qa_plan_{ts}.json` 留档）：
 

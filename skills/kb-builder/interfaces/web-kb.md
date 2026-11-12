@@ -2,8 +2,7 @@
 
 公开能力：从网站、产品站、帮助中心或文档站构建知识库目录与 QA，也支持在确认“保留网页原文”后创建网页资料。
 
-网页地址先做模式确认：保留原始网页时使用
-`node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-source-documents --plan-file <plan> --execute`；选择整理问答时才进入下面的 crawl → extract → import-qa 流程。
+先按 [`../SKILL.md` 的“来源模式”](../SKILL.md#来源模式)选择处理路径；下面的 crawl → extract → import-qa 流程仅用于提炼问答。
 
 ## Modes
 
