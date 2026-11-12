@@ -82,6 +82,39 @@ describe("cross-module API migration contracts", () => {
     ).toBeNumber();
   });
 
+  test("deep-merges generic Agent patches without dropping existing metadata", async () => {
+    const requests = capture((request) =>
+      request.url.endsWith("/queryAgent")
+        ? [
+            {
+              id: 7,
+              type: "CHAT_FLOW",
+              name: "Support flow",
+              meta: { chatFlowGlobalPrompt: "Old role", maxInvokeCount: 30 },
+            },
+          ]
+        : { success: true },
+    );
+    await new SolveaClient(session).patchAgent("7", {
+      meta: { chatFlowGlobalPrompt: "New role" },
+    });
+    expect(requests.at(-1)?.body).toMatchObject({
+      agentId: 7,
+      projectId: 302,
+      name: "Support flow",
+      meta: { chatFlowGlobalPrompt: "New role", maxInvokeCount: 30 },
+    });
+  });
+
+  test("rejects a generic Agent patch that changes the target id", async () => {
+    capture((request) =>
+      request.url.endsWith("/queryAgent") ? [{ id: 7, type: "CHAT_FLOW" }] : {},
+    );
+    await expect(new SolveaClient(session).patchAgent("7", { agentId: 8 })).rejects.toThrow(
+      "agentId cannot change the target Agent id",
+    );
+  });
+
   test("sends an idempotency key and never retries agent creation", async () => {
     let createAttempts = 0;
     let headers: Headers | undefined;

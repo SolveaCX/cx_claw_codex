@@ -72,6 +72,44 @@ describe("native Solvea command registry", () => {
     });
   });
 
+  test("applies partial updates through the generic Agent command", async () => {
+    const requests: Array<{ url: string; body?: Record<string, unknown> }> = [];
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input);
+      const body = init?.body ? JSON.parse(String(init.body)) : undefined;
+      requests.push({ url, body });
+      const response = url.endsWith("/api_v2/gpt/bots")
+        ? [{ projectId: 302 }]
+        : url.endsWith("/queryAgent")
+          ? [
+              {
+                id: 7,
+                type: "CHAT_FLOW",
+                name: "Support flow",
+                meta: { chatFlowGlobalPrompt: "Old role", maxInvokeCount: 30 },
+              },
+            ]
+          : { success: true };
+      return new Response(JSON.stringify(response), { status: 200 });
+    }) as typeof fetch;
+
+    await runSolveaCommand(session, "update-agent", [
+      "--id",
+      "7",
+      "--data",
+      JSON.stringify({ meta: { chatFlowGlobalPrompt: "New role" } }),
+    ]);
+
+    expect(requests.at(-1)?.url).toEndWith("/api_v2/gpt/ap/updateAgent");
+    expect(requests.at(-1)?.body).toMatchObject({
+      id: 7,
+      agentId: 7,
+      projectId: 302,
+      name: "Support flow",
+      meta: { chatFlowGlobalPrompt: "New role", maxInvokeCount: 30 },
+    });
+  });
+
   test("keeps data filters and lets direct knowledge options override them", async () => {
     let requestBody: unknown;
     globalThis.fetch = (async (input, init) => {

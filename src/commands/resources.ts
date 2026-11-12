@@ -23,7 +23,11 @@ export const resources = {
     list: action("list-agents", "List agents", "[--category text|voice]"),
     get: action("get-agent", "Get one agent", "--id <agent-id>"),
     create: action("create-agent", "Create an agent", "--data <json> | --data-file <path>"),
-    update: action("update-agent", "Update an agent", "--data <json> | --data-file <path>"),
+    update: action(
+      "update-agent",
+      "Update an agent",
+      "--id <agent-id> (--data <json> | --data-file <path>)",
+    ),
     "get-chatflow": action("get-chatflow-graph", "Get an agent chatflow", "--agent-id <agent-id>"),
   },
   intent: {
