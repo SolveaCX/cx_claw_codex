@@ -4,7 +4,43 @@ import { runAgentBuilder, validateGraph } from "./agent-builder.js";
 import { compileChatflowSource } from "./chatflow-compiler.js";
 import { runDelivery, runPoc } from "./delivery.js";
 import { runKbBuilder } from "./kb-builder.js";
-import { validateToolParameters } from "./chatflow-validator.js";
+import { validateToolEdgeCompatibility, validateToolParameters } from "./chatflow-validator.js";
+
+function toolRoutingGraph(enableActionStatus: boolean, sourceHandle: string): any {
+  return {
+    nodes: [
+      { id: "start", data: { category: "START", title: "Start", config: {} } },
+      {
+        id: "tool",
+        data: {
+          category: "TOOL",
+          title: "lookup",
+          config: { tool: { id: 7, enableActionStatus } },
+        },
+      },
+      { id: "finish", data: { category: "FINISH", title: "Finish", config: {} } },
+    ],
+    edges: [
+      {
+        id: "e1",
+        source: "start",
+        sourceHandle: "SOURCE",
+        target: "tool",
+        targetHandle: "TARGET",
+        type: "default",
+      },
+      {
+        id: "e2",
+        source: "tool",
+        sourceHandle,
+        target: "finish",
+        targetHandle: "TARGET",
+        type: "default",
+      },
+    ],
+    variables: [],
+  };
+}
 
 describe("TypeScript workflow migrations", () => {
   test("validates graph structure without a tenant session", () => {
@@ -12,8 +48,111 @@ describe("TypeScript workflow migrations", () => {
     expect(validateGraph({ nodes: [{ id: "a" }, { id: "a" }], edges: [] }).valid).toBe(false);
   });
 
-  test("accepts fixed CUSTOMIZE tool parameters supplied by the plugin", () => {
+  test("ignores NOTE nodes and accepts legacy graphs without variables", () => {
+    const graph = toolRoutingGraph(false, "SOURCE");
+    delete graph.variables;
+    graph.nodes.push({
+      id: "note",
+      type: "CUSTOM_NOTE",
+      data: { category: "NOTE", title: "" },
+    });
+
+    expect(validateGraph(graph)).toMatchObject({ valid: true, errors: [] });
+  });
+
+  test("allows a terminal AGENT without a SOURCE edge", () => {
     const graph = {
+      nodes: [
+        { id: "start", data: { category: "START", config: {} } },
+        {
+          id: "agent",
+          data: {
+            category: "AGENT",
+            title: "answer",
+            config: {
+              agentData: { prompt: "Answer", displayPrompt: "Answer", usedPlugins: [] },
+            },
+          },
+        },
+      ],
+      edges: [
+        {
+          id: "e1",
+          source: "start",
+          sourceHandle: "SOURCE",
+          target: "agent",
+          targetHandle: "TARGET",
+          type: "default",
+        },
+      ],
+    };
+
+    const result = validateGraph(graph);
+    expect(result.valid).toBe(true);
+    expect(result.warnings).toContain(
+      "AGENT 'answer' has no SOURCE outbound edge — confirm it's a terminal node",
+    );
+  });
+
+  test("accepts TOOL status edges and legacy empty SOURCE handles", () => {
+    const graph = toolRoutingGraph(true, "OK");
+    expect(validateGraph(graph)).toMatchObject({ valid: true });
+
+    graph.nodes[1].data.config.tool.enableActionStatus = false;
+    delete graph.edges[1].sourceHandle;
+    expect(validateGraph(graph)).toMatchObject({ valid: true });
+  });
+
+  test("rejects TOOL edges that cannot match the configured routing mode", () => {
+    const graph = toolRoutingGraph(true, "SOURCE");
+    expect(validateGraph(graph).errors).toContain(
+      "TOOL 'lookup' has no action-status outbound edge",
+    );
+
+    graph.nodes[1].data.config.tool.enableActionStatus = false;
+    graph.edges[1].sourceHandle = "MADE_UP_STATUS";
+    expect(validateGraph(graph).errors).toContain("TOOL 'lookup' missing SOURCE edge");
+  });
+
+  test("reports current plugin status drift as warnings for old graphs", () => {
+    const graph = toolRoutingGraph(true, "OK");
+    graph.edges.push({
+      id: "e3",
+      source: "tool",
+      sourceHandle: "LEGACY_FAILURE",
+      target: "finish",
+      targetHandle: "TARGET",
+      type: "default",
+    });
+    const plugin = {
+      id: 7,
+      meta: {
+        externalHttpCallConfig: {
+          actionStatuses: [{ name: "OK" }, { name: "FAILED" }],
+        },
+      },
+    };
+    expect(validateToolEdgeCompatibility(graph, [plugin])).toEqual({
+      errors: [],
+      warnings: [
+        "TOOL 'lookup' has no edge for current action status(es): FAILED",
+        "TOOL 'lookup' keeps legacy or unknown action status edge(s): LEGACY_FAILURE",
+      ],
+    });
+  });
+
+  test("requires HUMAN_REVIEW MESSAGE edge when midway messages are handled", () => {
+    const graph = toolRoutingGraph(false, "SOURCE");
+    graph.nodes[1].data.category = "HUMAN_REVIEW";
+    graph.nodes[1].data.title = "review";
+    graph.nodes[1].data.config = {
+      humanReview: { method: "fill", description: "Review", midwayMessageStrategy: "handle" },
+    };
+    expect(validateGraph(graph).errors).toContain("HUMAN_REVIEW 'review' missing MESSAGE edge");
+  });
+
+  test("accepts fixed CUSTOMIZE tool parameters supplied by the plugin", () => {
+    const graph: any = {
       nodes: [
         {
           id: "tool",
@@ -21,8 +160,10 @@ describe("TypeScript workflow migrations", () => {
             category: "TOOL",
             title: "Amazon_tracking",
             config: {
-              tool: { id: 7 },
-              inputParams: [{ name: "order_ids", variableSelector: ["SYSTEM", "Order", 1] }],
+              tool: {
+                id: 7,
+                inputParams: [{ name: "order_ids", variableSelector: ["SYSTEM", "Order", 1] }],
+              },
             },
           },
         },
@@ -53,6 +194,10 @@ describe("TypeScript workflow migrations", () => {
       },
     };
     expect(validateToolParameters(graph, [plugin])).toEqual([]);
+
+    graph.nodes[0].data.config.inputParams = graph.nodes[0].data.config.tool.inputParams;
+    delete graph.nodes[0].data.config.tool.inputParams;
+    expect(validateToolParameters(graph, [plugin])).toEqual([]);
   });
 
   test("reports missing fixed and nested required tool parameters", () => {
@@ -64,8 +209,10 @@ describe("TypeScript workflow migrations", () => {
             category: "TOOL",
             title: "lookup",
             config: {
-              tool: { id: 8 },
-              inputParams: [{ name: "address", children: [{ name: "city", text: "Seattle" }] }],
+              tool: {
+                id: 8,
+                inputParams: [{ name: "address", children: [{ name: "city", text: "Seattle" }] }],
+              },
             },
           },
         },
