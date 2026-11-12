@@ -122,4 +122,29 @@ describe("native Solvea command registry", () => {
 
     expect(requests.at(-1)).toEndWith("/sns_v1/project/302/document/8");
   });
+
+  test("forwards report drill-down scripts and exact chat IDs", async () => {
+    let requestBody: unknown;
+    globalThis.fetch = (async (input, init) => {
+      if (String(input).endsWith("/api_v2/gpt/bots"))
+        return new Response(JSON.stringify([{ projectId: 302 }]), { status: 200 });
+      requestBody = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({ list: [] }), { status: 200 });
+    }) as typeof fetch;
+
+    await runSolveaCommand(session, "list-transcripts", [
+      "--script",
+      '{"term":{"handoff":true}}',
+      "--chat-ids",
+      "c1,c2",
+    ]);
+
+    expect(requestBody).toEqual({
+      pageIndex: 1,
+      pageSize: 50,
+      debug: false,
+      script: '{"term":{"handoff":true}}',
+      chatIds: ["c1", "c2"],
+    });
+  });
 });

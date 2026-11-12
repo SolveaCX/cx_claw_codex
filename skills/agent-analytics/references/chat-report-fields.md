@@ -1,6 +1,6 @@
 # ChatReport (Agent 看板) 字段与接口
 
-本文描述系统当前正式的 `/chatReport`（数据分析 - Agent 看板）页面使用的 `chat-report/*` 接口。默认所有 Agent Analytics 统计查询都使用这些接口；只有用户明确要求旧版 `/report`、`statement` 或“返回旧版”时才使用标记为旧版的 `report-fields.md`。原实验性 `/dashboard` 页面已下线，不得再对接到其接口。
+本文描述系统当前正式的 `/chatReport`（数据分析 - Agent 看板）页面使用的 `chat-report/*` 接口。标签、知识、自学习、转人工、LiveChat、满意度明细、质检详情和导出继续使用 `report-fields.md` 中列出的当前详情页接口。原实验性 `/dashboard` 页面已下线，不得再对接到其接口。
 
 ## 指标命令与字段对照
 
@@ -15,10 +15,17 @@
 | `analytics satisfaction` | 服务质量（CSAT 满意度与点赞点踩） | `--start-date`、`--end-date` | `--bot-id`、`--touch-point` | 满意度 |
 | `analytics first-response` | 服务质量（首次响应时效） | `--start-date`、`--end-date` | `--bot-id`、`--touch-point` | 首次响应 |
 | `analytics return-retention` | 服务收益（RMA 挽回率） | `--start-date`、`--end-date` | `--bot-id`、`--touch-point` | 退货挽回与质检 |
-| `analytics inspection-results` | 风险与质检 | `--start-date`、`--end-date` | 无 | 退货挽回与质检 |
+| `analytics inspection-results` | 风险与质检趋势 | `--start-date`、`--end-date` | 无 | 每日质检结果数 |
+| `analytics inspection-results-by-type` | 风险与质检按类型汇总 | `--start-date`、`--end-date` | 无 | 日期、类型、名称、数量 |
 | `analytics intents` | 意图分布、趋势及指定意图的工单量、解决率、转人工率、消息量、回复率 | `--start-date`、`--end-date` | `--bot-id`、`--touch-point`、`--intent-id` | 日期与维度、工单计数、消息计数 |
+| `analytics intent-top` | 首页意图 Top | `--start-date`、`--end-date` | `--bot-id`、`--touch-point`、`--top-n` | `rows`、`totalCount` |
 | `analytics agents` | 智能体分布、趋势及指定 Agent 的工单量、解决率、转人工率、消息量、回复率 | `--start-date`、`--end-date` | `--bot-id`、`--touch-point`、`--agent-id` | 日期与维度、工单计数、消息计数 |
+| `analytics agent-top` | 首页 Agent Top | `--start-date`、`--end-date` | `--bot-id`、`--touch-point`、`--top-n` | `rows`、`totalCount` |
+| `analytics api-calls` | 工具调用每日趋势和工具详情 | `--start-date`、`--end-date` | `--bot-id`、`--touch-point`、`--tool-id` | 工具、状态、耗时、`script` |
+| `analytics api-calls-summary` | 工具调用汇总与 Top 工具 | `--start-date`、`--end-date` | `--bot-id`、`--touch-point`、`--top-n` | 汇总、每日总量、工具列表、`script` |
 | `analytics inbox-scripts` | 会话下钻筛选脚本 | 无 | 无 | 会话下钻脚本 |
+
+全部日期型命令还可用 `--time-type MESSAGE_CREATED_AT|TICKET_CREATED_AT` 指定统计时间字段。页面默认值由模块决定；没有业务依据时不要自行覆盖。
 
 ## 返回字段说明
 
@@ -112,6 +119,28 @@
 | `SATISFACTION` | `RECOVERED_TICKET` 已有综合评价的会话。 |
 
 下钻脚本描述指标条件，使用时仍需带上本次查询的时间和业务筛选条件。
+
+### 意图与 Agent Top
+
+- 意图行：`intentId`、`intentName`、`totalTicketCount`、`rate`。
+- Agent 行：`agentId`、`agentName`、`totalTicketCount`、`rate`。
+- `totalCount` 是当前筛选范围的总工单数；`rate` 是该行工单数占总量的比例。
+- Top 只用于首页排行。查看某个维度详情时，继续调用 `analytics intents` 或 `analytics agents` 并传对应 ID。
+
+### 工具调用
+
+`analytics api-calls-summary` 返回 `toolCount`、`totalCount`、`successCount`、`failedCount`、`unknownCount`、`successRate`、`avgLatencyMs`、`successAvgLatencyMs`、`dailyTotals`、`items` 和总量 `script`。
+
+`items[]` 与 `analytics api-calls` 的每日记录包含：
+
+- `toolId`、`toolName`、`toolType`
+- `totalCount`、`ticketCount`
+- `successCount`、`failedCount`、`unknownCount`、`successRate`
+- `avgLatencyMs`、`successAvgLatencyMs`、`maxLatencyMs`
+- `statusDistribution`
+- `script`、`failedScript`
+
+`statusDistribution` 的每个状态可返回 `{count, script}`。详情页点击总调用量、单工具或状态分布时，使用对应 `script` 进入收件箱；接口没有独立分页或导出能力，不得声称可以导出工具调用报表。
 
 ## 汇总与核心公式
 

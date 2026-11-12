@@ -45,6 +45,8 @@ async function transcriptFilters(args: string[]): Promise<JsonObject> {
     ["agentId", "--agent-id", Number],
     ["intentId", "--intent-id", Number],
     ["keyword", "--keyword", String],
+    ["script", "--script", String],
+    ["chatIds", "--chat-ids", (value) => value.split(",").filter(Boolean)],
     ["handoff", "--handoff", (value) => value === "true"],
   ];
   for (const [field, name, convert] of optional) {
