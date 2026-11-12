@@ -17,7 +17,6 @@ if (baseRef !== "main") {
 }
 
 const releaseMatch = /^release\/v(\d+\.\d+\.\d+)$/.exec(headRef);
-const developmentMatch = /^cxj\/\d{6}\/[a-z0-9][a-z0-9-]*$/.test(headRef);
 
 if (releaseMatch) {
   const version = releaseMatch[1];
@@ -53,8 +52,8 @@ if (releaseMatch) {
       `release PR may only change ${allowed.join(", ")}; got ${changed.join(", ") || "none"}`,
     );
   }
-} else if (!developmentMatch) {
-  throw new Error(`branch ${headRef} must match cxj/YYMMDD/topic or release/vX.Y.Z`);
+} else if (headRef.startsWith("release/")) {
+  throw new Error(`release branch ${headRef} must match release/vX.Y.Z`);
 } else if (/^chore\(release\): 发布/.test(title)) {
   throw new Error("release PR title is only allowed on release/vX.Y.Z branches");
 }

@@ -34,7 +34,12 @@ describe("kb-builder migration contracts", () => {
   test("resolves dir_path and converts QA plan fields before upload", async () => {
     await mkdir("_tmp_/kb-builder-contracts", { recursive: true });
     const plan = `_tmp_/kb-builder-contracts/qa-${Date.now()}.json`;
-    await writeFile(plan, JSON.stringify([{ dir_path: ["test-hw"], question: "Q", answer: "A" }]));
+    // 原文转 QA 必须保留长正文、办理条件和 Markdown，不走提炼截断。
+    const answer =
+      "退款办理条件：请提供订单号并联系客服。\n\n" +
+      "完整原文段落。".repeat(1000) +
+      "\n\n![流程图](https://example.test/flow.png)\n\n| 条件 | 步骤 |\n| --- | --- |\n| 已签收 | 提交申请 |";
+    await writeFile(plan, JSON.stringify([{ dir_path: ["test-hw"], question: "Q", answer }]));
     process.env.CXCLAW_OUTPUT_DIR = "_tmp_/kb-builder-contracts/output";
     const requests: Array<{ url: string; method: string; body?: unknown }> = [];
     globalThis.fetch = (async (input, init) => {
@@ -59,7 +64,7 @@ describe("kb-builder migration contracts", () => {
     expect(requests.at(-1)?.body).toEqual([
       {
         title: "Q",
-        content: "A",
+        content: answer,
         directoryId: 31577,
         type: "QA",
         forceIndex: true,
