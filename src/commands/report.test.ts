@@ -64,6 +64,66 @@ describe("legacy report resource commands", () => {
     });
   });
 
+  test("forwards page dimension filters for every legacy report action", async () => {
+    const requests: Array<{ url: string; body: Record<string, unknown> }> = [];
+    globalThis.fetch = (async (input, init) => {
+      requests.push({
+        url: String(input),
+        body: init?.body ? JSON.parse(String(init.body)) : {},
+      });
+      return new Response(JSON.stringify([]), { status: 200 });
+    }) as typeof fetch;
+    console.log = () => {};
+
+    const actions = [
+      "transcript",
+      "message",
+      "agent",
+      "intent",
+      "satisfaction",
+      "satisfaction-list",
+      "feedback",
+      "knowledge",
+      "knowledge-export",
+      "satisfaction-export",
+      "escalation",
+      "escalation-drilldown",
+      "agent-weekly-graph",
+      "self-learning",
+      "livechat",
+      "livechat-table",
+    ] as const;
+
+    for (const action of actions) {
+      await runReportAction(session, action, [
+        "--begin-ts",
+        "1792857600000",
+        "--end-ts",
+        "1793462399999",
+        "--bot-id",
+        "7",
+        "--channel",
+        "EMAIL",
+        "--agent-id",
+        "36623",
+        "--intent-id",
+        "88",
+        "--date-unit",
+        "WEEK",
+        ...(action === "escalation-drilldown" ? ["--reason", "CALL_TOOL_MISSING_PARAM"] : []),
+      ]);
+    }
+
+    const reportRequests = requests.filter((request) => !request.url.endsWith("/api_v2/gpt/bots"));
+    expect(reportRequests).toHaveLength(actions.length);
+    for (const request of reportRequests) {
+      expect(request.body.botId).toBe(7);
+      expect(request.body.touchPoint).toBe("EMAIL");
+      expect(request.body.agentId).toBe(36623);
+      expect(request.body.firstIntentId).toBe(88);
+    }
+  });
+
   test("supports solvea-kit report endpoints missing from the old CLI", async () => {
     const requests: string[] = [];
     globalThis.fetch = (async (input) => {
