@@ -1,12 +1,12 @@
 # 单 case 测试
 
-这里的“单测”指一次测试一个 Agent。执行测试必须调用 `live_test.start`，不要通过脚本、临时 JSON 或本地状态文件自行调用 Chat 接口。
+这里的“单测”指一次测试一个指定 Agent，或从系统意图识别开始执行完整链路。执行测试必须调用 `live_test.start`，不要通过脚本、临时 JSON 或本地状态文件自行调用 Chat 接口。
 
 ## 场景路由
 
 | 场景 | 读取文档 |
 |---|---|
-| 用户指定 Agent、直接给问题、说“随便测一下”或要求继续探索 | `direct-test.md` |
+| 用户指定 Agent、要求完整链路测试、直接给问题、说“随便测一下”或要求继续探索 | `direct-test.md` |
 | 用户给出历史 ChatId，要求复测 badcase、验证修复或比较变化 | `badcase-retest.md` |
 
 先读本文件，再只读命中的场景文档。
@@ -26,11 +26,12 @@
 
 | 参数 | 必填 | 规则 |
 |---|---|---|
-| `agentId` | 是 | 目标 Agent ID。不要传名称。 |
+| `testScope` | 否 | `AGENT` 直接测试指定 Agent；`END_TO_END` 从系统意图识别、策略匹配执行到最终回复。省略时按是否提供 `agentId` 自动判断。 |
+| `agentId` | 条件必填 | `AGENT` 必填；`END_TO_END` 禁止传入。不要传名称。 |
 | `botId` | 否 | 默认使用当前 CXClaw 请求携带的 Bot ID；只有当前请求没有 Bot ID 时才向用户确认。 |
-| `flowVersion` | 否 | 仅 `CHAT_FLOW` 支持。默认省略，`live_test.start` 会调用 `chatflow/queryGraph/latest` 取得当前用户草稿或最新发布版本。`SINGLE_AGENT` 不得传入。 |
+| `flowVersion` | 否 | 仅 `AGENT + CHAT_FLOW` 支持。默认省略，`live_test.start` 会调用 `chatflow/queryGraph/latest` 取得当前用户草稿或最新发布版本。`END_TO_END` 和 `SINGLE_AGENT` 不得传入。 |
 | `touchPoint` | 否 | 默认 `LIVE_CHAT`，传入时统一使用大写值。 |
-| `case` | 二选一 | `{ "caseId"?: string, "turns": [{ "message": string }] }`。至少一轮。 |
+| `case` | 二选一 | `{ "caseId"?: string, "turns": [{ "message": string, "expected"?: object }] }`。至少一轮。 |
 | `message` | 二选一 | 灵活探索模式的一条用户问题。 |
 | `chatId` | 否 | 只在 `message` 模式继续上一轮测试对话时传入。固定 `case` 模式由工具内部维护。 |
 | `metadata` | 否 | 经用户确认后，仅追加完成测试所需的业务上下文。 |
@@ -54,6 +55,27 @@
   },
   "metadata": {"order_number": "A-1001"},
   "option": {}
+}
+```
+
+完整链路测试不传 `agentId` 和 `flowVersion`：
+
+```json
+{
+  "contextId": "<currentContextId>",
+  "testScope": "END_TO_END",
+  "case": {
+    "turns": [
+      {
+        "message": "Where is my order?",
+        "expected": {
+          "intent": "Track Shipment",
+          "strategyName": "Logistics Routing",
+          "agentId": 2584
+        }
+      }
+    ]
+  }
 }
 ```
 
@@ -81,7 +103,7 @@
 - `metadata.specified_flow_version`
 - `metadata.show_chat_flow`
 
-`live_test.start` 会固定注入 `debug=true`、`verbose=true` 和 `metadata.specified_agent_id`。`CHAT_FLOW` 额外注入 `metadata.specified_flow_version` 和 `metadata.show_chat_flow`；`SINGLE_AGENT` 不注入这两个字段。外部同名字段会被忽略，不能用它们改变测试目标。
+`live_test.start` 始终固定注入 `debug=true`、`verbose=true`。`AGENT` 注入 `metadata.specified_agent_id`，其中 `CHAT_FLOW` 额外注入 `metadata.specified_flow_version` 和 `metadata.show_chat_flow`。`END_TO_END` 只注入 `metadata.show_chat_flow`，让系统自行完成意图识别、策略匹配和 Agent 路由。外部同名字段会被忽略，不能用它们改变测试目标。
 
 CHAT_FLOW 草稿按当前用户隔离，版本号为 `-userId`。保存草稿不会递增 `meta.chatFlowVersion`；只有发布才生成新的正版本并更新该字段。因此 Agent 刚修改并保存草稿后，调用 `live_test.start` 时不用自行计算 `flowVersion`：工具会查询当前登录用户的草稿版本，并把该负数版本明确写入测试请求。若已发布且草稿已删除，工具会改用最新发布版本。只有明确回放某个历史或已发布版本时才在工具入参中显式传正版本号。
 
@@ -126,6 +148,8 @@ live_test.start
 {
   "testRunId": "ltr_xxx",
   "status": "succeeded",
+  "verdict": "PASS",
+  "testScope": "AGENT",
   "chatId": "new-test-chat-id",
   "agentId": 2584,
   "agentType": "CHAT_FLOW",
@@ -138,6 +162,8 @@ live_test.start
 ```
 
 `SINGLE_AGENT` 结果中 `agentType=SINGLE_AGENT`，不包含 `flowVersion`。
+
+`END_TO_END` 结果不包含固定的顶层 `agentId`，每轮通过 `routing` 返回实际意图、策略和 Agent，通过 `evaluation.verdict` 返回 `PASS`、`FAIL` 或 `UNJUDGED`。`status` 表示链路是否执行成功，`verdict` 表示实际路由是否符合 `expected`，两者独立判断。
 
 失败时 `status=failed` 并包含 `error`。结果过大时可能出现 `truncated=true`，但 `chatId`、轮次和消息 ID 必须保留。
 

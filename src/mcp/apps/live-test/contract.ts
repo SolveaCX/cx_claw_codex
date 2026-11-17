@@ -3,7 +3,8 @@ import { z } from "zod";
 export const LiveTestStartInputSchema = z
   .object({
     contextId: z.string().min(1),
-    agentId: z.number().int().positive(),
+    testScope: z.enum(["AGENT", "END_TO_END"]).optional(),
+    agentId: z.number().int().positive().optional(),
     botId: z.number().int().positive().optional(),
     flowVersion: z.number().int().optional(),
     touchPoint: z.string().default("LIVE_CHAT"),
@@ -11,7 +12,21 @@ export const LiveTestStartInputSchema = z
       .object({
         caseId: z.string().optional(),
         turns: z
-          .array(z.object({ message: z.string().min(1).max(20_000) }))
+          .array(
+            z.object({
+              message: z.string().min(1).max(20_000),
+              expected: z
+                .object({
+                  intentId: z.union([z.number().int(), z.string().min(1)]).optional(),
+                  intent: z.string().min(1).optional(),
+                  strategyId: z.union([z.number().int(), z.string().min(1)]).optional(),
+                  strategyName: z.string().min(1).optional(),
+                  agentId: z.number().int().positive().optional(),
+                  actionType: z.string().min(1).optional(),
+                })
+                .optional(),
+            }),
+          )
           .min(1)
           .max(10),
       })
@@ -22,11 +37,18 @@ export const LiveTestStartInputSchema = z
     option: z.record(z.string(), z.unknown()).default({}),
   })
   .superRefine((value, context) => {
+    const testScope = value.testScope ?? (value.agentId === undefined ? "END_TO_END" : "AGENT");
     if (Boolean(value.case) === Boolean(value.message))
       context.addIssue({
         code: "custom",
         message: "case.turns 和 message 必须且只能提供一个",
       });
+    if (testScope === "AGENT" && value.agentId === undefined)
+      context.addIssue({ code: "custom", message: "AGENT 测试必须提供 agentId" });
+    if (testScope === "END_TO_END" && value.agentId !== undefined)
+      context.addIssue({ code: "custom", message: "END_TO_END 测试不能提供 agentId" });
+    if (testScope === "END_TO_END" && value.flowVersion !== undefined)
+      context.addIssue({ code: "custom", message: "END_TO_END 测试不能提供 flowVersion" });
     const messageChars =
       value.case?.turns.reduce((total, turn) => total + turn.message.length, 0) ??
       value.message?.length ??
@@ -58,6 +80,53 @@ export const LiveTestTurnSchema = z.object({
   completedAt: z.number().optional(),
   messageId: z.string().optional(),
   error: z.string().optional(),
+  expected: z
+    .object({
+      intentId: z.union([z.number().int(), z.string()]).optional(),
+      intent: z.string().optional(),
+      strategyId: z.union([z.number().int(), z.string()]).optional(),
+      strategyName: z.string().optional(),
+      agentId: z.number().int().optional(),
+      actionType: z.string().optional(),
+    })
+    .optional(),
+  routing: z
+    .object({
+      originIntent: z.string().optional(),
+      intents: z
+        .array(z.object({ id: z.unknown().optional(), name: z.string().optional() }))
+        .default([]),
+      intent: z.string().optional(),
+      strategy: z
+        .object({
+          id: z.unknown().optional(),
+          name: z.string().optional(),
+          actionType: z.string().optional(),
+        })
+        .optional(),
+      agent: z
+        .object({
+          id: z.unknown().optional(),
+          name: z.string().optional(),
+          type: z.string().optional(),
+        })
+        .optional(),
+      flowVersion: z.number().int().optional(),
+    })
+    .optional(),
+  evaluation: z
+    .object({
+      verdict: z.enum(["PASS", "FAIL", "UNJUDGED"]),
+      checks: z.array(
+        z.object({
+          field: z.string(),
+          expected: z.unknown(),
+          actual: z.unknown(),
+          passed: z.boolean(),
+        }),
+      ),
+    })
+    .optional(),
   outcome: z
     .object({
       actionType: z.string().optional(),
@@ -75,7 +144,9 @@ export const LiveTestSnapshotSchema = z.object({
   profileId: z.string(),
   accountId: z.number().int(),
   environment: z.string(),
-  agentId: z.number().int(),
+  testScope: z.enum(["AGENT", "END_TO_END"]).default("AGENT"),
+  verdict: z.enum(["PASS", "FAIL", "UNJUDGED"]).default("UNJUDGED"),
+  agentId: z.number().int().optional(),
   agentName: z.string().optional(),
   agentType: z.enum(["CHAT_FLOW", "SINGLE_AGENT"]).optional(),
   botId: z.number().int().optional(),

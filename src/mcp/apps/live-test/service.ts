@@ -30,13 +30,15 @@ export class LiveTestService {
       throw new Error("tenant session is unavailable");
     if (this.activeContexts.has(input.contextId))
       throw new Error(`context ${input.contextId} already has an active LiveTest`);
-    const turns = input.case?.turns.map((turn) => turn.message) ?? [input.message!];
+    const testScope = input.testScope ?? (input.agentId === undefined ? "END_TO_END" : "AGENT");
+    const turns = input.case?.turns ?? [{ message: input.message! }];
     const snapshot = await this.store.create(
       {
         contextId: input.contextId,
         profileId: session.runtimeContext.profileId,
         accountId: session.tenant.accountId,
         environment: session.tenant.environment,
+        testScope,
         agentId: input.agentId,
       },
       turns,

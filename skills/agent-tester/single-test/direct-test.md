@@ -1,12 +1,14 @@
 # 直接测试
 
-用户只给 Agent 名称时，先查询并精确匹配：
+用户要求测试指定 Agent 时，先查询并精确匹配：
 
 ```bash
 node "<PLUGIN_ROOT>/plugin-cli.mjs" agent list --pretty
 ```
 
 默认使用定位的 `agentId`、当前 Bot ID 和 `LIVE_CHAT`。`CHAT_FLOW` 使用当前用户草稿或最新发布版本；`SINGLE_AGENT` 直接使用当前 Agent 配置。用户说“随便测一下”但未给问题时，使用“你好，请介绍一下你可以帮助我处理哪些问题？”。
+
+用户要求从意图识别、策略匹配开始测试，或明确说“完整链路测试”时，使用 `testScope=END_TO_END`，不要查询或传入 `agentId`、`flowVersion`。该模式执行当前生效的意图、策略和已发布 Agent 配置；测试草稿仍使用 `testScope=AGENT`。
 
 无论问题看起来是否简单，只要用户没有明确 metadata 策略，开始测试前都要询问一次：是否需要固定 metadata（例如订单号、用户邮箱、商品或渠道）？用户明确“不需要”才省略；不得默认空 metadata 或自行编造业务值。
 
@@ -15,8 +17,26 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent list --pretty
 ```json
 {
   "contextId": "<currentContextId>",
+  "testScope": "AGENT",
   "agentId": 2584,
   "case": {"turns": [{"message": "我的订单什么时候发货？"}]}
+}
+```
+
+完整链路固定用例：
+
+```json
+{
+  "contextId": "<currentContextId>",
+  "testScope": "END_TO_END",
+  "case": {
+    "turns": [
+      {
+        "message": "Where is my order?",
+        "expected": {"intent": "Track Shipment", "agentId": 2584}
+      }
+    ]
+  }
 }
 ```
 
