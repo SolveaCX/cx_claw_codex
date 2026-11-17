@@ -33,6 +33,92 @@ const session: Session = {
 };
 
 describe("LiveTest runner", () => {
+  test("runs END_TO_END without Agent overrides and evaluates the routed result", async () => {
+    process.env.CXCLAW_LIVE_TEST_STATE_DIR = stateRoot;
+    const chatBodies: Record<string, unknown>[] = [];
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input);
+      if (url.endsWith("/api_v2/gpt/bots"))
+        return new Response(JSON.stringify([{ projectId: 302, id: 723 }]), { status: 200 });
+      if (url.endsWith("/api_v2/gpt/ap/queryAgent"))
+        throw new Error("END_TO_END must not resolve a fixed Agent");
+      if (url.endsWith("/chat/stream")) {
+        chatBodies.push(JSON.parse(String(init?.body)));
+        return new Response(
+          'data: {"content":"in transit"}\n\ndata: {"isEnd":true,"data":{"chatId":"chat-e2e","type":"MESSAGE","message":{"id":"ai-e2e","content":"in transit"},"contextComparison":{"chatContext":{"originIntent":"Track Shipment","intent":"Track Shipment","intents":[{"id":9750,"name":"Track Shipment"}],"strategyId":1001,"strategyName":"Logistics Routing","strategyAction":{"type":"AGENT","agentId":2584},"ext":{"invoke_agent_name":"Logistics Agent"}}}}}\n\n',
+          { status: 200 },
+        );
+      }
+      throw new Error(`unexpected request ${url}`);
+    }) as typeof fetch;
+
+    const store = new LiveTestStore();
+    const snapshot = await store.create(
+      {
+        contextId: "ctx_test",
+        profileId: "profile-test",
+        accountId: 12,
+        environment: "staging",
+        testScope: "END_TO_END",
+      },
+      [
+        {
+          message: "Where is my order?",
+          expected: {
+            intentId: 9750,
+            intent: "Track Shipment",
+            strategyName: "Logistics Routing",
+            agentId: 2584,
+            actionType: "AGENT",
+          },
+        },
+      ],
+    );
+    const runner = new LiveTestRunner(store, async () => structuredClone(session));
+    await runner.run(
+      snapshot,
+      {
+        contextId: "ctx_test",
+        testScope: "END_TO_END",
+        touchPoint: "LIVE_CHAT",
+        case: {
+          turns: [
+            {
+              message: "Where is my order?",
+              expected: {
+                intentId: 9750,
+                intent: "Track Shipment",
+                strategyName: "Logistics Routing",
+                agentId: 2584,
+                actionType: "AGENT",
+              },
+            },
+          ],
+        },
+        metadata: { specified_agent_id: 999, order_id: "A-1" },
+        option: { debug: false },
+      },
+      new AbortController().signal,
+    );
+
+    const completed = await store.read("profile-test", snapshot.testRunId);
+    expect(completed).toMatchObject({
+      status: "succeeded",
+      verdict: "PASS",
+      testScope: "END_TO_END",
+      chatId: "chat-e2e",
+    });
+    expect(completed.agentId).toBeUndefined();
+    expect(completed.turns[0]?.routing).toMatchObject({
+      intent: "Track Shipment",
+      strategy: { name: "Logistics Routing", actionType: "AGENT" },
+      agent: { id: 2584, name: "Logistics Agent" },
+    });
+    expect(completed.turns[0]?.evaluation?.verdict).toBe("PASS");
+    expect(chatBodies[0]?.metadata).toEqual({ order_id: "A-1", show_chat_flow: true });
+    expect(chatBodies[0]?.option).toEqual({ debug: true, verbose: true });
+  });
+
   test("bounds persisted snapshots", async () => {
     process.env.CXCLAW_LIVE_TEST_STATE_DIR = stateRoot;
     const store = new LiveTestStore();

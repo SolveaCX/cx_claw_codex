@@ -26,6 +26,15 @@ type Turn = {
   completedAt?: number;
   messageId?: string;
   outcome?: Outcome;
+  routing?: {
+    originIntent?: string;
+    intents: { id?: unknown; name?: string }[];
+    intent?: string;
+    strategy?: { id?: unknown; name?: string; actionType?: string };
+    agent?: { id?: unknown; name?: string; type?: string };
+    flowVersion?: number;
+  };
+  evaluation?: { verdict: "PASS" | "FAIL" | "UNJUDGED" };
 };
 type Snapshot = {
   testRunId: string;
@@ -33,8 +42,10 @@ type Snapshot = {
   environment: string;
   status: string;
   revision: number;
+  testScope: "AGENT" | "END_TO_END";
+  verdict: "PASS" | "FAIL" | "UNJUDGED";
   agentName?: string;
-  agentId: number;
+  agentId?: number;
   agentType?: "CHAT_FLOW" | "SINGLE_AGENT";
   botId?: number;
   flowVersion?: number;
@@ -467,13 +478,15 @@ export function LiveTestApp() {
     .toUpperCase();
   const metadata = bridge.input.metadata ?? {};
   const version =
-    snapshot.agentType === "SINGLE_AGENT"
-      ? "Single Agent"
-      : snapshot.flowVersion == null
-        ? "—"
-        : snapshot.flowVersion < 0
-          ? `草稿 v${snapshot.flowVersion}`
-          : `发布 v${snapshot.flowVersion}`;
+    snapshot.testScope === "END_TO_END"
+      ? "当前生效配置"
+      : snapshot.agentType === "SINGLE_AGENT"
+        ? "Single Agent"
+        : snapshot.flowVersion == null
+          ? "—"
+          : snapshot.flowVersion < 0
+            ? `草稿 v${snapshot.flowVersion}`
+            : `发布 v${snapshot.flowVersion}`;
   const visibleTurns = snapshot.turns.filter((turn) => turn.status !== "queued");
 
   const cancel = async () => {
@@ -503,11 +516,14 @@ export function LiveTestApp() {
     : trace.result.type === "HUMAN_REVIEW"
       ? "人工审核"
       : trace.execution.agentId
-        ? `Agent: ${snapshot.agentName ?? `#${trace.execution.agentId}`}`
+        ? `Agent: ${trace.execution.agentName ?? snapshot.agentName ?? `#${trace.execution.agentId}`}`
         : trace.result.type === "NOTHING"
           ? "不执行操作"
           : "AI 回复";
-  const agentUrl = buildAgentDetailUrl(snapshot.environment, snapshot.agentId, snapshot.agentType);
+  const agentUrl =
+    snapshot.agentId == null
+      ? undefined
+      : buildAgentDetailUrl(snapshot.environment, snapshot.agentId, snapshot.agentType);
 
   return (
     <Tooltip.Provider>
@@ -563,9 +579,11 @@ export function LiveTestApp() {
 
               <div className="lt-context">
                 <div>
-                  <span>Agent</span>
+                  <span>{snapshot.testScope === "END_TO_END" ? "测试范围" : "Agent"}</span>
                   <strong>
-                    #{snapshot.agentId} {snapshot.agentName}
+                    {snapshot.testScope === "END_TO_END"
+                      ? "完整链路"
+                      : `#${snapshot.agentId} ${snapshot.agentName ?? ""}`}
                   </strong>
                   <small>{version}</small>
                 </div>
@@ -592,7 +610,11 @@ export function LiveTestApp() {
                   </span>
                   <span>
                     <strong>正在准备测试</strong>
-                    <small>正在解析 Agent、Bot 和版本信息</small>
+                    <small>
+                      {snapshot.testScope === "END_TO_END"
+                        ? "正在准备意图、策略和 Agent 完整链路"
+                        : "正在解析 Agent、Bot 和版本信息"}
+                    </small>
                   </span>
                 </div>
               ) : null}
@@ -607,6 +629,24 @@ export function LiveTestApp() {
                       failedNodeTitle={snapshot.failedNodeTitle}
                       onExecution={() => void loadTranscript(turn.messageId)}
                     />
+                    {snapshot.testScope === "END_TO_END" && turn.routing ? (
+                      <div className="lt-routing-summary">
+                        <span>{turn.routing.intent ?? "未识别意图"}</span>
+                        <i>→</i>
+                        <span>{turn.routing.strategy?.name ?? "未命中策略"}</span>
+                        <i>→</i>
+                        <span>
+                          {turn.routing.agent?.name ??
+                            turn.routing.strategy?.actionType ??
+                            "无 Agent"}
+                        </span>
+                        {turn.evaluation?.verdict !== "UNJUDGED" ? (
+                          <strong data-verdict={turn.evaluation?.verdict}>
+                            {turn.evaluation?.verdict === "PASS" ? "符合预期" : "不符合预期"}
+                          </strong>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -614,6 +654,12 @@ export function LiveTestApp() {
               {(snapshot.error || error || bridge.error) && (
                 <div className="lt-error-summary">{snapshot.error ?? error ?? bridge.error}</div>
               )}
+
+              {!running && snapshot.verdict !== "UNJUDGED" ? (
+                <div className={snapshot.verdict === "PASS" ? "lt-notice" : "lt-error-summary"}>
+                  预期校验：{snapshot.verdict === "PASS" ? "通过" : "不符合预期"}
+                </div>
+              ) : null}
 
               <footer className="lt-footer">
                 <span>
@@ -695,12 +741,14 @@ export function LiveTestApp() {
                         buildAgentDetailUrl(
                           snapshot.environment,
                           trace.execution.agentId!,
-                          snapshot.agentType,
+                          trace.execution.agentType ?? snapshot.agentType,
                         ),
                       )
                     }
                   >
-                    {snapshot.agentName ?? `#${trace.execution.agentId}`}
+                    {trace.execution.agentName ??
+                      snapshot.agentName ??
+                      `#${trace.execution.agentId}`}
                     <ExternalLinkIcon />
                   </button>
                 ) : null}

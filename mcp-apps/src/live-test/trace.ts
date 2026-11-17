@@ -42,7 +42,13 @@ export type TracePresentation = {
     summary?: string;
     fields: { name: string; value: unknown; aiExtract: boolean }[];
   };
-  execution: { strategyName?: string; actionType: string; agentId?: string };
+  execution: {
+    strategyName?: string;
+    actionType: string;
+    agentId?: string;
+    agentName?: string;
+    agentType?: string;
+  };
   chatId?: string;
   metadata?: Record<string, unknown>;
   steps: TraceStep[];
@@ -146,6 +152,8 @@ export function extractTracePresentation(
       strategyName: text(chatContext.strategyName),
       actionType: text(strategyAction.type, selected.actionType, "AI_REPLY")!,
       agentId: strategyAction.agentId == null ? undefined : String(strategyAction.agentId),
+      agentName: text(ext?.invoke_agent_name, chatContext.agentName),
+      agentType: text(chatContext.agentType),
     },
     chatId: text(metadata?.__chat_id, selected.chatId, root.chatId, root.id),
     metadata,

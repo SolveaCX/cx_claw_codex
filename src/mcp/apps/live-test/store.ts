@@ -28,19 +28,32 @@ export class LiveTestStore {
     identity: Pick<
       LiveTestSnapshot,
       "contextId" | "profileId" | "accountId" | "environment" | "agentId"
-    >,
-    turns: string[],
+    > & { testScope?: LiveTestSnapshot["testScope"] },
+    turns: (
+      string | { message: string; expected?: LiveTestSnapshot["turns"][number]["expected"] }
+    )[],
   ): Promise<LiveTestSnapshot> {
     const now = Date.now();
     const snapshot: LiveTestSnapshot = {
       ...identity,
+      testScope: identity.testScope ?? (identity.agentId === undefined ? "END_TO_END" : "AGENT"),
       testRunId: `ltr_${randomUUID().replaceAll("-", "")}`,
       status: "queued",
+      verdict: "UNJUDGED",
       revision: 0,
       createdAt: now,
       updatedAt: now,
       truncated: false,
-      turns: turns.map((user, index) => ({ index, user, assistant: "", status: "queued" })),
+      turns: turns.map((input, index) => {
+        const turn = typeof input === "string" ? { message: input } : input;
+        return {
+          index,
+          user: turn.message,
+          expected: turn.expected,
+          assistant: "",
+          status: "queued",
+        };
+      }),
     };
     this.truncate(snapshot);
     await this.write(snapshot);

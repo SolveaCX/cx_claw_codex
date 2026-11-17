@@ -7,7 +7,11 @@ import { LiveTestStore } from "./store.js";
 type JsonObject = Record<string, unknown>;
 const protectedMetadata = new Set([
   "specified_agent_id",
+  "specified_agent_data",
   "specified_flow_version",
+  "active_flow_version",
+  "resolved_sub_graph_versions",
+  "draft_flow_update_time",
   "show_chat_flow",
 ]);
 const protectedOptions = new Set(["debug", "verbose"]);
@@ -64,9 +68,59 @@ function actionResult(action: JsonObject) {
   const actionType = stringValue(action.type, action.actionType, data?.type, data?.actionType);
   const failed =
     actionType?.toUpperCase() === "STOPPED" ||
+    actionType?.toUpperCase() === "CONFUSED" ||
     action.reason === "SYSTEM_ERROR" ||
     reasonList.includes("SYSTEM_ERROR") ||
     Boolean(node);
+  const contexts = [object(action.contextComparison), object(action.context)];
+  const contextCandidates = [
+    ...contexts.map((context) => object(context?.chatContext)),
+    ...contexts,
+  ];
+  const routingKeys = new Set([
+    "originIntent",
+    "intents",
+    "intent",
+    "intentI18n",
+    "strategyId",
+    "strategyName",
+  ]);
+  const chatContext =
+    contextCandidates.find(
+      (context) => context && Object.keys(context).some((key) => routingKeys.has(key)),
+    ) ??
+    contextCandidates.find((context) => context && Object.keys(context).length > 0) ??
+    {};
+  const ext = object(chatContext.ext) ?? {};
+  const strategyAction = object(chatContext.strategyAction) ?? {};
+  const intents = Array.isArray(chatContext.intents)
+    ? chatContext.intents.flatMap((item): { id?: unknown; name?: string }[] => {
+        const value = object(item);
+        if (!value) return item == null ? [] : [{ name: String(item) }];
+        return [
+          {
+            id: value.id ?? value.intentId,
+            name: stringValue(value.name, value.intentName),
+          },
+        ];
+      })
+    : [];
+  const routing = {
+    originIntent: stringValue(chatContext.originIntent),
+    intents,
+    intent: stringValue(chatContext.intentI18n, chatContext.intent),
+    strategy: {
+      id: chatContext.strategyId ?? action.strategyId,
+      name: stringValue(chatContext.strategyName, action.strategyName),
+      actionType: stringValue(strategyAction.type, action.strategyActionType, action.type),
+    },
+    agent: {
+      id: strategyAction.agentId ?? chatContext.agentId ?? action.agentId,
+      name: stringValue(ext.invoke_agent_name, chatContext.agentName, action.agentName),
+      type: stringValue(chatContext.agentType, action.agentType),
+    },
+    flowVersion: numberValue(chatContext.activeFlowVersion, ext.flow_version),
+  };
   return {
     chatId: stringValue(action.chatId, object(action.chat)?.id),
     messageId: stringValue(message?.id, action.messageId, action.id),
@@ -81,6 +135,7 @@ function actionResult(action: JsonObject) {
       reasonDesc: stringValue(action.reasonDesc, data?.reasonDesc),
       explain: stringValue(action.explain, data?.explain),
     },
+    routing,
     failed,
     node,
     error:
@@ -95,6 +150,54 @@ function actionResult(action: JsonObject) {
           ) ?? "Agent execution failed")
         : undefined),
   };
+}
+
+function evaluateRouting(
+  expected: LiveTestSnapshot["turns"][number]["expected"],
+  routing: ReturnType<typeof actionResult>["routing"],
+) {
+  if (!expected) return { verdict: "UNJUDGED" as const, checks: [] };
+  const actual: Record<string, unknown> = {
+    intentId: routing.intents[0]?.id,
+    intent: routing.intent,
+    strategyId: routing.strategy.id,
+    strategyName: routing.strategy.name,
+    agentId: routing.agent.id,
+    actionType: routing.strategy.actionType,
+  };
+  const checks = Object.entries(expected).flatMap(([field, expectedValue]) => {
+    if (expectedValue === undefined || expectedValue === "") return [];
+    const actualValue = actual[field];
+    const passed = ["intent", "strategyName", "actionType"].includes(field)
+      ? String(actualValue ?? "")
+          .trim()
+          .toLocaleLowerCase() === String(expectedValue).trim().toLocaleLowerCase()
+      : String(actualValue ?? "") === String(expectedValue);
+    return [{ field, expected: expectedValue, actual: actualValue, passed }];
+  });
+  return {
+    verdict:
+      checks.length && checks.every((check) => check.passed)
+        ? ("PASS" as const)
+        : ("FAIL" as const),
+    checks,
+  };
+}
+
+function debugTranscript(value: unknown) {
+  let candidates = [value];
+  for (let depth = 0; depth < 3; depth += 1) {
+    const nested: unknown[] = [];
+    for (const item of candidates) {
+      const record = object(item);
+      if (record) {
+        if (record.debug === true || record.isDebug === true) return true;
+        nested.push(...Object.values(record));
+      } else if (Array.isArray(item)) nested.push(...item);
+    }
+    candidates = nested;
+  }
+  return false;
 }
 
 function resolveFlowVersion(graph: unknown, agent: JsonObject): number | undefined {
@@ -130,25 +233,34 @@ export class LiveTestRunner {
       });
       this.assertIdentity(snapshot, initialSession);
       const initialClient = new SolveaClient(initialSession);
-      const agent = firstObject(await initialClient.getAgent(String(input.agentId)));
-      if (!agent) throw new Error(`Agent ${input.agentId} not found`);
-      const agentType = stringValue(agent.type)?.toUpperCase();
-      if (agentType !== "CHAT_FLOW" && agentType !== "SINGLE_AGENT")
-        throw new Error(`LiveTest does not support Agent type: ${agentType ?? "UNKNOWN"}`);
+      const testScope = snapshot.testScope;
+      let agentName: string | undefined;
+      let agentType: "CHAT_FLOW" | "SINGLE_AGENT" | undefined;
       const botId = input.botId ?? Number(await initialClient.botId());
       let flowVersion: number | undefined;
-      if (agentType === "CHAT_FLOW") {
-        flowVersion =
-          input.flowVersion ??
-          resolveFlowVersion(await initialClient.getChatflowGraph(String(input.agentId)), agent);
-        if (!Number.isSafeInteger(flowVersion))
-          throw new Error("unable to resolve Chatflow version");
-      } else if (input.flowVersion !== undefined) {
-        throw new Error("SINGLE_AGENT does not support flowVersion; remove this parameter");
+      if (testScope === "AGENT") {
+        const agent = firstObject(await initialClient.getAgent(String(input.agentId)));
+        if (!agent) throw new Error(`Agent ${input.agentId} not found`);
+        const resolvedType = stringValue(agent.type)?.toUpperCase();
+        if (resolvedType !== "CHAT_FLOW" && resolvedType !== "SINGLE_AGENT")
+          throw new Error(`LiveTest does not support Agent type: ${resolvedType ?? "UNKNOWN"}`);
+        agentType = resolvedType;
+        agentName = stringValue(agent.name, agent.title);
+        if (agentType === "CHAT_FLOW") {
+          flowVersion =
+            input.flowVersion ??
+            resolveFlowVersion(await initialClient.getChatflowGraph(String(input.agentId)), agent);
+          if (!Number.isSafeInteger(flowVersion))
+            throw new Error("unable to resolve Chatflow version");
+        } else if (input.flowVersion !== undefined) {
+          throw new Error("SINGLE_AGENT does not support flowVersion; remove this parameter");
+        }
+      } else if (input.chatId && !debugTranscript(await initialClient.transcript(input.chatId))) {
+        throw new Error("END_TO_END 续测只能复用 debug=true 的测试会话 chatId");
       }
       await this.store.update(profileId, testRunId, (value) => {
         value.status = "running";
-        value.agentName = stringValue(agent.name, agent.title);
+        value.agentName = agentName;
         value.agentType = agentType;
         value.botId = botId;
         value.flowVersion = flowVersion;
@@ -162,12 +274,12 @@ export class LiveTestRunner {
           value.turns[index]!.status = "running";
           value.turns[index]!.startedAt = Date.now();
         });
-        const metadata: JsonObject = {
-          ...filtered(input.metadata, protectedMetadata),
-          specified_agent_id: input.agentId,
-        };
-        if (agentType === "CHAT_FLOW") {
+        const metadata: JsonObject = filtered(input.metadata, protectedMetadata);
+        if (testScope === "AGENT") metadata.specified_agent_id = input.agentId;
+        if (testScope === "AGENT" && agentType === "CHAT_FLOW") {
           metadata.specified_flow_version = flowVersion;
+          metadata.show_chat_flow = true;
+        } else if (testScope === "END_TO_END") {
           metadata.show_chat_flow = true;
         }
         const payload: JsonObject = {
@@ -223,12 +335,15 @@ export class LiveTestRunner {
         }
         await flush(true);
         const result = actionResult(action);
+        const evaluation = evaluateRouting(turn.expected, result.routing);
         chatId = result.chatId ?? chatId;
         const completed = await this.store.update(profileId, testRunId, (value) => {
           const current = value.turns[index]!;
           if (!current.assistant && result.content) current.assistant = result.content;
           current.messageId = result.messageId;
           current.outcome = result.outcome;
+          current.routing = result.routing;
+          current.evaluation = evaluation;
           current.completedAt = Date.now();
           current.status = result.failed ? "failed" : "succeeded";
           current.error = result.error;
@@ -245,6 +360,12 @@ export class LiveTestRunner {
       }
       await this.store.update(profileId, testRunId, (value) => {
         value.status = "succeeded";
+        const verdicts = value.turns.map((turn) => turn.evaluation?.verdict);
+        value.verdict = verdicts.includes("FAIL")
+          ? "FAIL"
+          : verdicts.includes("PASS")
+            ? "PASS"
+            : "UNJUDGED";
         value.completedAt = Date.now();
       });
     } catch (error) {
