@@ -23,6 +23,7 @@ export const resources = {
     list: action("list-agents", "List agents", "[--category text|voice]"),
     get: action("get-agent", "Get one agent", "--id <agent-id>"),
     create: action("create-agent", "Create an agent", "--data <json> | --data-file <path>"),
+    delete: action("delete-agent", "Delete an agent", "--id <agent-id> --confirm-delete"),
     update: action(
       "update-agent",
       "Update an agent",

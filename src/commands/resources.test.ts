@@ -12,6 +12,7 @@ describe("resource command hierarchy", () => {
     expect(resolveResourceCommand("intent", "update")).toBe("update-intent");
     expect(resolveResourceCommand("intent", "toggle")).toBe("toggle-intent");
     expect(resolveResourceCommand("agent", "get-chatflow")).toBe("get-chatflow-graph");
+    expect(resolveResourceCommand("agent", "delete")).toBe("delete-agent");
     expect(resolveResourceCommand("field", "create")).toBe("create-managed-ai-field");
     expect(resolveResourceCommand("template", "delete")).toBe("delete-templates");
     expect(resolveResourceCommand("quality", "alerts")).toBe("list-quality-alert-rules");
@@ -31,6 +32,7 @@ describe("resource command hierarchy", () => {
     expect(resourceHelp("intent", "create")).toContain("--data-file <path>");
     expect(resourceHelp("intent", "toggle")).toContain("--enable | --disable");
     expect(resourceHelp("agent", "update")).toContain("--id <agent-id>");
+    expect(resourceHelp("agent", "delete")).toContain("--confirm-delete");
     expect(resourceHelp("analytics", "messages")).toContain("--start-date <YYYY-MM-DD>");
     expect(() => resourceHelp("intent", "remove")).toThrow("unknown intent action");
   });

@@ -98,6 +98,9 @@ export async function runSolveaCommand(
       return client.getChatflowGraph(option(args, "--agent-id", true)!);
     case "create-agent":
       return client.createAgent(await data(args));
+    case "delete-agent":
+      requireFlag(args, "--confirm-delete", command);
+      return client.deleteAgent(id());
     case "update-agent": {
       const changes = await data(args);
       const agentId = option(args, "--id") ?? String(changes.agentId ?? changes.id ?? "");
@@ -225,6 +228,7 @@ export function isNativeSolveaCommand(command: string) {
       "get-agent",
       "get-chatflow-graph",
       "create-agent",
+      "delete-agent",
       "update-agent",
       "list-plugins",
       "get-plugin",

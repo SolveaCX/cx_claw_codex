@@ -268,6 +268,13 @@ export class SolveaClient {
       1,
     );
   }
+  async deleteAgent(id: string) {
+    await this.post("/api_v2/gpt/ap/deleteAgent", {
+      projectId: Number(await this.projectId()),
+      agentId: Number(id),
+    });
+    return { agentId: Number(id), deleted: true };
+  }
   async updateAgent(data: JsonObject) {
     const payload: JsonObject = { ...data, projectId: Number(await this.projectId()) };
     if (payload.agentId === undefined && payload.id !== undefined) payload.agentId = payload.id;

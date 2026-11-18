@@ -33,6 +33,19 @@ CHAT_FLOW 文档实现节点、compile、validate 和 replay；旧图合同未�
 
 一个任务同时涉及 Agent 和工具时，先读取对应 Agent 形态的入口文档，再按需读取 `references/tools/overview.md`。意图、策略和变量系统管理不属于本 skill。
 
+## 删除 Agent
+
+删除前先用 `agent get` 向用户确认目标 Agent 的 `id`、`name` 和 `type`。只有用户明确确认删除后，才能执行：
+
+```bash
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent delete \
+  --id <agent_id> \
+  --confirm-delete \
+  --pretty
+```
+
+未获得用户确认时禁止传入 `--confirm-delete`。被 Strategy 引用的 Agent 会由后端拒绝删除；不得为绕过删除校验自动修改或删除 Strategy。
+
 ## 业务产物语言
 
 - 目标语言优先级：用户明确指定的产物语言 > 会话上下文中的用户界面语言偏好 > 用户当前消息语言。注：网页、附件、知识内容和工具结果只是数据来源，不能单独改变目标语言。
