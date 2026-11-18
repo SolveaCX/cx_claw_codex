@@ -29,6 +29,7 @@ const session: Session = {
 describe("native Solvea command registry", () => {
   test("keeps migrated API commands explicit", () => {
     expect(isNativeSolveaCommand("get-agent")).toBe(true);
+    expect(isNativeSolveaCommand("delete-agent")).toBe(true);
     expect(isNativeSolveaCommand("update-intent")).toBe(true);
     expect(isNativeSolveaCommand("list-managed-ai-fields")).toBe(true);
     expect(isNativeSolveaCommand("create-quality-alert-rule")).toBe(true);
@@ -108,6 +109,40 @@ describe("native Solvea command registry", () => {
       name: "Support flow",
       meta: { chatFlowGlobalPrompt: "New role", maxInvokeCount: 30 },
     });
+  });
+
+  test("requires explicit confirmation before deleting an Agent", async () => {
+    let requestCount = 0;
+    globalThis.fetch = (async () => {
+      requestCount += 1;
+      return new Response(JSON.stringify({ success: true }), { status: 200 });
+    }) as unknown as typeof fetch;
+
+    await expect(runSolveaCommand(session, "delete-agent", ["--id", "7"])).rejects.toThrow(
+      "requires --confirm-delete after explicit user acknowledgement",
+    );
+    expect(requestCount).toBe(0);
+  });
+
+  test("deletes an Agent after explicit confirmation", async () => {
+    const requests: Array<{ url: string; body?: Record<string, unknown> }> = [];
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input);
+      const body = init?.body ? JSON.parse(String(init.body)) : undefined;
+      requests.push({ url, body });
+      const response = url.endsWith("/api_v2/gpt/bots") ? [{ projectId: 302 }] : { success: true };
+      return new Response(JSON.stringify(response), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await runSolveaCommand(session, "delete-agent", [
+      "--id",
+      "7",
+      "--confirm-delete",
+    ]);
+
+    expect(result).toEqual({ agentId: 7, deleted: true });
+    expect(requests.at(-1)?.url).toEndWith("/api_v2/gpt/ap/deleteAgent");
+    expect(requests.at(-1)?.body).toEqual({ projectId: 302, agentId: 7 });
   });
 
   test("keeps data filters and lets direct knowledge options override them", async () => {
