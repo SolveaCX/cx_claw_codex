@@ -238,11 +238,30 @@ export class SolveaClient {
   }
 
   async listAgents(category = "text") {
-    return this.post("/api_v2/gpt/ap/queryAgent", {
-      projectId: Number(await this.projectId()),
-      needRelation: true,
-      noMeta: true,
-      category,
+    const projectId = Number(await this.projectId());
+    const [agents, bindings] = await Promise.all([
+      this.post("/api_v2/gpt/ap/queryAgent", {
+        projectId,
+        needRelation: true,
+        noMeta: true,
+        category,
+      }),
+      this.post("/api_v2/gpt/agent/tag/queryAllBindings", { projectId }),
+    ]);
+    if (!Array.isArray(agents)) return agents;
+
+    const tagsByAgent = new Map(
+      (Array.isArray(bindings) ? bindings : [])
+        .filter((binding): binding is JsonObject => Boolean(binding && typeof binding === "object"))
+        .map((binding) => [
+          String(binding.agentId),
+          Array.isArray(binding.tags) ? binding.tags : [],
+        ]),
+    );
+    return agents.map((agent) => {
+      if (!agent || typeof agent !== "object" || Array.isArray(agent)) return agent;
+      const item = agent as JsonObject;
+      return { ...item, tags: tagsByAgent.get(String(item.id)) ?? [] };
     });
   }
   async getAgent(id: string) {

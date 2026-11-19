@@ -35,7 +35,9 @@ CHAT_FLOW 文档实现节点、compile、validate 和 replay；旧图合同未�
 
 ## 删除 Agent
 
-删除前先用 `agent get` 向用户确认目标 Agent 的 `id`、`name` 和 `type`。只有用户明确确认删除后，才能执行：
+按标签查找时使用 `agent list --tag <标签名称或ID>`。列表中的每个 Agent 都返回 `tags`，标签项包含 `id`、`name` 和 `color`。同一标签可能匹配多个 Agent。
+
+删除前先查询并向用户展示所有匹配 Agent 的 `id`、`name`、`type` 和 `tags`。只有用户明确确认删除这批具体 Agent 后才能继续；不得仅凭标签名称直接批量删除。确认后逐个按 `id` 执行：
 
 ```bash
 node "<PLUGIN_ROOT>/plugin-cli.mjs" agent delete \

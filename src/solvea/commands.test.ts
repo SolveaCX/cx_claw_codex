@@ -73,6 +73,40 @@ describe("native Solvea command registry", () => {
     });
   });
 
+  test("attaches Agent labels and filters the list by label name", async () => {
+    const requests: Array<{ url: string; body?: Record<string, unknown> }> = [];
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input);
+      const body = init?.body ? JSON.parse(String(init.body)) : undefined;
+      requests.push({ url, body });
+      const response = url.endsWith("/api_v2/gpt/bots")
+        ? [{ projectId: 302 }]
+        : url.endsWith("/api_v2/gpt/ap/queryAgent")
+          ? [
+              { id: 7, name: "Returns", type: "CHAT_FLOW" },
+              { id: 8, name: "Shipping", type: "CHAT_FLOW" },
+            ]
+          : url.endsWith("/api_v2/gpt/agent/tag/queryAllBindings")
+            ? [{ agentId: 7, tags: [{ id: 11, name: "aaa", color: "#fff" }] }]
+            : { success: true };
+      return new Response(JSON.stringify(response), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await runSolveaCommand(session, "list-agents", ["--tag", "AAA"]);
+
+    expect(result).toEqual([
+      {
+        id: 7,
+        name: "Returns",
+        type: "CHAT_FLOW",
+        tags: [{ id: 11, name: "aaa", color: "#fff" }],
+      },
+    ]);
+    expect(
+      requests.some((request) => request.url.endsWith("/api_v2/gpt/agent/tag/queryAllBindings")),
+    ).toBe(true);
+  });
+
   test("applies partial updates through the generic Agent command", async () => {
     const requests: Array<{ url: string; body?: Record<string, unknown> }> = [];
     globalThis.fetch = (async (input, init) => {
