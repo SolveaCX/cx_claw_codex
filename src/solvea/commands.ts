@@ -90,8 +90,26 @@ export async function runSolveaCommand(
   switch (command) {
     case "get-project":
       return client.projectInfo();
-    case "list-agents":
-      return client.listAgents(option(args, "--category") ?? "text");
+    case "list-agents": {
+      const agents = await client.listAgents(option(args, "--category") ?? "text");
+      const tagFilter = option(args, "--tag")?.trim();
+      if (!tagFilter || !Array.isArray(agents)) return agents;
+      return agents.filter((agent) => {
+        if (!agent || typeof agent !== "object" || Array.isArray(agent)) return false;
+        const tags = (agent as Record<string, unknown>).tags;
+        return (
+          Array.isArray(tags) &&
+          tags.some((tag) => {
+            if (!tag || typeof tag !== "object" || Array.isArray(tag)) return false;
+            const item = tag as Record<string, unknown>;
+            return (
+              String(item.id) === tagFilter ||
+              String(item.name ?? "").toLocaleLowerCase() === tagFilter.toLocaleLowerCase()
+            );
+          })
+        );
+      });
+    }
     case "get-agent":
       return client.getAgent(id());
     case "get-chatflow-graph":

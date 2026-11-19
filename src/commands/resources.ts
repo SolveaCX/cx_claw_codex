@@ -20,7 +20,11 @@ const reportAction = (actionName: string, summary: string, usage = "") =>
 
 export const resources = {
   agent: {
-    list: action("list-agents", "List agents", "[--category text|voice]"),
+    list: action(
+      "list-agents",
+      "List agents with labels",
+      "[--category text|voice] [--tag <name-or-id>]",
+    ),
     get: action("get-agent", "Get one agent", "--id <agent-id>"),
     create: action("create-agent", "Create an agent", "--data <json> | --data-file <path>"),
     delete: action("delete-agent", "Delete an agent", "--id <agent-id> --confirm-delete"),
