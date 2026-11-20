@@ -678,6 +678,17 @@ export class SolveaClient {
   async listTemplates(data: JsonObject) {
     return this.post(`/api_v2/gpt/project/${await this.projectId()}/templates/filter`, data);
   }
+  async getTemplate(id: string) {
+    return this.get(
+      `/api_v2/gpt/project/${await this.projectId()}/template/${encodeURIComponent(id)}`,
+    );
+  }
+  async listTemplateOptions() {
+    return this.get(`/api_v2/gpt/project/${await this.projectId()}/templates/simple`);
+  }
+  async getTemplateConfig() {
+    return this.get(`/api_v2/gpt/project/${await this.projectId()}/templates/config`);
+  }
   async createTemplate(data: JsonObject) {
     const content = String(data.content ?? "");
     return this.post(`/api_v2/gpt/project/${await this.projectId()}/template`, {
@@ -686,6 +697,7 @@ export class SolveaClient {
       status: data.status ?? "ENABLED",
       multiContent: data.multiContent ?? { AUTO: content },
       ...(data.scene ? { scene: data.scene } : {}),
+      ...(data.directoryId !== undefined ? { directoryId: Number(data.directoryId) } : {}),
     });
   }
   async updateTemplate(id: string, data: JsonObject) {
@@ -694,9 +706,80 @@ export class SolveaClient {
       data,
     );
   }
+  async batchUpdateTemplates(updates: JsonObject[]) {
+    if (!updates.length) throw new Error("batch template updates must be a non-empty list");
+    return this.put(`/api_v2/gpt/project/${await this.projectId()}/templates`, {
+      list: updates,
+    });
+  }
+  async moveTemplates(ids: number[], directoryId: number) {
+    if (!ids.length) throw new Error("template ids must not be empty");
+    return this.put(`/api_v2/gpt/project/${await this.projectId()}/templates/directory`, {
+      templateIds: ids,
+      directoryId,
+    });
+  }
   async deleteTemplates(ids: number[]) {
     return this.request("DELETE", `/api_v2/gpt/project/${await this.projectId()}/templates`, {
       templateIds: ids,
+    });
+  }
+  async listTemplateDirectories() {
+    return this.get(`/api_v2/gpt/project/${await this.projectId()}/template-directories/tree`);
+  }
+  async getTemplateDirectory(id: string) {
+    return this.get(
+      `/api_v2/gpt/project/${await this.projectId()}/template-directory/${encodeURIComponent(id)}`,
+    );
+  }
+  async createTemplateDirectory(data: JsonObject) {
+    return this.post(`/api_v2/gpt/project/${await this.projectId()}/template-directory`, data);
+  }
+  async updateTemplateDirectory(id: string, data: JsonObject) {
+    return this.put(
+      `/api_v2/gpt/project/${await this.projectId()}/template-directory/${encodeURIComponent(id)}`,
+      data,
+    );
+  }
+  async deleteTemplateDirectory(id: string) {
+    return this.request(
+      "DELETE",
+      `/api_v2/gpt/project/${await this.projectId()}/template-directory/${encodeURIComponent(id)}`,
+    );
+  }
+  async downloadTemplateImportFile(target: string) {
+    return this.downloadFile(
+      `/api_v2/gpt/project/${await this.projectId()}/templates/import-template`,
+      target,
+    );
+  }
+  async importTemplatesFile(filePath: string) {
+    if (extname(filePath).toLowerCase() !== ".xlsx")
+      throw new Error("template import file must be an .xlsx file");
+    const contents = await readFile(resolve(filePath));
+    const form = new FormData();
+    form.append(
+      "file",
+      new Blob([Uint8Array.from(contents).buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }),
+      basename(filePath),
+    );
+    return this.request(
+      "POST",
+      `/api_v2/gpt/project/${await this.projectId()}/templates/import`,
+      form,
+    );
+  }
+  async exportTemplates(data: JsonObject) {
+    return this.post(`/api_v2/gpt/project/${await this.projectId()}/templates/export/async`, data);
+  }
+  async translateTemplateContents(contents: unknown[], targetLanguage: string) {
+    if (!contents.length) throw new Error("contents must be a non-empty list");
+    if (!targetLanguage) throw new Error("target language must not be empty");
+    return this.post(`/api_v2/gpt/project/${await this.projectId()}/templates/translate`, {
+      contents,
+      targetLanguage,
     });
   }
 

@@ -52,17 +52,35 @@ const handlers: Record<string, Handler> = {
   "list-templates": (client, args) =>
     client.listTemplates({
       pageIndex: Number(option(args, "--page") ?? 1),
-      pagesize: Number(option(args, "--page-size") ?? 50),
+      pageSize: Number(option(args, "--page-size") ?? 50),
       keyword: option(args, "--keyword") ?? "",
       ...(options(args, "--scene").length ? { scenes: options(args, "--scene") } : {}),
-      ...(option(args, "--status") ? { status: [option(args, "--status")] } : {}),
+      ...(options(args, "--status").length ? { status: options(args, "--status") } : {}),
+      ...(options(args, "--source").length ? { sources: options(args, "--source") } : {}),
+      ...(options(args, "--created-by").length
+        ? { createdBys: options(args, "--created-by").map(Number) }
+        : {}),
+      ...(option(args, "--created-at-gte")
+        ? { createdAtGte: Number(option(args, "--created-at-gte")) }
+        : {}),
+      ...(option(args, "--created-at-lte")
+        ? { createdAtLte: Number(option(args, "--created-at-lte")) }
+        : {}),
+      ...(option(args, "--directory-id") !== undefined
+        ? { directoryId: Number(option(args, "--directory-id")) }
+        : {}),
     }),
+  "get-template": (client, args) => client.getTemplate(requireId(args)),
+  "list-template-options": (client) => client.listTemplateOptions(),
+  "get-template-config": (client) => client.getTemplateConfig(),
   "create-template": async (client, args) => {
     const payload = await jsonData(args, false);
     if (option(args, "--name")) payload.name = option(args, "--name");
     if (option(args, "--content")) payload.content = option(args, "--content");
     if (option(args, "--status")) payload.status = option(args, "--status");
     if (options(args, "--scene")[0]) payload.scene = options(args, "--scene")[0];
+    if (option(args, "--directory-id") !== undefined)
+      payload.directoryId = Number(option(args, "--directory-id"));
     if (!payload.name || !payload.content)
       throw new Error("create-template requires name and content");
     return client.createTemplate(payload);
@@ -76,9 +94,38 @@ const handlers: Record<string, Handler> = {
     ] as const) {
       if (option(args, name)) payload[field] = option(args, name);
     }
+    if (option(args, "--directory-id") !== undefined)
+      payload.directoryId = Number(option(args, "--directory-id"));
     if (!Object.keys(payload).length)
       throw new Error("update-template requires at least one changed field");
     return client.updateTemplate(requireId(args), payload);
+  },
+  "batch-update-templates": async (client, args) => {
+    const value = await jsonValue(args);
+    const updates = Array.isArray(value) ? value : (value as JsonObject)?.list;
+    if (
+      !Array.isArray(updates) ||
+      !updates.length ||
+      updates.some((item) => !item || typeof item !== "object" || Array.isArray(item))
+    )
+      throw new Error(
+        "batch-update-templates requires a non-empty JSON list or object containing list",
+      );
+    return client.batchUpdateTemplates(updates as JsonObject[]);
+  },
+  "move-templates": async (client, args) => {
+    const payload = await jsonData(args, false);
+    const rawIds = optionList(args, "--ids").length
+      ? optionList(args, "--ids")
+      : ((payload.templateIds ?? payload.ids) as unknown[] | undefined);
+    const ids = Array.isArray(rawIds) ? rawIds.map(Number) : [];
+    if (!ids.length || ids.some((id) => !Number.isSafeInteger(id) || id <= 0))
+      throw new Error("move-templates requires positive integer --ids");
+    const rawDirectoryId = option(args, "--directory-id") ?? payload.directoryId;
+    const directoryId = Number(rawDirectoryId);
+    if (!Number.isSafeInteger(directoryId) || directoryId < 0)
+      throw new Error("move-templates requires a non-negative integer --directory-id");
+    return client.moveTemplates(ids, directoryId);
   },
   "delete-templates": async (client, args) => {
     requireFlag(args, "--confirm-delete", "delete-templates");
@@ -86,6 +133,65 @@ const handlers: Record<string, Handler> = {
     if (!ids.length || ids.some((id) => !Number.isSafeInteger(id) || id <= 0))
       throw new Error("delete-templates requires positive integer --ids");
     return client.deleteTemplates(ids);
+  },
+  "list-template-directories": (client) => client.listTemplateDirectories(),
+  "get-template-directory": (client, args) => client.getTemplateDirectory(requireId(args)),
+  "create-template-directory": async (client, args) => {
+    const payload = await jsonData(args, false);
+    if (option(args, "--name")) payload.name = option(args, "--name");
+    if (option(args, "--parent-id") !== undefined)
+      payload.parentId = Number(option(args, "--parent-id"));
+    if (!payload.name) throw new Error("create-template-directory requires --name");
+    if (payload.parentId === undefined) payload.parentId = 0;
+    return client.createTemplateDirectory(payload);
+  },
+  "update-template-directory": async (client, args) => {
+    const payload = await jsonData(args, false);
+    if (option(args, "--name")) payload.name = option(args, "--name");
+    if (option(args, "--parent-id") !== undefined)
+      payload.parentId = Number(option(args, "--parent-id"));
+    if (!Object.keys(payload).length)
+      throw new Error("update-template-directory requires --name or --parent-id");
+    return client.updateTemplateDirectory(requireId(args), payload);
+  },
+  "delete-template-directory": async (client, args) => {
+    requireFlag(args, "--confirm-delete", "delete-template-directory");
+    return client.deleteTemplateDirectory(requireId(args));
+  },
+  "download-template-import-file": async (client, args) => ({
+    file: await client.downloadTemplateImportFile(option(args, "--output", true)!),
+  }),
+  "import-templates-file": async (client, args) => ({
+    imported: await client.importTemplatesFile(option(args, "--file", true)!),
+  }),
+  "export-templates": async (client, args) => {
+    const payload = await jsonData(args, false);
+    if (option(args, "--keyword") !== undefined) payload.keyword = option(args, "--keyword");
+    if (options(args, "--status").length) payload.status = options(args, "--status");
+    if (options(args, "--scene").length) payload.scenes = options(args, "--scene");
+    if (options(args, "--source").length) payload.sources = options(args, "--source");
+    if (options(args, "--created-by").length)
+      payload.createdBys = options(args, "--created-by").map(Number);
+    if (option(args, "--created-at-gte"))
+      payload.createdAtGte = Number(option(args, "--created-at-gte"));
+    if (option(args, "--created-at-lte"))
+      payload.createdAtLte = Number(option(args, "--created-at-lte"));
+    if (option(args, "--directory-id") !== undefined)
+      payload.directoryId = Number(option(args, "--directory-id"));
+    return client.exportTemplates(payload);
+  },
+  "get-template-export-tasks": async (client, args) =>
+    client.rawCall("POST", `/api_v2/gpt/label/project/${await client.projectId()}/getLabelTask`, {
+      page: Number(option(args, "--page") ?? 1),
+      pageSize: Number(option(args, "--page-size") ?? 20),
+      taskType: "EXPORT_TEMPLATE",
+    }),
+  "translate-template-contents": async (client, args) => {
+    const payload = await jsonData(args);
+    const contents = payload.contents;
+    const targetLanguage = option(args, "--target-language") ?? payload.targetLanguage;
+    if (!Array.isArray(contents)) throw new Error("translate-template-contents requires contents");
+    return client.translateTemplateContents(contents, String(targetLanguage ?? ""));
   },
 };
 
