@@ -73,6 +73,107 @@ describe("native Solvea command registry", () => {
     });
   });
 
+  test("uses the paged isolation keyword endpoint", async () => {
+    const requests: Array<{ url: string; init?: RequestInit }> = [];
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input);
+      requests.push({ url, init });
+      const body = url.endsWith("/api_v2/gpt/bots")
+        ? [{ projectId: 302 }]
+        : { list: [{ id: 11, keyword: "pump" }], pageIndex: 2, pageSize: 5, totalPage: 3 };
+      return new Response(JSON.stringify(body), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await runSolveaCommand(session, "list-isolation-keywords", [
+      "--keyword",
+      "pump",
+      "--page",
+      "2",
+      "--page-size",
+      "5",
+    ]);
+
+    const request = requests.at(-1);
+    const url = new URL(request?.url ?? "https://invalid.example");
+    expect(url.pathname).toBe("/sns_v1/project/302/isolation_keywords/page");
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      keyword: "pump",
+      pageIndex: "2",
+      pageSize: "5",
+    });
+    expect(request?.init?.method).toBe("GET");
+    expect(result).toEqual([{ id: 11, keyword: "pump" }]);
+  });
+
+  test("preserves the raw isolation keyword page response", async () => {
+    globalThis.fetch = (async (input) => {
+      const url = String(input);
+      const body = url.endsWith("/api_v2/gpt/bots")
+        ? [{ projectId: 302 }]
+        : { list: [{ id: 11, keyword: "pump" }], pageIndex: 1, pageSize: 50, totalPage: 1 };
+      return new Response(JSON.stringify(body), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await runSolveaCommand(session, "list-isolation-keywords", ["--raw"]);
+
+    expect(result).toEqual({
+      list: [{ id: 11, keyword: "pump" }],
+      pageIndex: 1,
+      pageSize: 50,
+      totalPage: 1,
+    });
+  });
+
+  test("collects all isolation keyword pages using totalPage", async () => {
+    const requestedPages: number[] = [];
+    globalThis.fetch = (async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith("/api_v2/gpt/bots"))
+        return new Response(JSON.stringify([{ projectId: 302 }]), { status: 200 });
+
+      const pageIndex = Number(url.searchParams.get("pageIndex"));
+      requestedPages.push(pageIndex);
+      return new Response(
+        JSON.stringify({
+          list: [{ id: pageIndex, keyword: `keyword-${pageIndex}` }],
+          pageIndex,
+          pageSize: 1,
+          totalPage: 2,
+          totalCount: 2,
+        }),
+        { status: 200 },
+      );
+    }) as typeof fetch;
+
+    const result = await runSolveaCommand(session, "list-isolation-keywords", [
+      "--all",
+      "--page-size",
+      "1",
+    ]);
+
+    expect(result).toEqual([
+      { id: 1, keyword: "keyword-1" },
+      { id: 2, keyword: "keyword-2" },
+    ]);
+    expect(requestedPages).toEqual([1, 2]);
+  });
+
+  test("rejects repeated isolation keyword pages", async () => {
+    globalThis.fetch = (async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith("/api_v2/gpt/bots"))
+        return new Response(JSON.stringify([{ projectId: 302 }]), { status: 200 });
+      return new Response(
+        JSON.stringify({ list: [{ id: 11, keyword: "duplicate" }], pageSize: 1 }),
+        { status: 200 },
+      );
+    }) as typeof fetch;
+
+    await expect(
+      runSolveaCommand(session, "list-isolation-keywords", ["--all", "--page-size", "1"]),
+    ).rejects.toThrow("repeated page data at pageIndex=2");
+  });
+
   test("attaches Agent labels and filters the list by label name", async () => {
     const requests: Array<{ url: string; body?: Record<string, unknown> }> = [];
     globalThis.fetch = (async (input, init) => {

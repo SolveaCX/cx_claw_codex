@@ -7,6 +7,7 @@ const data = async (args: string[]) => jsonData(args, false);
 const project = async (client: SolveaClient) => client.projectId();
 const page = (args: string[]) => Number(option(args, "--page") ?? 1);
 const pageSize = (args: string[]) => Number(option(args, "--page-size") ?? 50);
+const MAX_ISOLATION_KEYWORD_PAGES = 1000;
 const reportBody = async (args: string[]) => ({
   beginTimestamp: Number(option(args, "--begin-ts", true)),
   endTimestamp: Number(option(args, "--end-ts", true)),
@@ -31,12 +32,65 @@ const handlers: Record<string, Handler> = {
       option(a, "--external-id", true)!,
       Number(option(a, "--page-size") ?? 10),
     ),
-  "list-isolation-keywords": async (c, a) =>
-    c.rawCall("GET", `${c.qamPath}/project/${await project(c)}/isolation_keywords`, undefined, {
-      keyword: option(a, "--keyword") ?? "",
-      pageIndex: page(a),
-      pageSize: pageSize(a),
-    }),
+  "list-isolation-keywords": async (c, a) => {
+    const path = `${c.qamPath}/project/${await project(c)}/isolation_keywords/page`;
+    const keyword = option(a, "--keyword") ?? "";
+    const requestedPageSize = pageSize(a);
+    const fetchPage = (pageIndex: number) =>
+      c.rawCall("GET", path, undefined, {
+        keyword,
+        pageIndex,
+        pageSize: requestedPageSize,
+      });
+    const pageItems = (response: unknown) => {
+      if (!response || typeof response !== "object" || Array.isArray(response))
+        throw new Error("isolation keyword page response must be an object");
+      const items = (response as Record<string, unknown>).list;
+      if (!Array.isArray(items))
+        throw new Error("isolation keyword page response list must be an array");
+      return items;
+    };
+
+    if (!flag(a, "--all")) {
+      const response = await fetchPage(page(a));
+      return flag(a, "--raw") ? response : pageItems(response);
+    }
+
+    const allItems: unknown[] = [];
+    const seenPages = new Set<string>();
+    for (let pageIndex = 1; pageIndex <= MAX_ISOLATION_KEYWORD_PAGES; pageIndex += 1) {
+      const response = await fetchPage(pageIndex);
+      const pageResponse = response as Record<string, unknown>;
+      const items = pageItems(response);
+
+      const signature = JSON.stringify(
+        items.map((item) =>
+          item && typeof item === "object" && !Array.isArray(item)
+            ? [(item as Record<string, unknown>).id, (item as Record<string, unknown>).keyword]
+            : item,
+        ),
+      );
+      if (items.length > 0 && seenPages.has(signature))
+        throw new Error(
+          `isolation keyword pagination repeated page data at pageIndex=${pageIndex}`,
+        );
+      seenPages.add(signature);
+      allItems.push(...items);
+
+      const rawTotalPage = pageResponse.totalPage;
+      if (rawTotalPage !== undefined) {
+        const totalPage = Number(rawTotalPage);
+        if (!Number.isInteger(totalPage) || totalPage < 0)
+          throw new Error("isolation keyword totalPage must be a non-negative integer");
+        if (pageIndex >= totalPage) return allItems;
+      } else if (items.length < requestedPageSize) {
+        return allItems;
+      }
+    }
+    throw new Error(
+      `isolation keyword pagination exceeded max pages ${MAX_ISOLATION_KEYWORD_PAGES}`,
+    );
+  },
   "create-isolation-keyword": async (c, a) =>
     c.rawCall("POST", `${c.qamPath}/project/${await project(c)}/isolation_keyword`, {
       keyword: option(a, "--keyword", true),
