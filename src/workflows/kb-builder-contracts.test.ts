@@ -145,10 +145,48 @@ describe("kb-builder migration contracts", () => {
           name: "Refund",
           content: "Please contact support",
           status: "ENABLED",
+          multiContent: { AUTO: "Please contact support" },
           directoryId: 123,
         },
       ],
       count: 1,
+      skipped_duplicates: [],
+    });
+  });
+
+  test("parses custom template headers, languages, and duplicate names", async () => {
+    await mkdir("_tmp_/kb-builder-contracts", { recursive: true });
+    const source = `_tmp_/kb-builder-contracts/templates-${Date.now()}.csv`;
+    const output = `_tmp_/kb-builder-contracts/template-csv-${Date.now()}.json`;
+    await writeFile(
+      source,
+      "快捷词,回复内容,英文话术\n退款,请联系客服,Contact support\n退款,重复内容,Duplicate\n",
+    );
+
+    const result = await runKbBuilder(session, "import-templates", [
+      "--xlsx",
+      source,
+      "--name-col",
+      "快捷词",
+      "--content-col",
+      "回复内容",
+      "--lang-col",
+      "ENGLISH=英文话术",
+      "--skip-duplicates",
+      "--output",
+      output,
+      "--dry-run",
+    ]);
+
+    expect(result).toMatchObject({
+      dryRun: true,
+      count: 1,
+      skipped_duplicates: [{ row: 3, name: "退款" }],
+    });
+    expect(JSON.parse(await Bun.file(output).text()).items[0]).toMatchObject({
+      name: "退款",
+      content: "请联系客服",
+      multiContent: { AUTO: "请联系客服", ENGLISH: "Contact support" },
     });
   });
 });

@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import ExcelJS from "exceljs";
 import type { Session } from "../types.js";
-import { flag, option } from "../args.js";
+import { flag, option, options } from "../args.js";
 import { SolveaClient } from "../solvea/client.js";
 import {
   asRows,
@@ -14,6 +14,78 @@ import {
 } from "./common.js";
 
 type JsonObject = Record<string, unknown>;
+const templateHeaderAliases: Record<string, string[]> = {
+  name: [
+    "name",
+    "title",
+    "topic",
+    "template",
+    "template_name",
+    "template name",
+    "template title",
+    "模板名称",
+    "模板名",
+    "模版名称",
+    "模版名",
+    "名称",
+    "标题",
+    "主题",
+  ],
+  content: [
+    "content",
+    "message",
+    "body",
+    "reply",
+    "answer",
+    "response",
+    "template_content",
+    "template content",
+    "reply text",
+    "模板内容",
+    "模板回复",
+    "模版内容",
+    "模版回复",
+    "回复内容",
+    "回复话术",
+    "话术",
+    "答案",
+    "内容",
+  ],
+  status: ["status", "state", "状态", "发布状态"],
+  scene: ["scene", "usage", "scenario", "场景", "适用场景"],
+};
+const templateLanguages = new Set([
+  "AUTO",
+  "ENGLISH",
+  "CHINESE",
+  "JAPANESE",
+  "FRENCH",
+  "GERMAN",
+  "SPANISH",
+  "ARABIC",
+  "RUSSIAN",
+  "PORTUGUESE",
+  "ITALIAN",
+  "KOREAN",
+  "DUTCH",
+  "INDONESIAN",
+  "TURKISH",
+  "ROMANIAN",
+  "POLISH",
+  "PHILIPPINES",
+]);
+const normalizedTemplateHeader = (value: unknown) =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replaceAll("-", "_");
+const canonicalTemplateHeader = (value: unknown) => {
+  const raw = String(value ?? "").trim();
+  const normalized = normalizedTemplateHeader(raw);
+  for (const [canonical, aliases] of Object.entries(templateHeaderAliases))
+    if (aliases.some((alias) => normalizedTemplateHeader(alias) === normalized)) return canonical;
+  return templateLanguages.has(raw.toUpperCase()) ? raw.toUpperCase() : normalized;
+};
 const clean = (value: unknown) =>
   String(value ?? "")
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
@@ -371,8 +443,11 @@ async function importSources(client: SolveaClient, args: string[]) {
 }
 
 async function importTemplates(client: SolveaClient, args: string[]) {
-  const source = option(args, "--plan-file") ?? option(args, "--xlsx");
-  if (!source) throw new Error("--xlsx or --plan-file is required");
+  const planFile = option(args, "--plan-file");
+  const inputFile = option(args, "--xlsx");
+  if (Boolean(planFile) === Boolean(inputFile))
+    throw new Error("exactly one of --xlsx or --plan-file is required");
+  const source = planFile ?? inputFile!;
   const directoryId = option(args, "--directory-id");
   if (
     directoryId !== undefined &&
@@ -380,47 +455,133 @@ async function importTemplates(client: SolveaClient, args: string[]) {
   )
     throw new Error("--directory-id must be a non-negative integer");
   const rows: JsonObject[] = [];
-  if (source.endsWith(".json")) rows.push(...asRows(await readJson(source)));
+  const skippedDuplicates: JsonObject[] = [];
+  if (planFile) rows.push(...asRows(await readJson(source)));
   else {
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(source);
+    if (source.toLowerCase().endsWith(".csv")) await workbook.csv.readFile(source);
+    else if (/\.xls(?:x|m)$/i.test(source)) await workbook.xlsx.readFile(source);
+    else throw new Error("only .xlsx, .xlsm, and .csv files are supported");
     const sheet = option(args, "--sheet")
       ? workbook.getWorksheet(option(args, "--sheet")!)
       : workbook.worksheets[0];
     if (!sheet) throw new Error("workbook has no worksheet");
-    const headers = (sheet.getRow(1).values as unknown[]).slice(1).map((v) => String(v ?? ""));
+    const rawHeaders = (sheet.getRow(1).values as unknown[])
+      .slice(1)
+      .map((value) => String(value ?? "").trim());
+    const headers = rawHeaders.map(canonicalTemplateHeader);
+    for (const [canonical, argument] of [
+      ["name", "--name-col"],
+      ["content", "--content-col"],
+      ["status", "--status-col"],
+      ["scene", "--scene-col"],
+    ] as const) {
+      const requested = option(args, argument);
+      if (!requested) continue;
+      const index = rawHeaders.findIndex(
+        (header) => normalizedTemplateHeader(header) === normalizedTemplateHeader(requested),
+      );
+      if (index < 0)
+        throw new Error(`${argument} '${requested}' not found; available columns: ${rawHeaders}`);
+      headers[index] = canonical;
+    }
+    for (const mapping of options(args, "--lang-col")) {
+      const separator = mapping.indexOf("=");
+      if (separator <= 0 || separator === mapping.length - 1)
+        throw new Error(`--lang-col must use LANGUAGE=COLUMN format, got: ${mapping}`);
+      const language = mapping.slice(0, separator).trim().toUpperCase();
+      const requested = mapping.slice(separator + 1).trim();
+      if (!templateLanguages.has(language))
+        throw new Error(`unsupported template language: ${language}`);
+      const index = rawHeaders.findIndex(
+        (header) => normalizedTemplateHeader(header) === normalizedTemplateHeader(requested),
+      );
+      if (index < 0)
+        throw new Error(
+          `--lang-col ${language} '${requested}' not found; available columns: ${rawHeaders}`,
+        );
+      headers[index] = language;
+    }
+    if (!headers.includes("name") || !headers.includes("content"))
+      throw new Error(
+        `cannot detect template name/content columns; use --name-col and --content-col; available columns: ${rawHeaders}`,
+      );
     sheet.eachRow((row, number) => {
       if (number === 1) return;
       const values = (row.values as unknown[]).slice(1);
       const item: JsonObject = {};
       headers.forEach((header, index) => {
-        if (header) item[header] = values[index] ?? "";
+        if (header) item[header] = String(values[index] ?? "").trim();
       });
       rows.push(item);
     });
   }
-  const items = rows
-    .map((row) => {
-      const item: JsonObject = {
-        name: String(row.name ?? row.Name ?? "").trim(),
-        content: String(row.content ?? row.Content ?? row.template ?? ""),
-        status: row.status ?? row.Status ?? "ENABLED",
-        scene: row.scene ?? row.Scene,
-        ...(row.multiContent ? { multiContent: row.multiContent } : {}),
-      };
-      if (directoryId !== undefined) item.directoryId = Number(directoryId);
-      else if (row.directoryId !== undefined) item.directoryId = Number(row.directoryId);
-      return item;
-    })
-    .filter((item) => item.name && item.content);
+  const seenNames = new Set<string>();
+  const items: JsonObject[] = [];
+  rows.forEach((row, index) => {
+    const name = String(row.name ?? row.Name ?? "").trim();
+    const content = String(row.content ?? row.Content ?? row.template ?? "").trim();
+    if (!name && !content) return;
+    if (!name || !content) throw new Error(`row ${index + 2}: name and content are required`);
+    if (seenNames.has(name)) {
+      if (!flag(args, "--skip-duplicates"))
+        throw new Error(`row ${index + 2}: duplicate template name in file: ${name}`);
+      skippedDuplicates.push({ row: index + 2, name });
+      return;
+    }
+    seenNames.add(name);
+    const multiContent: JsonObject = { AUTO: row.AUTO || content };
+    for (const language of templateLanguages)
+      if (language !== "AUTO" && row[language]) multiContent[language] = row[language];
+    const item: JsonObject = {
+      name,
+      content,
+      status: row.status ?? row.Status ?? "ENABLED",
+      scene: row.scene ?? row.Scene,
+      multiContent: row.multiContent ?? multiContent,
+    };
+    if (directoryId !== undefined) item.directoryId = Number(directoryId);
+    else if (row.directoryId !== undefined) item.directoryId = Number(row.directoryId);
+    items.push(item);
+  });
   const output =
     option(args, "--output") ??
-    join(outputRoot("kb-builder"), `template_import_plan_${Date.now()}.json`);
-  await writeJson(output, { items, count: items.length });
-  if (flag(args, "--dry-run")) return { dryRun: true, output, count: items.length };
-  const results = [];
-  for (const item of items) results.push(await client.createTemplate(item));
-  return { output, count: results.length, results };
+    join(
+      outputRoot("kb-builder"),
+      `template_import_${flag(args, "--dry-run") ? "plan" : "result"}_${Date.now()}.json`,
+    );
+  const plan = { items, count: items.length, skipped_duplicates: skippedDuplicates };
+  if (flag(args, "--dry-run")) {
+    await writeJson(output, plan);
+    return { dryRun: true, output, count: items.length, skipped_duplicates: skippedDuplicates };
+  }
+  const createdItems: JsonObject[] = [];
+  const errors: JsonObject[] = [];
+  for (const item of items) {
+    try {
+      const response = await client.createTemplate(item);
+      const result = response && typeof response === "object" ? (response as JsonObject) : {};
+      const data =
+        result.data && typeof result.data === "object" ? (result.data as JsonObject) : {};
+      createdItems.push({ id: result.id ?? data.id, name: item.name });
+    } catch (error) {
+      errors.push({
+        name: item.name,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  const result = {
+    input: items.length,
+    created: createdItems.length,
+    failed: errors.length,
+    output,
+    created_items: createdItems,
+    skipped_duplicates: skippedDuplicates,
+    errors,
+  };
+  await writeJson(output, result);
+  return result;
 }
 
 async function exportKnowledge(client: SolveaClient, args: string[]) {
