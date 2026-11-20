@@ -1,35 +1,46 @@
 # 回复模板库管理
 
-优先用 `/skill-lib/solvea-api/cxclawctl api` 管理模板；用户上传 Excel / CSV 批量导入时，用 ``node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-templates``。
+优先用 `cxclawctl template` 管理模板；用户上传自定义 Excel / CSV 批量导入时，用 `kb-builder import-templates`。
 
 ## 能力清单
 
 | 用户要做什么 | 使用方式 | 是否需要确认 | 输出 / 结果 |
 |--------------|----------|--------------|-------------|
-| 查模板 | `list-templates` | 否 | 返回 `id/name/content/status/scene` |
-| 创建单条模板 | `create-template` | 是 | 返回新模板 `id` |
-| 修改单条模板（改名 / 内容 / 状态） | `update-template --id ...` | 是 | 返回更新后的模板 |
+| 查模板 | `template list` | 否 | 返回模板列表及目录归属 |
+| 查单条模板和可选值 | `template get` / `template options` / `template config` | 否 | 返回完整模板或配置 |
+| 查模板目录 | `template directory-list` / `template directory-get` | 否 | 返回目录树或目录详情 |
+| 创建单条模板 | `template create` | 是 | 返回新模板 `id` |
+| 修改单条模板（改名 / 内容 / 状态） | `template update --id ...` | 是 | 返回更新后的模板 |
 | 批量导入模板 | `kb-builder import-templates --dry-run` → 用户确认 → 正式导入 | 是 | dry-run 生成 `template_import_plan_*`；正式导入生成 `template_import_result_*` |
 | 保留首条并跳过重复名 | `kb-builder import-templates --skip-duplicates` | 是 | `skipped_duplicates` 记录被跳过的行 |
-| 删除模板 | `delete-templates --ids ... --confirm-delete` | 是，必须确认模板名称和 id | 按 id 删除 |
-| 单条发布 / 下架 | `update-template --id ... --status ENABLED/DISABLED` | 是 | 改单条模板状态 |
-| 批量发布 / 下架 | 暂无批量 CLI | 是 | 单条走 `update-template`；批量走前端“批量更新” |
+| 删除模板 | `template delete --ids ... --confirm-delete` | 是，必须确认模板名称和 id | 按 id 删除 |
+| 单条发布 / 下架 | `template update --id ... --status ENABLED/DISABLED` | 是 | 改单条模板状态 |
+| 批量发布 / 下架 | `template batch-update` | 是 | 按模板 id 部分更新 |
+| 创建、重命名或移动目录 | `template directory-create` / `template directory-update` | 是 | 返回目录详情 |
+| 批量归类模板 | `template move` | 是 | `directoryId=0` 表示移出目录 |
+| 删除模板目录树 | `template directory-delete --confirm-delete` | 是，必须确认目录、子目录和其中模板 | 递归删除目录及模板 |
+| 官方 Excel 导入 / 导出 | `template import-template` / `template import` / `template export` | 导入前需要确认 | 后端批量处理；导出返回任务 |
+| 翻译模板内容 | `template translate` | 是 | 只返回译文，不直接修改模板 |
 
 ## 管理 CLI
 
 所有命令都走：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api <command> [args]
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template <action> [args]
 ```
 
-### `list-templates`
+### `template list`
 
 查询模板库。只读，可直接执行。
 
 | 参数 | 必填 | 说明 |
 |------|------|------|
 | `--keyword` | 否 | 按模板名 / 内容关键字查询；传数字时也可用于定位 id |
+| `--directory-id` | 否 | `0` 查未分组；正数查指定目录及子目录 |
+| `--source` | 否 | 来源过滤，可重复传；合法值先查 `template config` |
+| `--created-by` | 否 | 创建人 ID，可重复传 |
+| `--created-at-gte` / `--created-at-lte` | 否 | 创建时间毫秒时间戳边界 |
 | `--status` | 否 | 状态过滤，如 `ENABLED` / `DISABLED` |
 | `--scene` | 否 | 场景过滤；可重复传。普通模板一般不传，语音短信模板传 `voice_sms` |
 | `--page` | 否 | 页码，默认 `1` |
@@ -37,11 +48,11 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api <command> [args]
 | `--pretty` | 否 | 格式化输出，排查时建议加 |
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-templates \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template list \
   --keyword "广告" --page-size 20 --pretty
 ```
 
-### `create-template`
+### `template create`
 
 创建单条模板。执行前先向用户确认模板名称和内容。
 
@@ -51,12 +62,13 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-templates \
 | `--content` | 是，除非用 `--data-file` | 默认回复内容 |
 | `--status` | 否 | 模板状态；不传时后端默认 `ENABLED` |
 | `--scene` | 否 | 模板场景；普通模板不传，语音短信模板传 `voice_sms` |
+| `--directory-id` | 否 | 目标模板目录；`0` 表示未分组 |
 | `--data` | 否 | JSON 字符串；适合传 `multiContent` 等复杂字段 |
 | `--data-file` | 否 | JSON 文件路径；适合复杂模板 |
 | `--pretty` | 否 | 格式化输出 |
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-template \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template create \
   --name "广告关闭" \
   --content "您好，您可以在APP右下角“我的”里关闭广告。" \
   --status ENABLED \
@@ -70,13 +82,14 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-template \
   "name": "广告关闭",
   "content": "您好，您可以在APP右下角“我的”里关闭广告。",
   "status": "ENABLED",
+  "directoryId": 123,
   "multiContent": {
     "AUTO": "您好，您可以在APP右下角“我的”里关闭广告。"
   }
 }
 ```
 
-### `update-template`
+### `template update`
 
 修改单条已有模板，**部分更新**：只传要改的字段，未传的保持不变。执行前先向用户确认改哪条、改成什么。
 
@@ -86,6 +99,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-template \
 | `--name` | 否 | 新模板名；项目内唯一，撞名会报 `template name is already existed` |
 | `--content` | 否 | 新默认回复内容；后端会自动同步到 `multiContent.AUTO` |
 | `--status` | 否 | `ENABLED` / `DISABLED` |
+| `--directory-id` | 否 | 移入指定目录；`0` 表示移出目录 |
 | `--data` / `--data-file` | 否 | JSON；传 `multiContent` 等多语种字段 |
 | `--pretty` | 否 | 格式化输出 |
 
@@ -93,10 +107,10 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api create-template \
 
 ```bash
 # 下架
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-template --id 12008 --status DISABLED
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template update --id 12008 --status DISABLED
 
 # 改名 + 内容
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-template \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template update \
   --id 12008 --name "转人工" --content "<p>这是转人工的模版文案</p>" --pretty
 ```
 
@@ -106,7 +120,68 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-template \
 { "multiContent": { "AUTO": "<p>…</p>", "ENGLISH": "<p>…</p>" } }
 ```
 
-### `delete-templates`
+## 模板目录与批量管理
+
+目录最多三级，`parentId=0` 表示根目录。创建前先查询目录树并按同一父目录下的名称查重。
+
+```bash
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template directory-list --pretty
+
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template directory-create \
+  --name "WhatsAPP Template" --parent-id 0 --pretty
+
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template directory-update \
+  --id 123 --name "WhatsApp Template" --pretty
+```
+
+批量修改使用 JSON 列表，每项带模板 `id` 和需要修改的字段：
+
+```json
+{"list":[{"id":12008,"status":"DISABLED"},{"id":12009,"status":"DISABLED"}]}
+```
+
+```bash
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template batch-update \
+  --data-file /workspace/state/kb-builder/template_updates.json
+
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template move \
+  --ids 12008 12009 --directory-id 123
+```
+
+移动前展示全部模板 `id/name` 和目标目录，执行后按目录回查。删除目录会递归删除子目录及其中模板，必须展示完整影响范围并取得强确认：
+
+```bash
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template directory-delete \
+  --id 123 --confirm-delete
+```
+
+## 官方 Excel 导入、导出与翻译
+
+官方 Excel 支持按行指定三级目录，由后端单次批量导入最多 1000 条。先下载当前格式，核对表头、行数、目录路径、重复名和样例，确认后再导入：
+
+```bash
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template import-template \
+  --output /workspace/outputs/kb-builder/template_import.xlsx
+
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template import \
+  --file /workspace/state/kb-builder/template_import.xlsx --pretty
+```
+
+官方文件包含 `Level 1 Dir`、`Level 2 Dir`、`Level 3 Dir`、`Name`、`Scene`、`Status`、`AUTO` 及其它语言列；`Name` 和 `AUTO` 必填。
+
+导出沿用模板筛选字段。创建任务不代表文件已经生成，需通过模板导出任务确认完成：
+
+```bash
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template export \
+  --directory-id 123 --status ENABLED --pretty
+
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template export-tasks \
+  --page 1 --page-size 20 --pretty
+```
+
+`template translate` 只返回译文，不直接修改模板。译文经确认后，再通过 `template update` 或 `template batch-update` 写入 `multiContent`。
+
+### `template delete`
 
 按 id 批量删除模板。删除前必须向用户展示模板名称和 id，并要求回复“我已知晓删除影响并确认删除”或等价强确认。
 
@@ -117,7 +192,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api update-template \
 | `--data-file` | 否 | JSON 文件路径 |
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" api delete-templates --ids 123 124 125 --confirm-delete
+node "<PLUGIN_ROOT>/plugin-cli.mjs" template delete --ids 123 124 125 --confirm-delete
 ```
 
 ## 批量导入脚本
@@ -152,6 +227,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-templates [args]
 | `--scene-col` | 否 | 指定场景列 |
 | `--lang-col` | 否 | 指定多语言列，可重复传，格式 `LANGUAGE=列名`，如 `CHINESE=中文话术` |
 | `--skip-duplicates` | 否 | 文件内模板名重复时保留第一条，跳过后续同名行；结果写入 `skipped_duplicates` |
+| `--directory-id` | 否 | 将本次自定义文件内模板全部导入同一目录；`0` 表示未分组 |
 | `--dry-run` | 否 | 只解析并生成导入计划，不创建模板 |
 
 `--xlsx` 和 `--plan-file` 二选一。dry-run 阶段通常用 `--xlsx`；正式导入阶段优先用 `--plan-file`。
@@ -228,10 +304,12 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-templates [args]
 ## 规则
 
 - 查询模板可直接执行；创建、修改、正式批量导入、删除前必须等用户明确确认。
-- `update-template` 是部分更新：只改传入字段，未传字段不变；改名同样受“名称唯一”校验；改单条状态（上架 / 下架）用 `update-template --status`，无需依赖前端。
+- `template update` 是部分更新：只改传入字段，未传字段不变；改名同样受“名称唯一”校验；改单条状态（上架 / 下架）用 `template update --status`。
 - 删除模板前必须展示并确认模板名称和 id。
 - 后端校验模板名唯一；脚本不会覆盖已有模板。
-- Excel 导入没有后端批量创建接口，脚本会逐行调用单条创建接口。
+- 官方 Excel 走后端批量导入；自定义 Excel / CSV 的 dry-run 流程按确认后的计划逐条创建。
 - 正式导入不会生成新的 import plan，只生成 import result。
+- 不把 Skill 命令缺失描述成产品能力限制；接口实际报错时保留原始错误并说明失败步骤。
+- 创建、修改、移动、导入、翻译和状态变更执行后，按模板和目录回查实际结果。
 - 跨轮不要依赖 `/workspace/tmp` 临时文件；正式导入应使用 dry-run 生成的 `template_import_plan_*`。
 - plan 是用户确认的导入内容快照；正式导入不要重新解析 Excel，避免文件消失、表头参数不一致或临时处理丢失。

@@ -109,22 +109,81 @@ export const resources = {
     list: action(
       "list-templates",
       "List reply templates",
-      "[--page <number>] [--page-size <number>] [--keyword <text>] [--scene <scene>] [--status <status>]",
+      "[--page <number>] [--page-size <number>] [--keyword <text>] [--directory-id <id>] [--scene <scene>] [--status <status>] [--source <source>] [--created-by <id>] [--created-at-gte <ms>] [--created-at-lte <ms>]",
     ),
+    get: action("get-template", "Get one reply template", "--id <template-id>"),
+    options: action("list-template-options", "List compact reply template options"),
+    config: action("get-template-config", "Get reply template statuses and sources"),
     create: action(
       "create-template",
       "Create a reply template",
-      "(--name <name> --content <content>) | --data-file <path>",
+      "(--name <name> --content <content>) | --data-file <path> [--directory-id <id>]",
     ),
     update: action(
       "update-template",
       "Update a reply template",
-      "--id <template-id> [--name <name>] [--content <content>] [--status <status>] [--data-file <path>]",
+      "--id <template-id> [--name <name>] [--content <content>] [--status <status>] [--directory-id <id>] [--data-file <path>]",
+    ),
+    "batch-update": action(
+      "batch-update-templates",
+      "Partially update multiple reply templates",
+      "--data <json> | --data-file <path>",
+    ),
+    move: action(
+      "move-templates",
+      "Move reply templates into one directory",
+      "--ids <id> [id...] --directory-id <id>",
     ),
     delete: action(
       "delete-templates",
       "Delete reply templates",
       "--ids <id> [id...] --confirm-delete",
+    ),
+    "directory-list": action("list-template-directories", "List the reply template directory tree"),
+    "directory-get": action(
+      "get-template-directory",
+      "Get one reply template directory",
+      "--id <directory-id>",
+    ),
+    "directory-create": action(
+      "create-template-directory",
+      "Create a reply template directory",
+      "--name <name> [--parent-id <directory-id>]",
+    ),
+    "directory-update": action(
+      "update-template-directory",
+      "Rename or move a reply template directory",
+      "--id <directory-id> [--name <name>] [--parent-id <directory-id>]",
+    ),
+    "directory-delete": action(
+      "delete-template-directory",
+      "Delete a reply template directory subtree",
+      "--id <directory-id> --confirm-delete",
+    ),
+    "import-template": action(
+      "download-template-import-file",
+      "Download the canonical reply template XLSX",
+      "--output <path>",
+    ),
+    import: action(
+      "import-templates-file",
+      "Import a canonical reply template XLSX",
+      "--file <path>",
+    ),
+    export: action(
+      "export-templates",
+      "Submit an asynchronous reply template export",
+      "[--keyword <text>] [--directory-id <id>] [--scene <scene>] [--status <status>] [--source <source>] [--created-by <id>] [--created-at-gte <ms>] [--created-at-lte <ms>] [--data <json> | --data-file <path>]",
+    ),
+    "export-tasks": action(
+      "get-template-export-tasks",
+      "List reply template export tasks",
+      "[--page <number>] [--page-size <number>]",
+    ),
+    translate: action(
+      "translate-template-contents",
+      "Translate reply template contents",
+      "--target-language <language> (--data <json> | --data-file <path>)",
     ),
   },
   knowledge: {

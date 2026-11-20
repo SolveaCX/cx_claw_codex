@@ -373,6 +373,12 @@ async function importSources(client: SolveaClient, args: string[]) {
 async function importTemplates(client: SolveaClient, args: string[]) {
   const source = option(args, "--plan-file") ?? option(args, "--xlsx");
   if (!source) throw new Error("--xlsx or --plan-file is required");
+  const directoryId = option(args, "--directory-id");
+  if (
+    directoryId !== undefined &&
+    (!Number.isSafeInteger(Number(directoryId)) || Number(directoryId) < 0)
+  )
+    throw new Error("--directory-id must be a non-negative integer");
   const rows: JsonObject[] = [];
   if (source.endsWith(".json")) rows.push(...asRows(await readJson(source)));
   else {
@@ -394,12 +400,18 @@ async function importTemplates(client: SolveaClient, args: string[]) {
     });
   }
   const items = rows
-    .map((row) => ({
-      name: String(row.name ?? row.Name ?? "").trim(),
-      content: String(row.content ?? row.Content ?? row.template ?? ""),
-      status: row.status ?? row.Status ?? "ENABLED",
-      scene: row.scene ?? row.Scene,
-    }))
+    .map((row) => {
+      const item: JsonObject = {
+        name: String(row.name ?? row.Name ?? "").trim(),
+        content: String(row.content ?? row.Content ?? row.template ?? ""),
+        status: row.status ?? row.Status ?? "ENABLED",
+        scene: row.scene ?? row.Scene,
+        ...(row.multiContent ? { multiContent: row.multiContent } : {}),
+      };
+      if (directoryId !== undefined) item.directoryId = Number(directoryId);
+      else if (row.directoryId !== undefined) item.directoryId = Number(row.directoryId);
+      return item;
+    })
     .filter((item) => item.name && item.content);
   const output =
     option(args, "--output") ??

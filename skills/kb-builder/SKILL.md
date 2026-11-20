@@ -20,7 +20,7 @@ requires:
 | 网页/文件/工单整理成问答 | [`qa-quality.md`](references/qa-quality.md)、[`qa-from-web.md`](references/qa-from-web.md)、[`qa-from-help-center.md`](references/qa-from-help-center.md)、[`qa-from-pdf.md`](references/qa-from-pdf.md)、[`qa-from-tickets.md`](references/qa-from-tickets.md) | `kb-builder extract-web-qa`、`kb-builder batch-extract-ticket-qa`、`kb-builder import-qa` |
 | Excel / CSV 整理成问答 | [`references/upload.md`](references/upload.md) | 先解析表格，再按 QA 导入流程执行 |
 | 上传已有 QA 计划 | [`references/upload.md`](references/upload.md) | `kb-builder import-qa` |
-| 回复模板库导入 | [`references/reply-template.md`](references/reply-template.md) | `kb-builder import-templates` |
+| 回复模板查询、目录、导入导出与完整管理 | [`references/reply-template.md`](references/reply-template.md) | `template <action>`、`kb-builder import-templates` |
 | 查看、更新、移动、删除或改变知识状态 | [`references/knowledge.md`](references/knowledge.md) | 按 reference 提供的固定入口 |
 | 创建或更新产品知识 | [`references/product.md`](references/product.md) | `create-product-knowledge`、`update-product-knowledge` |
 | 导出知识 | [`references/export.md`](references/export.md) | `kb-builder export-knowledge` |
@@ -60,7 +60,8 @@ requires:
 | 知识标签定义 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge tags --pretty` |
 | 隔离关键词 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-isolation-keywords --page-size 50 --page 1 --pretty` |
 | 单条知识已绑定的隔离关键词 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api get-knowledge-isolation-keywords --id <knowledge_id> --type {QA,LEARN_SELF,FILE,WEBSITE,PRODUCT} --pretty` |
-| 回复模板 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" api list-templates --page-size 50 --pretty` |
+| 回复模板 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" template list --page-size 50 --pretty` |
+| 回复模板目录树 | `node "<PLUGIN_ROOT>/plugin-cli.mjs" template directory-list --pretty` |
 
 `list-knowledge` 分页时先看返回的 `total`，再按需增加 `--page`；接口最大 `--page-size` 为 1000，不要用不断增大页大小的方式探测总量。
 
@@ -78,7 +79,7 @@ requires:
 | 导入文档或网页 | `kb-builder import-source-documents` | 本文件“来源模式” |
 | 修改知识标签 | `edit-knowledge-tags` | [`tags.md`](references/tags.md) |
 | 创建、修改、删除或绑定隔离关键词 | `create-isolation-keyword` / `update-isolation-keyword` / `delete-isolation-keyword` / `batch-update-isolation-keyword-bindings` | [`isolation-keywords.md`](references/isolation-keywords.md) |
-| 创建、修改或删除回复模板 | `create-template` / `update-template` / `delete-templates` | [`reply-template.md`](references/reply-template.md) |
+| 创建、修改、批量管理、归类、导入导出、翻译或删除回复模板 | `template <action>` / `kb-builder import-templates` | [`reply-template.md`](references/reply-template.md) |
 
 ## 统一规则
 

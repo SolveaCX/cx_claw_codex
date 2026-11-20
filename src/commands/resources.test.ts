@@ -15,6 +15,13 @@ describe("resource command hierarchy", () => {
     expect(resolveResourceCommand("agent", "delete")).toBe("delete-agent");
     expect(resolveResourceCommand("field", "create")).toBe("create-managed-ai-field");
     expect(resolveResourceCommand("template", "delete")).toBe("delete-templates");
+    expect(resolveResourceCommand("template", "directory-create")).toBe(
+      "create-template-directory",
+    );
+    expect(resolveResourceCommand("template", "batch-update")).toBe("batch-update-templates");
+    expect(resolveResourceCommand("template", "import")).toBe("import-templates-file");
+    expect(resolveResourceCommand("template", "export-tasks")).toBe("get-template-export-tasks");
+    expect(resolveResourceCommand("template", "translate")).toBe("translate-template-contents");
     expect(resolveResourceCommand("quality", "alerts")).toBe("list-quality-alert-rules");
     expect(() => resolveResourceCommand("analytics", "messages")).toThrow("implemented directly");
   });
@@ -34,6 +41,9 @@ describe("resource command hierarchy", () => {
     expect(resourceHelp("agent", "update")).toContain("--id <agent-id>");
     expect(resourceHelp("agent", "list")).toContain("--tag <name-or-id>");
     expect(resourceHelp("agent", "delete")).toContain("--confirm-delete");
+    expect(resourceHelp("template", "directory-delete")).toContain("--confirm-delete");
+    expect(resourceHelp("template", "move")).toContain("--directory-id <id>");
+    expect(resourceHelp("template", "import-template")).toContain("--output <path>");
     expect(resourceHelp("analytics", "messages")).toContain("--start-date <YYYY-MM-DD>");
     expect(() => resourceHelp("intent", "remove")).toThrow("unknown intent action");
   });

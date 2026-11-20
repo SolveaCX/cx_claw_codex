@@ -121,4 +121,34 @@ describe("kb-builder migration contracts", () => {
       isVisible: true,
     });
   });
+
+  test("keeps a confirmed template directory in custom import plans", async () => {
+    await mkdir("_tmp_/kb-builder-contracts", { recursive: true });
+    const plan = `_tmp_/kb-builder-contracts/templates-${Date.now()}.json`;
+    const output = `_tmp_/kb-builder-contracts/template-output-${Date.now()}.json`;
+    await writeFile(plan, JSON.stringify([{ name: "Refund", content: "Please contact support" }]));
+
+    const result = await runKbBuilder(session, "import-templates", [
+      "--plan-file",
+      plan,
+      "--directory-id",
+      "123",
+      "--output",
+      output,
+      "--dry-run",
+    ]);
+
+    expect(result).toMatchObject({ dryRun: true, count: 1 });
+    expect(JSON.parse(await Bun.file(output).text())).toEqual({
+      items: [
+        {
+          name: "Refund",
+          content: "Please contact support",
+          status: "ENABLED",
+          directoryId: 123,
+        },
+      ],
+      count: 1,
+    });
+  });
 });
