@@ -15,7 +15,7 @@ staging  /sns_v1
 
 | 能力 | 方法与路径 | 请求/参数 |
 |------|------------|-----------|
-| 搜索/查询 | `GET /project/{projectId}/isolation_keywords` | `keyword`、`pageIndex`、`pageSize` |
+| 搜索/查询 | `GET /project/{projectId}/isolation_keywords/page` | `keyword`、`pageIndex`、`pageSize` |
 | 创建 | `POST /project/{projectId}/isolation_keyword` | `{ "keyword": "hihi,oo" }`；逗号分隔输入会拆成多个关键词 |
 | 修改 | `POST /project/{projectId}/isolation_keyword/{id}` | `{ "keyword": "new-value" }` |
 | 删除 | `DELETE /project/{projectId}/isolation_keyword/{id}` | 无请求体 |
@@ -36,7 +36,13 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api batch-update-isolation-keyword-bindings 
 
 批量绑定命令的 JSON 文件在接口结构 `items`、`directoryIds`、`keywordIds` 之外，使用 `operation` 声明业务操作：`append`（追加）、`remove`（移除）或 `replace`（替换）。知识级操作省略时默认为 `append`。
 
-查询结果通常是数组，每项包含：
+后端查询结果是分页对象：
+
+```text
+list / pageIndex / pageSize / totalPage / totalCount
+```
+
+CLI 默认只输出当前页的精简 `list`；使用 `--raw` 时保留分页字段，使用 `--all` 时按 `totalPage` 拉取全部分页。每项包含：
 
 ```text
 id / keyword / bindCount / projectId / tenantId / createdAt / updatedAt
@@ -96,7 +102,7 @@ CLI 计划中的 `knowledgeType` 使用知识列表返回的界面类型：`QA`�
 
 用户要求新建关键词时，禁止直接调用创建接口。必须先执行：
 
-1. 用 `list_isolation_keywords` 分页拉取当前项目的关键词（需要全量查重时按 `totalCount` / 分页结果继续查询）。
+1. 用 `list_isolation_keywords` 分页拉取当前项目的关键词；需要全量查重时使用 `--all`，由 CLI 按 `totalPage` 拉取全部分页。
 2. 将用户输入按逗号拆分、去除首尾空格并在本次输入内去重。
 3. 与现有关键词按规范化后的精确文本匹配；把已存在的关键词单独列出并告知用户，不重复提交。
 4. 只对不存在的关键词发起创建，并在写入前向用户展示待创建清单、重复清单和失败风险，取得明确确认。
