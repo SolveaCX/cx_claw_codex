@@ -21,7 +21,7 @@ requires:
 | Excel / CSV 整理成问答 | [`references/upload.md`](references/upload.md) | 先解析表格，再按 QA 导入流程执行 |
 | 上传已有 QA 计划 | [`references/upload.md`](references/upload.md) | `kb-builder import-qa` |
 | 回复模板查询、目录、导入导出与完整管理 | [`references/reply-template.md`](references/reply-template.md) | `template <action>`、`kb-builder import-templates` |
-| 查看、更新、移动、删除或改变知识状态 | [`references/knowledge.md`](references/knowledge.md) | 按 reference 提供的固定入口 |
+| 查看、更新、管理相似问、移动、删除或改变知识状态 | [`references/knowledge.md`](references/knowledge.md) | 按 reference 提供的固定入口 |
 | 创建或更新产品知识 | [`references/product.md`](references/product.md) | `create-product-knowledge`、`update-product-knowledge` |
 | 导出知识 | [`references/export.md`](references/export.md) | `kb-builder export-knowledge` |
 | 知识库目录管理 | [`references/directory.md`](references/directory.md) | 按 reference 提供的操作入口 |

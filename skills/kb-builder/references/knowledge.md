@@ -51,7 +51,26 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge update --id 3057821 --data-file /w
 
 5. 再次读取同一 ID，核对实际结果。
 
-更新文件支持 `title`、`content`、`published`、`directoryId`、`status`、`forceIndex`。仅写需要修改的字段；除非明确需要重建或删除索引，不要设置 `forceIndex`。
+更新文件支持 `title`、`content`、`similarQuestions`、`published`、`directoryId`、`status`、`forceIndex`。仅写需要修改的字段；除非明确需要重建或删除索引，不要设置 `forceIndex`。
+
+## 管理相似问
+
+相似问只属于问答和 AI自学习知识。读取详情时查看 `similarQuestions`；更新时通过 `knowledge update` 提交完整字符串数组。
+
+- 最多 10 条，每条必须是非空字符串，不能重复。
+- 表达必须与主问题语义一致，不得添加新的业务条件、答案或事实。
+- 手工添加时先读取当前列表，默认保留现有内容并追加；总数超过 10 条时，先请用户选择删除或替换项。
+- 用户要求 AI 生成时，根据主问题和当前相似问生成不重复的问法，补足到 10 条；语言跟随主问题。
+- 清空时显式提交 `{"similarQuestions": []}`。
+- 展示最终列表并获得用户明确确认后才更新；更新后重新读取同一 ID，核对 `similarQuestions`。
+
+示例：
+
+```bash
+node "<PLUGIN_ROOT>/plugin-cli.mjs" knowledge update --id 3057821 \
+  --data '{"similarQuestions":["How can I reset the device?","Where is the reset control?"]}' \
+  --pretty
+```
 
 ### 批量更新问答正文 / 标题
 
