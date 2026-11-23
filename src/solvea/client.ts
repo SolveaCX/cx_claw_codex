@@ -62,6 +62,20 @@ const isolationKnowledgeType = (value: unknown) =>
   ({ QA: "QA", LEARN_SELF: "QA", FILE: "DOCUMENT", WEBSITE: "DOCUMENT", PRODUCT: "PRODUCT" })[
     knowledgeType(value)
   ]!;
+const normalizeSimilarQuestions = (value: unknown) => {
+  if (!Array.isArray(value)) throw new Error("similarQuestions must be an array");
+  if (value.length > 10) throw new Error("similarQuestions must contain at most 10 items");
+  const normalized: string[] = [];
+  for (const question of value) {
+    if (typeof question !== "string" || !question.trim())
+      throw new Error("similarQuestions items must be non-empty strings");
+    const stripped = question.trim();
+    if (normalized.includes(stripped))
+      throw new Error("similarQuestions must not contain duplicates");
+    normalized.push(stripped);
+  }
+  return normalized;
+};
 
 const embeddedImagePattern = /data:(image\/[a-z0-9.+-]+);base64,([a-z0-9+/=]+)/gi;
 const localImagePattern = /(\bsrc\s*=\s*["']|!\[[^\]]*\]\()([^"')]+)(["']|\))/gi;
@@ -821,6 +835,8 @@ export class SolveaClient {
   }
   async updateKnowledge(id: string, data: JsonObject) {
     const payload = { ...data };
+    if (payload.similarQuestions !== undefined)
+      payload.similarQuestions = normalizeSimilarQuestions(payload.similarQuestions);
     if (typeof payload.content === "string")
       payload.content = await this.uploadEmbeddedImages(payload.content);
     if (payload.directoryId === undefined) {
@@ -845,7 +861,7 @@ export class SolveaClient {
       const content = await this.uploadEmbeddedImages(String(item.content ?? "").trim());
       if (!title) throw new Error(`QA item #${index + 1} requires title`);
       if (!content) throw new Error(`QA item #${index + 1} requires content`);
-      payload.push({
+      const normalized: JsonObject = {
         title,
         content,
         forceIndex: item.forceIndex ?? true,
@@ -855,7 +871,10 @@ export class SolveaClient {
         metadata: item.metadata ?? { tags: [] },
         directoryId: item.directoryId ?? "",
         isVisible: item.isVisible ?? true,
-      });
+      };
+      if (item.similarQuestions !== undefined)
+        normalized.similarQuestions = normalizeSimilarQuestions(item.similarQuestions);
+      payload.push(normalized);
     }
     return this.post(`${this.qamPrefix}/project/${await this.projectId()}/kus`, payload);
   }
@@ -1070,6 +1089,8 @@ export class SolveaClient {
         `batch knowledge item #${index + 1} requires kuId or id`,
       );
       delete row.id;
+      if (row.similarQuestions !== undefined)
+        row.similarQuestions = normalizeSimilarQuestions(row.similarQuestions);
       if (typeof row.content === "string")
         row.content = await this.uploadEmbeddedImages(row.content);
       if (row.directoryId === undefined) {

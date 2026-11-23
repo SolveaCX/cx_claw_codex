@@ -39,7 +39,17 @@ describe("kb-builder migration contracts", () => {
       "退款办理条件：请提供订单号并联系客服。\n\n" +
       "完整原文段落。".repeat(1000) +
       "\n\n![流程图](https://example.test/flow.png)\n\n| 条件 | 步骤 |\n| --- | --- |\n| 已签收 | 提交申请 |";
-    await writeFile(plan, JSON.stringify([{ dir_path: ["test-hw"], question: "Q", answer }]));
+    await writeFile(
+      plan,
+      JSON.stringify([
+        {
+          dir_path: ["test-hw"],
+          question: "Q",
+          answer,
+          similar_questions: [" Another way to ask Q? "],
+        },
+      ]),
+    );
     process.env.CXCLAW_OUTPUT_DIR = "_tmp_/kb-builder-contracts/output";
     const requests: Array<{ url: string; method: string; body?: unknown }> = [];
     globalThis.fetch = (async (input, init) => {
@@ -66,6 +76,7 @@ describe("kb-builder migration contracts", () => {
         title: "Q",
         content: answer,
         directoryId: 31577,
+        similarQuestions: ["Another way to ask Q?"],
         type: "QA",
         forceIndex: true,
         published: true,
@@ -83,6 +94,26 @@ describe("kb-builder migration contracts", () => {
     await expect(
       runKbBuilder(session, "import-qa", ["--qa-file", plan, "--dry-run"]),
     ).rejects.toThrow("question must be a non-empty string");
+  });
+
+  test("dry-run rejects duplicate similar questions", async () => {
+    await mkdir("_tmp_/kb-builder-contracts", { recursive: true });
+    const plan = `_tmp_/kb-builder-contracts/invalid-similar-${Date.now()}.json`;
+    await writeFile(
+      plan,
+      JSON.stringify([
+        {
+          dir_path: ["test-hw"],
+          question: "Q",
+          answer: "A",
+          similar_questions: ["Q alternative", "Q alternative"],
+        },
+      ]),
+    );
+
+    await expect(
+      runKbBuilder(session, "import-qa", ["--qa-file", plan, "--dry-run"]),
+    ).rejects.toThrow("similar_questions must not contain duplicates");
   });
 
   test("converts source document plans into the documents API contract", async () => {

@@ -27,9 +27,12 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" kb-builder import-qa \
 {
   "dir_path": ["Product Introduction", "Smart Plugs", "Kasa EP25"],
   "question": "Kasa EP25 — What is the product overview?",
-  "answer": "Markdown answer"
+  "answer": "Markdown answer",
+  "similar_questions": ["What does the Kasa EP25 do?"]
 }
 ```
+
+`similar_questions` 可选，最多 10 条；每条必须是主问题的不重复等价问法。
 
 `dir_path` 必须是目录名数组，每一段都是一个实际文件夹名称。禁止写成字符串路径，例如
 `"/kb/B0117-03018-BK"` 或 `"Product Introduction/Speakers/B0117-03018-BK"`；这类输入会在

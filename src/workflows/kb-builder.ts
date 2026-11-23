@@ -238,7 +238,12 @@ async function extractWebQa(args: string[]) {
   return { outputDir, files, count: files.length };
 }
 
-type QaPlanItem = { dirPath: string[]; title: string; content: string };
+type QaPlanItem = {
+  dirPath: string[];
+  title: string;
+  content: string;
+  similarQuestions?: string[];
+};
 const flattenDirectories = (nodes: JsonObject[], result: JsonObject[] = []) => {
   for (const node of nodes) {
     result.push(node);
@@ -271,7 +276,29 @@ function validateQaItems(values: unknown[], maxDepth: number): QaPlanItem[] {
     if (!title) throw new Error(`QA item #${index + 1} question must be a non-empty string`);
     if (!content)
       throw new Error(`QA item #${index + 1} answer must be a non-empty markdown string`);
-    return { dirPath, title, content };
+    let similarQuestions: string[] | undefined;
+    if (item.similar_questions !== undefined) {
+      if (!Array.isArray(item.similar_questions))
+        throw new Error(`QA item #${index + 1} similar_questions must be an array`);
+      if (item.similar_questions.length > 10)
+        throw new Error(`QA item #${index + 1} similar_questions has more than 10 entries`);
+      similarQuestions = [];
+      for (const value of item.similar_questions) {
+        if (typeof value !== "string" || !value.trim())
+          throw new Error(
+            `QA item #${index + 1} similar_questions entries must be non-empty strings`,
+          );
+        const normalized = value.trim();
+        if (normalized === title)
+          throw new Error(
+            `QA item #${index + 1} similar_questions must not repeat the primary question`,
+          );
+        if (similarQuestions.includes(normalized))
+          throw new Error(`QA item #${index + 1} similar_questions must not contain duplicates`);
+        similarQuestions.push(normalized);
+      }
+    }
+    return { dirPath, title, content, similarQuestions };
   });
 }
 
@@ -354,6 +381,7 @@ async function importQa(client: SolveaClient, args: string[]) {
       title: item.title,
       content: item.content,
       directoryId: await resolveDirectory(client, item.dirPath, directories, cache),
+      ...(item.similarQuestions === undefined ? {} : { similarQuestions: item.similarQuestions }),
     });
   return { planFile, count: payload.length, result: await client.uploadQa(payload) };
 }

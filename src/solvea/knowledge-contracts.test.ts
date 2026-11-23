@@ -129,6 +129,43 @@ describe("knowledge API migration contracts", () => {
     expect(requests.at(-1)?.url).toEndWith("/sns_v1/project/302/kus");
   });
 
+  test("preserves normalized similar questions across QA writes", async () => {
+    const requests = capture();
+    const client = new SolveaClient(session);
+
+    await client.uploadQa([
+      {
+        title: "How do I reset?",
+        content: "Press reset.",
+        similarQuestions: [" How can I restart? "],
+      },
+    ]);
+    await client.updateKnowledge("7", {
+      directoryId: 99,
+      similarQuestions: [" Where is reset? "],
+    });
+    await client.updateKus([{ id: 7, directoryId: 99, similarQuestions: [] }]);
+
+    expect((requests.at(-3)?.body as Record<string, unknown>[])[0]?.similarQuestions).toEqual([
+      "How can I restart?",
+    ]);
+    expect(requests.at(-2)?.body).toMatchObject({ similarQuestions: ["Where is reset?"] });
+    expect(requests.at(-1)?.body).toEqual({
+      list: [{ kuId: 7, directoryId: 99, similarQuestions: [] }],
+    });
+  });
+
+  test.each([
+    "not-an-array",
+    [""],
+    ["same", "same"],
+    Array.from({ length: 11 }, (_, index) => `question-${index}`),
+  ])("rejects invalid similar questions: %p", async (similarQuestions) => {
+    await expect(
+      new SolveaClient(session).updateKnowledge("7", { directoryId: 99, similarQuestions }),
+    ).rejects.toThrow("similarQuestions");
+  });
+
   test("routes detail reads by UI knowledge type", async () => {
     const requests = capture();
     const client = new SolveaClient(session);

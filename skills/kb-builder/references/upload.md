@@ -39,10 +39,16 @@
      {
        "dir_path": ["Product Introduction", "Smart Plugs", "Kasa EP25"],
        "question": "Kasa EP25 Smart Plug — What is the maximum wattage?",
-       "answer": "..."
+       "answer": "...",
+       "similar_questions": [
+         "How many watts can the Kasa EP25 handle?",
+         "What is the Kasa EP25 power limit?"
+       ]
      }
    ]
    ```
+
+   `similar_questions` 可选，最多 10 条。每条都是主问题的另一种问法，不能与主问题或其他相似问重复。
 
    `dir_path` 必须是目录名数组，不是字符串路径。不要写 `"/kb/Kasa EP25"`、
    `"Product Introduction/Smart Plugs/Kasa EP25"` 或其他带 `/` 的单个字符串；脚本会在
