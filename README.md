@@ -15,8 +15,6 @@ CXClaw 是 Solvea 内部使用的 Codex 插件。它把原 CXClaw 的业务能�
 - Codex 会话通过独立 context 绑定租户，右侧面板显示指定 context 的当前租户
 - 写操作的预览、确认、提交和结果核验
 
-`runtime-inspector` 只在 `dev` 和 `canary` 通道使用。
-
 ## 运行要求
 
 - Codex CLI
