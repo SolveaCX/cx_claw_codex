@@ -1,6 +1,6 @@
 ---
 name: agent-analytics
-description: Shulex 客服智能体（AI Agent）运营数据分析。用于统计指标、趋势、排行、报表和运营下钻；badcase 或单次会话根因排查由 shulex-support 主责，本 skill 可按需提供统计和样本辅助证据。
+description: Inbox（Agent 会话记录）的查询与运营分析。Shulex 客服智能体（AI Agent）运营数据分析。用于按时间范围统计指标、趋势、排行、报表、失败原因和运营下钻；包括工具缺参、工具失败、转人工原因等聚合统计。
 ---
 
 # Agent Analytics

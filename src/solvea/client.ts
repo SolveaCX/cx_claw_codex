@@ -131,6 +131,7 @@ export class SolveaClient {
     query?: Record<string, string | number | boolean>,
     requestHeaders?: HeadersInit,
     maxAttempts = 3,
+    redirect: RequestRedirect = "follow",
   ): Promise<T> {
     const url = new URL(`${this.baseUrl}${path}`);
     for (const [key, value] of Object.entries(query ?? {}))
@@ -156,6 +157,7 @@ export class SolveaClient {
             : JSON.stringify(body);
         const response = await fetch(url, {
           method,
+          redirect,
           headers,
           body: requestBody,
           signal: AbortSignal.timeout(30_000),

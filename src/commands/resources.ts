@@ -3,6 +3,10 @@ import { runApi } from "../business.js";
 import { runAnalyticsAction } from "./analytics.js";
 import { runReportAction } from "./report.js";
 
+import { ticketCommands } from "./ticket.js";
+import { integrationCommands } from "./integration.js";
+import { executeRead, readActionDefinitions } from "./read-client.js";
+
 type ActionDefinition = {
   command?: string;
   summary: string;
@@ -19,6 +23,8 @@ const reportAction = (actionName: string, summary: string, usage = "") =>
   action(`report-${actionName}`, summary, usage);
 
 export const resources = {
+  ticket: readActionDefinitions(ticketCommands),
+  integration: readActionDefinitions(integrationCommands),
   agent: {
     list: action(
       "list-agents",
@@ -564,6 +570,16 @@ export async function runResourceCommand(
   const definition = (resources[resource] as Record<string, ActionDefinition>)[action];
   if (!definition)
     throw new Error(`unknown ${resource} action: ${action}\n${resourceHelp(resource)}`);
+  if (resource === "ticket" || resource === "integration") {
+    const result = await executeRead(
+      session,
+      resource === "ticket" ? ticketCommands : integrationCommands,
+      action,
+      args,
+    );
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
   if (resource === "analytics") return runAnalyticsAction(session, action, args);
   if (resource === "report") return runReportAction(session, action, args);
   if (!definition.command) throw new Error(`${resource} ${action} has no implementation`);

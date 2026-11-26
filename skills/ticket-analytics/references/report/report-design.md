@@ -1,12 +1,9 @@
-# Shulex Desk HTML Design
+# 客服工单报告结构
 
-This document defines the visual and structural standard for `solvea-desk` HTML deliverables.
-The renderer uses the sibling files:
+This document defines the visual and structural standard for `ticket-analytics` HTML deliverables.
+The CLI bundles its report template and CSS; no external CDN or plugin-relative asset path is needed at runtime.
 
-- `report.css`: fixed self-contained CSS for the report.
-- `report-template.html`: fixed semantic HTML shell with renderer placeholders.
-
-Agents should not copy these files into `analysis step`. Generate structured `report_data.json`, then call ``node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk render-report`` to build the HTML.
+Agents should not copy these files into `analysis.ts`. Generate structured `report_data.json`, then call `ticket-analytics render-report` to build the HTML.
 
 ## Design Read
 
@@ -31,7 +28,7 @@ Avoid:
 
 ## Report Data Contract
 
-`analysis step` writes `STATE_TASK_DIR/report_data.json`. The renderer accepts this shape:
+`analysis.ts` writes `STATE_TASK_DIR/report_data.json`. The renderer accepts this shape:
 
 ```json
 {
@@ -73,14 +70,14 @@ Rules:
 
 - `report_slug` must be ASCII lowercase snake_case, for example `weekly_ticket_summary`.
 - `report_data.json` must contain top-level `kpis` or `sections`; usually both. The renderer rejects free-form legacy shapes that only contain `overview`, `personal_performance`, `daily_trend`, or `status_distribution`.
-- `row_count` means the raw snapshot row count from `solvea-desk fetch-sources`; `solvea-desk render-report` fills it from `manifest.json.row_counts` when omitted. Do not use filtered analysis sample size here.
+- For snapshot reports, `row_count` means the raw snapshot row count; the renderer fills it from `manifest.json.row_counts` when omitted. Do not use filtered sample size. For reports sourced from aggregate API responses without row counts, use a descriptive value such as “不适用（聚合统计）”; do not fabricate a count or a snapshot manifest.
 - Visible labels should be Chinese business labels. Raw field names can appear only in short audit notes when necessary.
 - Table columns should be ordered by business importance, not raw data order.
 - Use `numeric: true` for numeric columns so the renderer can right-align and use tabular numbers.
-- `sections[].chart` is optional. HTML reports support self-contained static `bar`、`line`、`pie`、`scatter` charts. Use the same chart type vocabulary as the `render_chart` tool.
+- `sections[].chart` is optional. HTML reports support self-contained static `bar`、`line`、`pie`、`scatter` charts. Use the same chart type vocabulary as the 当前宿主可用的图表工具 tool.
 - `bar`、`line`、`scatter` charts use `{"chartType": "bar|line|scatter", "xKey": "...", "yKey": "...", "label": "..."}`.
 - `pie` charts use `{"chartType": "pie", "nameKey": "...", "valueKey": "...", "label": "..."}`. `xKey/yKey` can be used only when they clearly mean category/value.
-- `chart_type` and `type` are accepted as aliases, but new `analysis step` should write `chartType`.
+- `chart_type` and `type` are accepted as aliases, but new `analysis.ts` should write `chartType`.
 - Chart sections always render a toggle: table is selected first, and the same `rows` can be viewed as the configured static chart.
 - Agents must not generate chart HTML, CSS, JavaScript, or full ECharts options for HTML reports. The renderer builds the static chart from the same summary `rows`, so token cost stays close to a table plus a small chart config.
 - Keep `sections[].rows` to report-sized summaries. Long raw detail belongs in `<report_slug>_detail.xlsx`.
@@ -88,57 +85,23 @@ Rules:
 
 ## Analysis Script Contract Template
 
-`analysis step` should define small local helpers before building `report_data`. This avoids the common failure where `columns` is written as `["日期", "工单数"]` instead of renderer-readable objects.
+`analysis.ts` should define small local helpers before building `report_data`. This avoids the common failure where `columns` is written as `["日期", "工单数"]` instead of renderer-readable objects.
 
 Copy this shape and fill it with the current report's metrics and summary rows:
 
-```python
-REPORT_SLUG = "weekly_ticket_summary"
-
-
-def kpi(label, value, basis):
-    return {"label": label, "value": str(value), "basis": basis}
-
-
-def col(key, label, numeric=False):
-    item = {"key": key, "label": label}
-    if numeric:
-        item["numeric"] = True
-    return item
-
-
-def section(title, columns, rows, chart=None, description="", note=""):
-    return {
-        "title": title,
-        "description": description,
-        "columns": columns,
-        "rows": rows,
-        **({"chart": chart} if chart else {}),
-        **({"note": note} if note else {}),
-    }
-
-
-daily_rows = [
-    {"date": "03-01", "tickets": 12},
-    {"date": "03-02", "tickets": 18},
-]
-
-report_data = {
-    "report_slug": REPORT_SLUG,
-    "title": "工单周报",
-    "range": "2026-03-01 至 2026-03-07（北京时间）",
-    "truncated": bool(manifest.get("truncated")),
-    "kpis": [
-        kpi("工单总量", total_tickets, "按工单 ID 去重"),
-    ],
-    "sections": [
-        section(
-            "每日工单趋势",
-            [col("date", "日期"), col("tickets", "工单数", numeric=True)],
-            daily_rows,
-            chart={"chartType": "line", "xKey": "date", "yKey": "tickets", "label": "工单数"},
-        )
-    ],
+```json
+{
+  "report_slug": "weekly_ticket_summary",
+  "title": "客服工单周报",
+  "range": "2026-03-01 至 2026-03-07（北京时间）",
+  "truncated": false,
+  "kpis": [{"label": "工单数", "value": 30, "basis": "按工单 ID 去重"}],
+  "sections": [{
+    "title": "每日趋势",
+    "columns": [{"key": "date", "label": "日期"}, {"key": "tickets", "label": "工单数", "numeric": true}],
+    "rows": [{"date": "03-01", "tickets": 12}, {"date": "03-02", "tickets": 18}],
+    "chart": {"chartType": "line", "xKey": "date", "yKey": "tickets"}
+  }]
 }
 ```
 
@@ -147,7 +110,7 @@ Rules for the template:
 - `columns` 必须是对象数组，每个对象至少有 `key` 和 `label`；不要写成字符串数组。
 - Every `rows` item must use the same keys declared in `columns`.
 - Chart data comes from the same `rows`; do not create separate `x` / `series` fields for HTML.
-- Run `solvea-desk render-report --validate-only` immediately after writing `report_data.json`.
+- Run `ticket-analytics render-report --validate-only` immediately after writing `report_data.json`.
 
 ## Page Structure
 
@@ -175,16 +138,16 @@ The renderer outputs this structure:
 Use the renderer:
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk render-report \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" ticket-analytics render-report \
   --task-id "<task_id>" \
   --report-slug "assignee_group_weekly"
 ```
 
 Default paths:
 
-- Input: `workspace/state/solvea-desk/<task_id>/report_data.json`
-- Input: `workspace/state/solvea-desk/<task_id>/calculation_notes.json`
-- Output: `workspace/outputs/solvea-desk/<task_id>/<report_slug>.html`
+- Input: `workspace/state/ticket-analytics/<task_id>/report_data.json`
+- Input: `workspace/state/ticket-analytics/<task_id>/calculation_notes.json`
+- Output: `workspace/outputs/ticket-analytics/<task_id>/<report_slug>.html`
 
 Use `--report-data`, `--notes`, or `--output` only for local debugging or unusual internal workflows.
 

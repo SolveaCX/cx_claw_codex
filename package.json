@@ -10,7 +10,8 @@
     "bin",
     "dist/cli.js",
     "dist/cli.js.map",
-    "dist/mcp-apps"
+    "dist/mcp-apps",
+    "dist/assets"
   ],
   "scripts": {
     "build:server": "tsup",
