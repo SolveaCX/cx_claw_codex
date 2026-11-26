@@ -1,0 +1,2902 @@
+[
+  {
+    "domain": "ticket",
+    "action": "list",
+    "params": {
+      "viewId": 1,
+      "ticketNumber": "sample",
+      "ticketStatusList": ["sample"],
+      "channelList": ["sample"],
+      "platformList": ["sample"],
+      "channelIdList": [1],
+      "supportEmailIdList": [1],
+      "agentIdList": [1],
+      "tagList": [1],
+      "replyUserList": [1],
+      "customerEmail": "sample",
+      "customerName": "sample",
+      "customerEmailFull": "sample",
+      "customerPhone": "sample",
+      "createTimeBegin": "sample",
+      "createTimeEnd": "sample",
+      "createTimeBeginMillis": 1,
+      "createTimeEndMillis": 1,
+      "satisfactionSubmitTimeBegin": "sample",
+      "satisfactionSubmitTimeEnd": "sample",
+      "satisfactionSubmitTimeBeginMillis": 1,
+      "satisfactionSubmitTimeEndMillis": 1,
+      "keyword": "sample",
+      "marketList": ["sample"],
+      "sendFailure": false,
+      "orderId": "sample",
+      "categoryList": ["sample"],
+      "brandList": ["sample"],
+      "humanHandling": false,
+      "myTicket": false,
+      "snoozed": false,
+      "scheduled": false,
+      "notSpam": false,
+      "notNotification": false,
+      "botIdList": [1],
+      "noTag": false,
+      "ticketNumberList": ["sample"],
+      "supportPhoneList": ["sample"],
+      "unread": false,
+      "personaId": 1,
+      "slaV1StatusList": ["sample"],
+      "slaV1MetricTypeList": ["sample"],
+      "slaV1PriorityList": ["sample"],
+      "campaignName": "sample",
+      "lastVoiceAnswerType": "sample",
+      "lastVoicePhoneType": "sample",
+      "page": 1,
+      "pageSize": 1,
+      "sort": "sample",
+      "order": "sample"
+    },
+    "request": {
+      "kind": "pages",
+      "method": "POST",
+      "path": "/api_v2/tars/api/ticket/list",
+      "body": {
+        "viewId": 1,
+        "ticketNumber": "sample",
+        "ticketStatusList": ["sample"],
+        "channelList": ["sample"],
+        "platformList": ["sample"],
+        "channelIdList": [1],
+        "supportEmailIdList": [1],
+        "agentIdList": [1],
+        "tagList": [1],
+        "replyUserList": [1],
+        "customerEmail": "sample",
+        "customerName": "sample",
+        "customerEmailFull": "sample",
+        "customerPhone": "sample",
+        "createTimeBegin": "sample",
+        "createTimeEnd": "sample",
+        "createTimeBeginMillis": 1,
+        "createTimeEndMillis": 1,
+        "satisfactionSubmitTimeBegin": "sample",
+        "satisfactionSubmitTimeEnd": "sample",
+        "satisfactionSubmitTimeBeginMillis": 1,
+        "satisfactionSubmitTimeEndMillis": 1,
+        "keyword": "sample",
+        "marketList": ["sample"],
+        "sendFailure": false,
+        "orderId": "sample",
+        "categoryList": ["sample"],
+        "brandList": ["sample"],
+        "humanHandling": false,
+        "myTicket": false,
+        "snoozed": false,
+        "scheduled": false,
+        "notSpam": false,
+        "notNotification": false,
+        "botIdList": [1],
+        "noTag": false,
+        "ticketNumberList": ["sample"],
+        "supportPhoneList": ["sample"],
+        "unread": false,
+        "personaId": 1,
+        "slaV1StatusList": ["sample"],
+        "slaV1MetricTypeList": ["sample"],
+        "slaV1PriorityList": ["sample"],
+        "campaignName": "sample",
+        "lastVoiceAnswerType": "sample",
+        "lastVoicePhoneType": "sample",
+        "page": 1,
+        "pageSize": 1,
+        "sort": "sample",
+        "order": "sample"
+      },
+      "items_key": "list",
+      "page_key": "page",
+      "size_key": "pageSize"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "get",
+    "params": {
+      "ticketNumber": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/v2/d/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "messages",
+    "params": {
+      "before": "sample",
+      "limit": 1,
+      "ticketNumber": "sample"
+    },
+    "request": {
+      "kind": "pages",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/v2/content/sample",
+      "params": {
+        "before": "sample",
+        "limit": 1
+      },
+      "items_key": "items",
+      "page_key": "before",
+      "size_key": "limit",
+      "cursor": true
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "notes",
+    "params": {
+      "ticketNumber": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/v2/content/sample/notes"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "message-origin",
+    "params": {
+      "ticketNumber": "sample",
+      "messageId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/v2/content/sample/message/sample/origin"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "response-content",
+    "params": {
+      "ticketNumber": "sample",
+      "responseId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/v2/content/sample/response/sample/full-content"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "previous",
+    "params": {
+      "ticketNumber": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/v2/previous/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "orders",
+    "params": {
+      "ticketNumber": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/order/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "channel-status",
+    "params": {
+      "ticketNumber": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/channel-auth-infos/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "channel-errors",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/channel-auth-errors"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "tags",
+    "params": {
+      "ticketNum": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/tags/ticket_tags",
+      "params": {
+        "ticketNum": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "fields",
+    "params": {
+      "ticketNum": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/custom/field/ticket/list",
+      "params": {
+        "ticketNum": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "activity",
+    "params": {
+      "ticket_number": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/operation-log/get",
+      "params": {
+        "ticket_number": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "logistics",
+    "params": {
+      "orderNumber": "sample",
+      "trackingNumber": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/order/logistics",
+      "params": {
+        "orderNumber": "sample",
+        "trackingNumber": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "attachment",
+    "params": {
+      "messageId": "sample",
+      "ticketId": "sample",
+      "type": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/attachment/download",
+      "params": {
+        "messageId": "sample",
+        "ticketId": "sample",
+        "type": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "tags-batch",
+    "params": {
+      "ticketIdList": [1]
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/tars/api/tags/new/getTags",
+      "body": {
+        "ticketIdList": [1]
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "related",
+    "params": {
+      "customerId": 1,
+      "ticketNumber": "sample",
+      "page": 1,
+      "pageSize": 1,
+      "sort": "sample",
+      "order": "sample"
+    },
+    "request": {
+      "kind": "pages",
+      "method": "POST",
+      "path": "/api_v2/tars/api/ticket/relate",
+      "body": {
+        "customerId": 1,
+        "ticketNumber": "sample",
+        "page": 1,
+        "pageSize": 1,
+        "sort": "sample",
+        "order": "sample"
+      },
+      "items_key": "list",
+      "page_key": "page",
+      "size_key": "pageSize"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "sla-projection",
+    "params": {
+      "ticketId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/sla/tickets/sample/projection"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "sla-metrics",
+    "params": {
+      "ticketId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/sla/tickets/sample/metrics"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "sla-events",
+    "params": {
+      "ticketId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/sla/tickets/sample/events"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "satisfaction",
+    "params": {
+      "ticketId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/satisfaction/tickets/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "conversation-satisfaction",
+    "params": {
+      "projectId": 1,
+      "chatId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/gpt/transcript/satisfaction/customer",
+      "params": {
+        "projectId": 1,
+        "chatId": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "recording",
+    "params": {
+      "voiceCallId": "sample",
+      "artifactId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/voice/v2/calls/sample/recordings/sample/download"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "shopify-order",
+    "params": {
+      "channelAuthId": 1,
+      "shopifyOrderId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/order/shopify/action/order",
+      "params": {
+        "channelAuthId": 1,
+        "shopifyOrderId": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "shopify-order-name",
+    "params": {
+      "channelAuthId": 1,
+      "shopifyOrderName": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/order/shopify/action/order/name",
+      "params": {
+        "channelAuthId": 1,
+        "shopifyOrderName": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "batch-failures",
+    "params": {
+      "taskId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/create/batch/tasks/sample/failures"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "batches",
+    "params": {
+      "startCreatedAt": "sample",
+      "endCreatedAt": "sample",
+      "creatorId": 1,
+      "assigneeId": 1,
+      "subject": "sample",
+      "status": "sample",
+      "page": 1,
+      "pageSize": 1,
+      "sort": "sample",
+      "order": "sample"
+    },
+    "request": {
+      "kind": "pages",
+      "method": "POST",
+      "path": "/api_v2/tars/api/ticket/create/batch/tasks",
+      "body": {
+        "startCreatedAt": "sample",
+        "endCreatedAt": "sample",
+        "creatorId": 1,
+        "assigneeId": 1,
+        "subject": "sample",
+        "status": "sample",
+        "page": 1,
+        "pageSize": 1,
+        "sort": "sample",
+        "order": "sample"
+      },
+      "items_key": "list",
+      "page_key": "page",
+      "size_key": "pageSize"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "customers-list",
+    "params": {
+      "keyword": "sample",
+      "personaId": 1,
+      "emotionType": "sample",
+      "sortOrder": "asc",
+      "pageNum": 1,
+      "pageSize": 1
+    },
+    "request": {
+      "kind": "pages",
+      "method": "GET",
+      "path": "/api_v2/tars/api/customer/plg/list",
+      "params": {
+        "keyword": "sample",
+        "personaId": 1,
+        "emotionType": "sample",
+        "sortOrder": "asc",
+        "pageNum": 1,
+        "pageSize": 1
+      },
+      "items_key": "records",
+      "page_key": "pageNum",
+      "size_key": "pageSize"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "customers-get",
+    "params": {
+      "customerId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/customer/plg/sample/detail"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "customers-import-current",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/customer/plg/import/task/current"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "customers-import-task",
+    "params": {
+      "taskId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/customer/plg/import/task/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-users",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/user/list"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-assignable-users",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/user/assign_list"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-channels",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel-auth/types"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-stores",
+    "params": {
+      "channel": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel-auth/types/store",
+      "params": {
+        "channel": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-emails",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel-auth/types/support-email"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-phones",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel-auth/types/support-phone"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-platforms",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel-auth/types/ecomm-platform"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-markets",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel-auth/types/market"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-brands",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/account/brands"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-categories",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/field/category/list"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-skus",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/field/sku/list"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-tags",
+    "params": {
+      "name": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/tags/list",
+      "params": {
+        "name": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-tag-search",
+    "params": {
+      "tagName": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/tags/new/find",
+      "params": {
+        "tagName": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "catalog-fields",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/custom/field/list"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-overview",
+    "params": {
+      "timezone": "sample",
+      "startDate": "sample",
+      "endDate": "sample",
+      "startTime": "sample",
+      "endTime": "sample",
+      "channelList": ["sample"],
+      "agentIdList": [1],
+      "supportEmailIdList": [1],
+      "platformList": ["sample"],
+      "channelIdList": [1],
+      "dateType": "sample",
+      "replyAgentQueryType": "sample",
+      "queryMetrics": "sample",
+      "dataType": "sample"
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/tars/api/ticket-report/overview",
+      "body": {
+        "timezone": "sample",
+        "startDate": "sample",
+        "endDate": "sample",
+        "startTime": "sample",
+        "endTime": "sample",
+        "channelList": ["sample"],
+        "agentIdList": [1],
+        "supportEmailIdList": [1],
+        "platformList": ["sample"],
+        "channelIdList": [1],
+        "dateType": "sample",
+        "replyAgentQueryType": "sample",
+        "queryMetrics": "sample",
+        "dataType": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-growth",
+    "params": {
+      "timezone": "sample",
+      "startDate": "sample",
+      "endDate": "sample",
+      "startTime": "sample",
+      "endTime": "sample",
+      "channelList": ["sample"],
+      "agentIdList": [1],
+      "supportEmailIdList": [1],
+      "platformList": ["sample"],
+      "channelIdList": [1],
+      "dateType": "sample",
+      "replyAgentQueryType": "sample",
+      "queryMetrics": "sample",
+      "dataType": "sample"
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/tars/api/ticket-report/new-data",
+      "body": {
+        "timezone": "sample",
+        "startDate": "sample",
+        "endDate": "sample",
+        "startTime": "sample",
+        "endTime": "sample",
+        "channelList": ["sample"],
+        "agentIdList": [1],
+        "supportEmailIdList": [1],
+        "platformList": ["sample"],
+        "channelIdList": [1],
+        "dateType": "sample",
+        "replyAgentQueryType": "sample",
+        "queryMetrics": "sample",
+        "dataType": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-responses",
+    "params": {
+      "timezone": "sample",
+      "startDate": "sample",
+      "endDate": "sample",
+      "startTime": "sample",
+      "endTime": "sample",
+      "channelList": ["sample"],
+      "agentIdList": [1],
+      "supportEmailIdList": [1],
+      "platformList": ["sample"],
+      "channelIdList": [1],
+      "dateType": "sample",
+      "replyAgentQueryType": "sample",
+      "queryMetrics": "sample",
+      "dataType": "sample"
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/tars/api/ticket-report/response",
+      "body": {
+        "timezone": "sample",
+        "startDate": "sample",
+        "endDate": "sample",
+        "startTime": "sample",
+        "endTime": "sample",
+        "channelList": ["sample"],
+        "agentIdList": [1],
+        "supportEmailIdList": [1],
+        "platformList": ["sample"],
+        "channelIdList": [1],
+        "dateType": "sample",
+        "replyAgentQueryType": "sample",
+        "queryMetrics": "sample",
+        "dataType": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-performance-v1",
+    "params": {
+      "timezone": "sample",
+      "startDate": "sample",
+      "endDate": "sample",
+      "startTime": "sample",
+      "endTime": "sample",
+      "channelList": ["sample"],
+      "agentIdList": [1],
+      "supportEmailIdList": [1],
+      "platformList": ["sample"],
+      "channelIdList": [1],
+      "dateType": "sample",
+      "replyAgentQueryType": "sample",
+      "queryMetrics": "sample",
+      "dataType": "sample"
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/tars/api/ticket-report/reply-agent",
+      "body": {
+        "timezone": "sample",
+        "startDate": "sample",
+        "endDate": "sample",
+        "startTime": "sample",
+        "endTime": "sample",
+        "channelList": ["sample"],
+        "agentIdList": [1],
+        "supportEmailIdList": [1],
+        "platformList": ["sample"],
+        "channelIdList": [1],
+        "dateType": "sample",
+        "replyAgentQueryType": "sample",
+        "queryMetrics": "sample",
+        "dataType": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-performance-v2",
+    "params": {
+      "timezone": "sample",
+      "startDate": "sample",
+      "endDate": "sample",
+      "startTime": "sample",
+      "endTime": "sample",
+      "channelList": ["sample"],
+      "agentIdList": [1],
+      "supportEmailIdList": [1],
+      "platformList": ["sample"],
+      "channelIdList": [1],
+      "dateType": "sample",
+      "replyAgentQueryType": "sample",
+      "queryMetrics": "sample",
+      "dataType": "sample"
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/tars/api/ticket-report/reply-agent/v2",
+      "body": {
+        "timezone": "sample",
+        "startDate": "sample",
+        "endDate": "sample",
+        "startTime": "sample",
+        "endTime": "sample",
+        "channelList": ["sample"],
+        "agentIdList": [1],
+        "supportEmailIdList": [1],
+        "platformList": ["sample"],
+        "channelIdList": [1],
+        "dateType": "sample",
+        "replyAgentQueryType": "sample",
+        "queryMetrics": "sample",
+        "dataType": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-today",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket-report/today"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-freshness",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket-report/stat-log"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-options",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/rpt-dashboard/options"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-queues",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/routing/monitoring/snapshot"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-waiting",
+    "params": {
+      "queueId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/routing/monitoring/queues/sample/waiting"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-raw",
+    "params": {
+      "startTime": "sample",
+      "endTime": "sample",
+      "timeRangeType": "created_at",
+      "page": 1,
+      "pageSize": 1
+    },
+    "request": {
+      "kind": "pages",
+      "method": "POST",
+      "path": "/api_v2/tars/api/ticket/report/raw/page",
+      "body": {
+        "startTime": "sample",
+        "endTime": "sample",
+        "timeRangeType": "created_at",
+        "page": 1,
+        "pageSize": 1
+      },
+      "items_key": "list",
+      "page_key": "page",
+      "size_key": "pageSize"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-dashboard",
+    "params": {
+      "startDate": "sample",
+      "endDate": "sample",
+      "teamIdList": [1],
+      "agentIdList": [1],
+      "brandIdList": [1],
+      "brandNameList": ["sample"],
+      "channelList": ["sample"],
+      "platformList": ["sample"],
+      "channelIdList": [1],
+      "supportEmailIdList": [1],
+      "ticketTypeIdList": [1],
+      "livechatTypeList": ["sample"],
+      "phoneNumberList": ["sample"],
+      "voiceDirectionList": ["sample"],
+      "voiceTypeList": ["sample"],
+      "completionStatusList": ["sample"],
+      "initiatorTypeList": ["sample"],
+      "assignmentStatusList": ["sample"],
+      "slaPolicyIdList": [1],
+      "slaMetricTypeList": ["sample"],
+      "groupField": "sample",
+      "dimensionType": "sample",
+      "dateGrain": "sample",
+      "pageNum": 1,
+      "pageSize": 1,
+      "keyword": "sample",
+      "sortField": "sample",
+      "sortOrder": "asc",
+      "domain": "support",
+      "tabKey": "sample"
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/tars/api/rpt-dashboard/support/sample",
+      "body": {
+        "startDate": "sample",
+        "endDate": "sample",
+        "teamIdList": [1],
+        "agentIdList": [1],
+        "brandIdList": [1],
+        "brandNameList": ["sample"],
+        "channelList": ["sample"],
+        "platformList": ["sample"],
+        "channelIdList": [1],
+        "supportEmailIdList": [1],
+        "ticketTypeIdList": [1],
+        "livechatTypeList": ["sample"],
+        "phoneNumberList": ["sample"],
+        "voiceDirectionList": ["sample"],
+        "voiceTypeList": ["sample"],
+        "completionStatusList": ["sample"],
+        "initiatorTypeList": ["sample"],
+        "assignmentStatusList": ["sample"],
+        "slaPolicyIdList": [1],
+        "slaMetricTypeList": ["sample"],
+        "groupField": "sample",
+        "dimensionType": "sample",
+        "dateGrain": "sample",
+        "pageNum": 1,
+        "pageSize": 1,
+        "keyword": "sample",
+        "sortField": "sample",
+        "sortOrder": "asc"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-chart",
+    "params": {
+      "startDate": "sample",
+      "endDate": "sample",
+      "teamIdList": [1],
+      "agentIdList": [1],
+      "brandIdList": [1],
+      "brandNameList": ["sample"],
+      "channelList": ["sample"],
+      "platformList": ["sample"],
+      "channelIdList": [1],
+      "supportEmailIdList": [1],
+      "ticketTypeIdList": [1],
+      "livechatTypeList": ["sample"],
+      "phoneNumberList": ["sample"],
+      "voiceDirectionList": ["sample"],
+      "voiceTypeList": ["sample"],
+      "completionStatusList": ["sample"],
+      "initiatorTypeList": ["sample"],
+      "assignmentStatusList": ["sample"],
+      "slaPolicyIdList": [1],
+      "slaMetricTypeList": ["sample"],
+      "groupField": "sample",
+      "dimensionType": "sample",
+      "dateGrain": "sample",
+      "pageNum": 1,
+      "pageSize": 1,
+      "keyword": "sample",
+      "sortField": "sample",
+      "sortOrder": "asc",
+      "domain": "support",
+      "tabKey": "sample",
+      "chartKey": "sample"
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/tars/api/rpt-dashboard/support/sample/charts/sample",
+      "body": {
+        "startDate": "sample",
+        "endDate": "sample",
+        "teamIdList": [1],
+        "agentIdList": [1],
+        "brandIdList": [1],
+        "brandNameList": ["sample"],
+        "channelList": ["sample"],
+        "platformList": ["sample"],
+        "channelIdList": [1],
+        "supportEmailIdList": [1],
+        "ticketTypeIdList": [1],
+        "livechatTypeList": ["sample"],
+        "phoneNumberList": ["sample"],
+        "voiceDirectionList": ["sample"],
+        "voiceTypeList": ["sample"],
+        "completionStatusList": ["sample"],
+        "initiatorTypeList": ["sample"],
+        "assignmentStatusList": ["sample"],
+        "slaPolicyIdList": [1],
+        "slaMetricTypeList": ["sample"],
+        "groupField": "sample",
+        "dimensionType": "sample",
+        "dateGrain": "sample",
+        "pageNum": 1,
+        "pageSize": 1,
+        "keyword": "sample",
+        "sortField": "sample",
+        "sortOrder": "asc"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "reports-table",
+    "params": {
+      "startDate": "sample",
+      "endDate": "sample",
+      "teamIdList": [1],
+      "agentIdList": [1],
+      "brandIdList": [1],
+      "brandNameList": ["sample"],
+      "channelList": ["sample"],
+      "platformList": ["sample"],
+      "channelIdList": [1],
+      "supportEmailIdList": [1],
+      "ticketTypeIdList": [1],
+      "livechatTypeList": ["sample"],
+      "phoneNumberList": ["sample"],
+      "voiceDirectionList": ["sample"],
+      "voiceTypeList": ["sample"],
+      "completionStatusList": ["sample"],
+      "initiatorTypeList": ["sample"],
+      "assignmentStatusList": ["sample"],
+      "slaPolicyIdList": [1],
+      "slaMetricTypeList": ["sample"],
+      "groupField": "sample",
+      "dimensionType": "sample",
+      "dateGrain": "sample",
+      "pageNum": 1,
+      "pageSize": 1,
+      "keyword": "sample",
+      "sortField": "sample",
+      "sortOrder": "asc",
+      "domain": "support",
+      "tabKey": "sample",
+      "tableKey": "sample"
+    },
+    "request": {
+      "kind": "pages",
+      "method": "POST",
+      "path": "/api_v2/tars/api/rpt-dashboard/support/sample/tables/sample",
+      "body": {
+        "startDate": "sample",
+        "endDate": "sample",
+        "teamIdList": [1],
+        "agentIdList": [1],
+        "brandIdList": [1],
+        "brandNameList": ["sample"],
+        "channelList": ["sample"],
+        "platformList": ["sample"],
+        "channelIdList": [1],
+        "supportEmailIdList": [1],
+        "ticketTypeIdList": [1],
+        "livechatTypeList": ["sample"],
+        "phoneNumberList": ["sample"],
+        "voiceDirectionList": ["sample"],
+        "voiceTypeList": ["sample"],
+        "completionStatusList": ["sample"],
+        "initiatorTypeList": ["sample"],
+        "assignmentStatusList": ["sample"],
+        "slaPolicyIdList": [1],
+        "slaMetricTypeList": ["sample"],
+        "groupField": "sample",
+        "dimensionType": "sample",
+        "dateGrain": "sample",
+        "pageNum": 1,
+        "pageSize": 1,
+        "keyword": "sample",
+        "sortField": "sample",
+        "sortOrder": "asc"
+      },
+      "items_key": "rows",
+      "page_key": "pageNum",
+      "size_key": "pageSize"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-views-public",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/view/public/list"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-views-private",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/view/private/list-v2"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-view",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket/view/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-automation-list",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/automation/list"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-automation-get",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/automation/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-automation-task",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/automation/task"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-triggers",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/trigger/rules"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-trigger-categories",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/trigger/categories"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-trigger-channel-options",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/trigger/condition-options/channel-types"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-sla-policies",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/sla/policies"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-sla-metadata",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/sla/metadata"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-queues",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/routing/queues"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-queue",
+    "params": {
+      "queueId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/routing/queues/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-queue-channels",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/routing/queues/options/channels"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-queue-languages",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/routing/queues/options/languages"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-routing-activation",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/routing/activation"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-teams",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/teams"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-calendars",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/routing/business-calendars"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-calendar",
+    "params": {
+      "calendarId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/routing/business-calendars/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-capacity",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/routing/capacity-rules"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-capacity-get",
+    "params": {
+      "ruleId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/routing/capacity-rules/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-capacity-default",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/routing/capacity-rules/default"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-members",
+    "params": {
+      "content": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/user/management_list",
+      "params": {
+        "content": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-member",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/user/sample/getUserInfo"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-roles",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/role/list"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-role",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/role/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-role-members",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/role/sample/user_list"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-permissions",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/permission/list"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-my-permissions",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/user/permission_list"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-fields",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/custom/field/list"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-ai-tag-policy",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/tags/policy"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-inactivity",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/ticket-timer/customer-inactivity-close"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-satisfaction-templates",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/satisfaction/templates"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-satisfaction-versions",
+    "params": {
+      "templateId": 1,
+      "language": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/satisfaction/templates/versions",
+      "params": {
+        "templateId": 1,
+        "language": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-satisfaction-auto-send",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/satisfaction/templates/auto-send"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-outreach-plans",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/outreach/directed/plans"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-outreach-runs",
+    "params": {
+      "planId": "sample",
+      "page": 1,
+      "pageSize": 1
+    },
+    "request": {
+      "kind": "pages",
+      "method": "GET",
+      "path": "/api_v2/tars/api/outreach/directed/plans/sample/runs/page",
+      "params": {
+        "page": 1,
+        "pageSize": 1
+      },
+      "items_key": "list",
+      "page_key": "page",
+      "size_key": "pageSize"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-outreach-run",
+    "params": {
+      "planId": "sample",
+      "runId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/outreach/directed/plans/sample/runs/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-outreach-import",
+    "params": {
+      "importId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/outreach/directed/imports/sample"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-outreach-attempts",
+    "params": {
+      "recipientId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/outreach/directed/recipients/sample/attempts"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-trigger-executions",
+    "params": {
+      "before": 1,
+      "limit": 1,
+      "ticketId": "sample"
+    },
+    "request": {
+      "kind": "pages",
+      "method": "GET",
+      "path": "/api_v2/tars/api/trigger/tickets/sample/executions",
+      "params": {
+        "before": 1,
+        "limit": 1
+      },
+      "items_key": "items",
+      "page_key": "before",
+      "size_key": "limit",
+      "cursor": true
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-trigger-preview",
+    "params": {
+      "ticketNumber": "sample",
+      "id": "sample"
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/tars/api/trigger/rules/sample/preview",
+      "body": {
+        "ticketNumber": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-settings-list",
+    "params": {
+      "types": ["sample"]
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/tars/api/system/setting/list",
+      "body": ["sample"]
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-toolbar-configs",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/toolbar-extension/configs"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-whatsapp-accounts",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/whatsapp/templates/wabaAccounts"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-whatsapp-templates",
+    "params": {
+      "wabaId": "sample",
+      "page": 1,
+      "limit": 1,
+      "includeTotal": false,
+      "name": "sample"
+    },
+    "request": {
+      "kind": "pages",
+      "method": "GET",
+      "path": "/api_v2/intelli/whatsapp/templates/list",
+      "params": {
+        "wabaId": "sample",
+        "page": 1,
+        "limit": 1,
+        "includeTotal": false,
+        "name": "sample"
+      },
+      "items_key": "data",
+      "page_key": "page",
+      "size_key": "limit"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-whatsapp-template",
+    "params": {
+      "name": "sample",
+      "language": "sample",
+      "wabaId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/whatsapp/templates/sample/get",
+      "params": {
+        "name": "sample",
+        "language": "sample"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-templates",
+    "params": {
+      "page": 1,
+      "size": 1
+    },
+    "request": {
+      "kind": "pages",
+      "method": "GET",
+      "path": "/api_v2/tars/api/templates/list",
+      "params": {
+        "page": 1,
+        "size": 1
+      },
+      "items_key": "list",
+      "page_key": "page",
+      "size_key": "size",
+      "total_key": "totalCount"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-outreach-recipients",
+    "params": {
+      "planId": "sample",
+      "runId": "sample",
+      "page": 1,
+      "pageSize": 1
+    },
+    "request": {
+      "kind": "pages",
+      "method": "GET",
+      "path": "/api_v2/tars/api/outreach/directed/plans/sample/runs/sample/recipients",
+      "params": {
+        "page": 1,
+        "pageSize": 1
+      },
+      "items_key": "$",
+      "page_key": "page",
+      "size_key": "pageSize"
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-outreach-import-rows",
+    "params": {
+      "importId": "sample",
+      "afterRow": 1,
+      "limit": 1,
+      "validOnly": false
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/outreach/directed/imports/sample/rows",
+      "params": {
+        "afterRow": 1,
+        "limit": 1,
+        "validOnly": false
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "customers-export",
+    "params": {
+      "keyword": "sample",
+      "personaId": 1,
+      "emotionType": "sample",
+      "sortOrder": "asc"
+    },
+    "request": {
+      "kind": "download",
+      "method": "GET",
+      "path": "/api_v2/tars/api/customer/plg/export",
+      "params": {
+        "keyword": "sample",
+        "personaId": 1,
+        "emotionType": "sample",
+        "sortOrder": "asc"
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "customers-import-template",
+    "params": {},
+    "request": {
+      "kind": "download",
+      "method": "GET",
+      "path": "/api_v2/tars/api/customer/plg/import/template",
+      "params": {}
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-trigger-intent-options",
+    "params": {
+      "projectId": 1
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/trigger/condition-options/ai-intents",
+      "params": {
+        "projectId": 1
+      }
+    }
+  },
+  {
+    "domain": "ticket",
+    "action": "admin-sla-preview",
+    "params": {
+      "ticketId": 1,
+      "priority": "sample",
+      "ticket": {
+        "sample": "value"
+      }
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/tars/api/sla/preview-match",
+      "body": {
+        "ticketId": 1,
+        "priority": "sample",
+        "ticket": {
+          "sample": "value"
+        }
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "connections-list",
+    "params": {
+      "botId": 1
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/channels",
+      "params": {
+        "botId": 1
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "connections-counts",
+    "params": {
+      "personaId": 1
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/channel/count",
+      "params": {
+        "personaId": 1
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "custom-ticket-list",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/custom-ticket/channels"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "custom-ticket-get",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/custom-ticket/channels/sample"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "custom-ticket-history-status",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/custom-ticket/channels/sample/learn-history/status"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "custom-ticket-history-progress",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/custom-ticket/channels/sample/learn-history/progress"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "custom-livechat-list",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/custom-livechat/channels"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "custom-livechat-get",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/custom-livechat/channels/sample"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "custom-livechat-history-status",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/custom-livechat/channels/sample/learn-history/status"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "custom-livechat-history-progress",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/custom-livechat/channels/sample/learn-history/progress"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "line-list",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/line/channels"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "line-get",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/line/channels/sample"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "whatsapp-list",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/whatsapp/channels"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "whatsapp-get",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/whatsapp/channels/sample"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "custom-data-list",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/custom-data/channels"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "custom-data-get",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/custom-data/channels/sample"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zendesk-settings",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zendesk/setting"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-settings",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/setting"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "freshdesk-settings",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/freshdesk/setting"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "liveagent-settings",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/liveagent/setting"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "sunshine-settings",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/sunshine/setting"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zendesk-agents",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zendesk/agents"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zendesk-views",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zendesk/views"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zendesk-support-addresses",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zendesk/supportAddresses"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zendesk-ticket-fields",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zendesk/ticket-fields"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zendesk-ai-field-mapping",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zendesk/ai-field-mapping"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zendesk-ai-variable-mapping",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zendesk/ai-variable-mapping"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zendesk-ticket-field-mapping",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zendesk/ticket-field-mapping"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zendesk-auth-result",
+    "params": {
+      "attemptId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zendesk/auth/result/sample"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zendesk-diagnose",
+    "params": {
+      "ticketId": 1,
+      "sampleLimit": 1
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/intelli/zendesk/full-chain/test",
+      "body": {
+        "ticketId": 1,
+        "sampleLimit": 1
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zendesk-trace",
+    "params": {
+      "externKeyId": 1,
+      "ticketId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zendesk/trace/tickets/sample",
+      "params": {
+        "externKeyId": 1
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-auth-status",
+    "params": {
+      "orgId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/auth/status",
+      "params": {
+        "orgId": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-bot-binding",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/bot-binding"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-intent-tagging",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/intent-tagging"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-process-rules",
+    "params": {
+      "orgId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/process-rules",
+      "params": {
+        "orgId": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-ticket-fields",
+    "params": {
+      "orgId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/ticket-fields",
+      "params": {
+        "orgId": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-departments",
+    "params": {
+      "orgId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/departments",
+      "params": {
+        "orgId": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-views",
+    "params": {
+      "orgId": "sample",
+      "departmentId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/views",
+      "params": {
+        "orgId": "sample",
+        "departmentId": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-ai-field-mapping",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/ai-field-mapping"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-ai-field-config",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/ai-field-config"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-ticket-field-mapping",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/ticket-field-mapping"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-custom-field-mapping",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/custom-field-mapping"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-ai-variable-mapping",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/ai-variable-mapping"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-diagnose",
+    "params": {
+      "ticketId": "sample",
+      "orgId": "sample",
+      "sampleLimit": 1
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/intelli/zoho/full-chain/test",
+      "body": {
+        "ticketId": "sample",
+        "orgId": "sample",
+        "sampleLimit": 1
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zendesk-history-status",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zendesk/learnHistory/status"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "zoho-history-status",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/zoho/learnHistory/status"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "sunshine-history-status",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/sunshine/learnHistory/status"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "freshdesk-agents",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/freshdesk/agents"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "freshdesk-automations",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/freshdesk/automations"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "liveagent-agents",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/liveagent/agents"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "gmail-list",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/gmail/list"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "tiktok-settings",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/tiktok-shop/setting"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "tiktok-apps",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/tiktok-shop/apps"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "sync-orders",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/job-params/progress"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "sync-products",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/job-params/product/progress"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "sync-catalog",
+    "params": {
+      "projectId": 1
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/products/fullSync/process",
+      "params": {
+        "projectId": 1
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "custom-ticket-docs",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/custom-ticket/integration-docs"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "email-list",
+    "params": {
+      "keyword": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/email/list",
+      "params": {
+        "keyword": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "amazon-list",
+    "params": {
+      "keyword": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/amazon/list",
+      "params": {
+        "keyword": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "ebay-list",
+    "params": {
+      "keyword": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/ebay/list",
+      "params": {
+        "keyword": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "shopify-list",
+    "params": {
+      "keyword": "sample",
+      "personaId": 1
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/shopify/list",
+      "params": {
+        "keyword": "sample",
+        "personaId": 1
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "walmart-list",
+    "params": {
+      "keyword": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/walmart/list",
+      "params": {
+        "keyword": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "rakuten-list",
+    "params": {
+      "keyword": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/rakuten/list",
+      "params": {
+        "keyword": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "email-get",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/email/details",
+      "params": {
+        "id": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "amazon-get",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/amazon/details",
+      "params": {
+        "id": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "ebay-get",
+    "params": {
+      "state": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/ebay/details",
+      "params": {
+        "state": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "shopify-get",
+    "params": {
+      "state": "sample",
+      "personaId": 1
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/shopify/details",
+      "params": {
+        "state": "sample",
+        "personaId": 1
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "email-folders",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/tars/api/channel/email/get_email_folder",
+      "params": {
+        "id": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "shopline-list",
+    "params": {
+      "keyword": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/shopline/extern-keys",
+      "params": {
+        "keyword": "sample"
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "shopline-get",
+    "params": {
+      "id": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/shopline/extern-keys/sample"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "shopify-countries",
+    "params": {
+      "channelId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/shopify/channels/sample/serving-countries"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "shulex-ticket-status",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/ticket/tars-ai-reply/status"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "shulex-ticket-emails",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/ticket/tars-ai-reply/support-emails"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "api-list",
+    "params": {
+      "projectId": 1
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/custom-api/listBrief",
+      "params": {
+        "projectId": 1
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "livechat-list",
+    "params": {},
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/intelli/livechat/bot"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "livechat-config",
+    "params": {
+      "source": "sample",
+      "t": 1,
+      "botId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/gpt/bot/sample/livechat/config",
+      "params": {
+        "source": "sample",
+        "t": 1
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "livechat-setup",
+    "params": {
+      "botId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/gpt/bot/sample/setup"
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "phone-list",
+    "params": {
+      "search": "sample",
+      "page": 1,
+      "limit": 1,
+      "projectId": "sample"
+    },
+    "request": {
+      "kind": "post",
+      "method": "POST",
+      "path": "/api_v2/gpt/voice/projectId/sample/phone-number/list",
+      "body": {
+        "search": "sample",
+        "page": 1,
+        "limit": 1
+      }
+    }
+  },
+  {
+    "domain": "integration",
+    "action": "phone-get",
+    "params": {
+      "projectId": "sample",
+      "phoneId": "sample"
+    },
+    "request": {
+      "kind": "get",
+      "method": "GET",
+      "path": "/api_v2/gpt/voice/projectId/sample/phone-number/sample"
+    }
+  }
+]

@@ -1,6 +1,6 @@
 ---
 name: shulex-support
-description: Shulex 产品支持统一入口。凡用户提到 badcase、异常回复、失败节点、报错、卡住、排查，或提供 ChatId / 会话 ID / External ID 要求定位会话，优先使用本 skill；也用于产品咨询、功能需求和售后工单。
+description: Shulex 产品支持统一入口。用于 Inbox（Agent 会话记录）的单次 badcase、异常回复、失败节点、报错、卡住，或根据 ChatId / 会话 ID / External ID 定位根因；也用于产品咨询、功能需求和售后工单（产品支持工单）。
 requires:
   libs:
     - solvea-api

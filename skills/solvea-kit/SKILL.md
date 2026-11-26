@@ -35,7 +35,10 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" api <legacy-command> --pretty
 | 知识库内容、目录、QA、隔离关键词、回复模板库 | `kb-builder` |
 | badcase、异常回复、失败节点，或按 ChatId / External ID 定位会话 | `shulex-support`（优先级高于所有数据分析入口，进入 Agent 会话诊断场景） |
 | Agent 运营数据、指标、趋势、原始会话列表下钻（不要求解释异常根因） | `agent-analytics` |
-| Shulex Desk 工单查询、报表和标签操作 | `solvea-desk` |
+| 客服工单列表、详情、消息和标签查询 | `ticket-helper` |
+| 客服工单指标、趋势和分析报告 | `ticket-analytics` |
+| 客服工单设置、自动规则、触发器与 SLA | `ticket-admin` |
+| 渠道和第三方平台接入指导、状态诊断 | `integrations` |
 | 售后咨询、创建/查询/追加售后工单 | `shulex-support` |
 
 ## 核心约束（必须遵守，不用查文档也要记住）

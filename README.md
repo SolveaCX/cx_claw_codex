@@ -107,7 +107,7 @@ npx --yes @shulex/cxclawctl@latest intent list --context <contextId> --pretty
 # 使用 TypeScript CLI 执行本地工作流
 npx --yes @shulex/cxclawctl@latest poc plan --init
 npx --yes @shulex/cxclawctl@latest kb-builder crawl --url https://docs.example.com
-npx --yes @shulex/cxclawctl@latest solvea-desk fetch-tickets --task-id demo
+npx --yes @shulex/cxclawctl@latest ticket-analytics fetch-tickets --task-id demo
 
 # 直接从本机查询 SLS；from/to 使用 Unix 秒级时间戳
 npx --yes @shulex/cxclawctl@latest sls query \

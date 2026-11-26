@@ -1,6 +1,8 @@
-# Desk 当前工单列表接口
+# 当前工单快照分析取数
 
-`solvea-desk fetch-tickets` 忠实封装 `/api_v2/tars/api/ticket/list`：把受支持的请求条件传给后端，按接口分页拉取，并将响应列表原样写入 `datasource.xlsx` 的 `data` sheet。脚本不增加业务筛选语义，也不修改返回结果集。
+本页用于统计分析和 XLSX 数据快照。用户只想查看/筛选工单时由 ticket-helper 的共享查询处理，无需生成分析任务。
+
+`ticket-analytics fetch-tickets` 忠实封装 `/api_v2/tars/api/ticket/list`：把受支持的请求条件传给后端，按接口分页拉取，并将响应列表原样写入 `datasource.xlsx` 的 `data` sheet。脚本不增加业务筛选语义，也不修改返回结果集。
 
 ## 请求参数说明
 
@@ -15,7 +17,7 @@
 | `--max-pages` | 不下发 | 客户端安全上限 |
 | `--max-rows` | 不下发 | 客户端安全上限 |
 
-业务过滤条件通过 `--filters-json` 或 `--filters-file` 传入 JSON 对象。字段名与 Tars `TicketListPageDTO` 一致，并在 Elasticsearch 查询阶段执行。
+业务过滤条件通过 `--filters-json` 或 `--filters-file` 传入 JSON 对象。字段名与 客服工单服务 `TicketListPageDTO` 一致，并在 Elasticsearch 查询阶段执行。
 
 `page`、`pageSize`、`viewId`、`sort`、`order` 不允许放进过滤对象，避免覆盖脚本控制的分页与视图参数。
 
@@ -30,6 +32,7 @@
 | 标签 | `tagList`、`noTag` | ID 数组、布尔值 |
 | 客户 | `customerEmail`、`customerName`、`customerEmailFull`、`customerPhone` | 字符串 |
 | 创建时间 | `createTimeBegin`、`createTimeEnd` | 带 offset 的 ISO-8601 时间字符串 |
+| 满意度提交时间 | `satisfactionSubmitTimeBegin`、`satisfactionSubmitTimeEnd` | 带 offset 的 ISO-8601 时间字符串 |
 | 综合搜索 | `keyword` | 匹配正文、备注、主题、客户、工单号或订单号等后端搜索字段 |
 | 市场/订单 | `marketList`、`orderId` | 字符串数组、字符串 |
 | 品类/品牌 | `categoryList`、`brandList` | 字符串数组 |
@@ -43,7 +46,7 @@
 示例：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk fetch-tickets \
+node "<PLUGIN_ROOT>/plugin-cli.mjs" ticket-analytics fetch-tickets \
   --view-id 1 \
   --filters-json '{"channelList":["ebay"],"agentIdList":[474501],"ticketStatusList":["open","pending"]}' \
   --page-size 100 \
@@ -53,7 +56,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk fetch-tickets \
 
 只下推值已经明确的条件。用户只给负责人姓名时不要猜 `agentId`；可以下推其他已知条件，再在响应字段 `agent` 上完成本地分析。
 
-接口不支持按 `lastMessageTime`、`lastResponseTime`、`firstAgentResponseTime` 或 `lastUpdateTime` 传时间范围。用户要求这些口径时，先按后端已有条件拉取，再由 `analysis step` 对响应字段进行筛选。不要创造额外的 fetch 参数或偷偷替换时间字段。
+接口不支持按 `lastMessageTime`、`lastResponseTime`、`firstAgentResponseTime` 或 `lastUpdateTime` 传时间范围。用户要求这些口径时，先按后端已有条件拉取，再由 `analysis.ts` 对响应字段进行筛选。不要创造额外的 fetch 参数或偷偷替换时间字段。
 
 脚本根据响应 `total` 判断是否还有下一页；没有 `total` 时以当前页是否满页兜底。`manifest.json.truncated=true` 表示命中 `max-pages` 或 `max-rows`，不能声称已经获取全部工单。原始分页响应保存在 `tmp_task_dir/raw_page_*.json`，仅用于排查和重放。
 
@@ -101,3 +104,32 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" solvea-desk fetch-tickets \
 - 当前列表提供 `subject`、`title`、`lastMessageContent`；报表事实不提供消息正文。
 - 当前列表时间字段反映当前记录；报表事实按回复日/解决日或创建日形成时间范围。
 - 联合分析时优先用 `ticketNumber`，内部 ID 则用 `id` 对应报表的 `ticketId`，并注明两个快照的生成时间。
+
+## 先核对当前筛选再取快照
+
+入口为 `node "<PLUGIN_ROOT>/plugin-cli.mjs" <resource> <action>`，参数用 `--params-json` 或 `--params-file`。粗体为必填参数；`<命令> --help` 查看参数类型与默认值。
+
+支持分页的查询可加 `--all --max-pages 20`，必须检查 `pagination.truncated`；`pageMetadata` 保留列名与总量。JSON 快照用 `--output <WORKSPACE>/outputs/ticket-analytics/<唯一文件名>.json` 保存。
+
+| 业务查询命令 | JSON 参数 | 分页/交付 |
+|---|---|---|
+| `ticket list` | viewId:integer, ticketNumber:string, ticketStatusList:array, channelList:array, platformList:array, channelIdList:array, supportEmailIdList:array, agentIdList:array, tagList:array, replyUserList:array, customerEmail:string, customerName:string, customerEmailFull:string, customerPhone:string, createTimeBegin:string, createTimeEnd:string, createTimeBeginMillis:integer, createTimeEndMillis:integer, satisfactionSubmitTimeBegin:string, satisfactionSubmitTimeEnd:string, satisfactionSubmitTimeBeginMillis:integer, satisfactionSubmitTimeEndMillis:integer, keyword:string, marketList:array, sendFailure:boolean, orderId:string, categoryList:array, brandList:array, humanHandling:boolean, myTicket:boolean, snoozed:boolean, scheduled:boolean, notSpam:boolean, notNotification:boolean, botIdList:array, noTag:boolean, ticketNumberList:array, supportPhoneList:array, unread:boolean, personaId:integer, slaV1StatusList:array, slaV1MetricTypeList:array, slaV1PriorityList:array, campaignName:string, lastVoiceAnswerType:string, lastVoicePhoneType:string, page:integer, pageSize:integer, sort:string, order:string | 支持 `--all`；检查截断 |
+
+需要目录 ID 时按下表解析名称；不要把当前负责人当历史回复人。
+
+| 业务查询命令 | JSON 参数 | 分页/交付 |
+|---|---|---|
+| `ticket catalog-users` | 无 | 单次响应；保留服务端分页字段 |
+| `ticket catalog-assignable-users` | 无 | 单次响应；保留服务端分页字段 |
+| `ticket catalog-channels` | 无 | 单次响应；保留服务端分页字段 |
+| `ticket catalog-stores` | channel:string | 单次响应；保留服务端分页字段 |
+| `ticket catalog-emails` | 无 | 单次响应；保留服务端分页字段 |
+| `ticket catalog-phones` | 无 | 单次响应；保留服务端分页字段 |
+| `ticket catalog-platforms` | 无 | 单次响应；保留服务端分页字段 |
+| `ticket catalog-markets` | 无 | 单次响应；保留服务端分页字段 |
+| `ticket catalog-brands` | 无 | 单次响应；保留服务端分页字段 |
+| `ticket catalog-categories` | 无 | 单次响应；保留服务端分页字段 |
+| `ticket catalog-skus` | 无 | 单次响应；保留服务端分页字段 |
+| `ticket catalog-tags` | name:string | 单次响应；保留服务端分页字段 |
+| `ticket catalog-tag-search` | **tagName**:string | 单次响应；保留服务端分页字段 |
+| `ticket catalog-fields` | 无 | 单次响应；保留服务端分页字段 |

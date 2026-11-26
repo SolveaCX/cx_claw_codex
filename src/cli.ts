@@ -37,7 +37,7 @@ import { runAgentBuilder } from "./workflows/agent-builder.js";
 import { runAgentTester } from "./workflows/tester.js";
 import { runDelivery, runPoc } from "./workflows/delivery.js";
 import { runKbBuilder } from "./workflows/kb-builder.js";
-import { runDesk } from "./workflows/desk.js";
+import { runTicketAnalytics, ticketAnalyticsHelp } from "./workflows/ticket-analytics.js";
 import { errorOutput } from "./cli-error.js";
 import { isFlatAnalyticsCommand } from "./commands/analytics.js";
 
@@ -46,7 +46,7 @@ const usage = () =>
   [
     "cxclawctl <resource> <action> [options]",
     "cxclawctl auth|tenant|context|profile|sls|runtime|doctor|update|setup|version",
-    "cxclawctl agent-builder|agent-tester|delivery|poc|kb-builder|solvea-desk <action>",
+    "cxclawctl agent-builder|agent-tester|delivery|poc|kb-builder|ticket-analytics <action>",
     resourceHelp(),
     "Example: cxclawctl intent create --data-file intent.json",
   ].join("\n\n");
@@ -183,6 +183,8 @@ const businessArgs = (args: string[]) => stripOptions(args, runtimeOptions);
 
 async function main(args = process.argv.slice(2)) {
   const [command, action, ...rest] = args;
+  if (command === "ticket-analytics" && (!action || action === "help" || flag(args, "--help")))
+    return console.log(ticketAnalyticsHelp);
   if (!command || command === "help" || flag(args, "--help")) {
     console.log(
       command && isResourceCommand(command)
@@ -192,6 +194,8 @@ async function main(args = process.argv.slice(2)) {
     return;
   }
   if (isResourceCommand(command)) {
+    if ((command === "ticket" || command === "integration") && (!action || action === "help"))
+      return console.log(resourceHelp(command));
     await runResourceCommand(await tenantSession(rest), command, action, businessArgs(rest));
     return;
   }
@@ -304,8 +308,17 @@ async function main(args = process.argv.slice(2)) {
         businessArgs(rest),
       ),
     );
-  if (command === "solvea-desk")
-    return print(await runDesk(await tenantSession(rest), action, businessArgs(rest)));
+  if (command === "ticket-analytics") {
+    if (!action || action === "help" || rest.includes("--help"))
+      return console.log(ticketAnalyticsHelp);
+    return print(
+      await runTicketAnalytics(
+        action === "render-report" ? undefined : await tenantSession(rest),
+        action,
+        businessArgs(rest),
+      ),
+    );
+  }
   if (command === "api") {
     if (!action) throw new Error("api command is required");
     if (isFlatAnalyticsCommand(action))

@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const root = join(import.meta.dirname, "..");
@@ -45,6 +45,27 @@ try {
     throw new Error(`packed version mismatch: ${JSON.stringify(version)}`);
   }
   execFileSync(bin, ["doctor"], { env, stdio: "inherit" });
+  const help = execFileSync(bin, ["ticket", "get", "--help"], { env, encoding: "utf8" });
+  if (!help.includes("ticketNumber")) throw new Error("packed ticket CLI is missing");
+  const reportData = join(temp, "report.json");
+  writeFileSync(reportData, JSON.stringify({ kpis: [{ label: "Tickets", value: 2 }] }));
+  const output = join(temp, "ticket-report.html");
+  execFileSync(
+    bin,
+    [
+      "ticket-analytics",
+      "render-report",
+      "--task-id",
+      "package-check",
+      "--report-data",
+      reportData,
+      "--output",
+      output,
+    ],
+    { env },
+  );
+  if (!readFileSync(output, "utf8").includes("Tickets"))
+    throw new Error("packed report renderer or assets are missing");
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }
