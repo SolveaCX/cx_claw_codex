@@ -30,7 +30,6 @@ import {
 } from "./tenant.js";
 import { installMarketplace, installScheduler, update } from "./update.js";
 import { SERVER_API_VERSION, TOOL_SCHEMA_VERSION, VERSION } from "./version.js";
-import { runRuntime } from "./workflows/runtime.js";
 import { runSolveaKitWorkflow } from "./workflows/solvea-kit.js";
 import { runSupport } from "./workflows/support.js";
 import { runAgentBuilder } from "./workflows/agent-builder.js";
@@ -45,7 +44,7 @@ const print = (value: unknown) => console.log(JSON.stringify(value, null, 2));
 const usage = () =>
   [
     "cxclawctl <resource> <action> [options]",
-    "cxclawctl auth|tenant|context|profile|sls|runtime|doctor|update|setup|version",
+    "cxclawctl auth|tenant|context|profile|sls|doctor|update|setup|version",
     "cxclawctl agent-builder|agent-tester|delivery|poc|kb-builder|ticket-analytics <action>",
     resourceHelp(),
     "Example: cxclawctl intent create --data-file intent.json",
@@ -229,7 +228,6 @@ async function main(args = process.argv.slice(2)) {
   if (command === "tenant") return runTenant(action, rest);
   if (command === "context") return runContext(action, rest);
   if (command === "profile") return runProfile(action, rest);
-  if (command === "runtime") return print(await runRuntime(action, rest));
   if (command === "workflow") return print(await runSolveaKitWorkflow(action, rest));
   if (command === "support")
     return print(await runSupport(await tenantSession(rest), action, businessArgs(rest)));
