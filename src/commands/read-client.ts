@@ -325,7 +325,15 @@ export async function executeRead(
   };
   if (output) {
     await mkdir(dirname(output), { recursive: true });
-    await writeFile(output, JSON.stringify(result, null, 2), { flag: "wx" });
+    const temporary = await mkdtemp(join(dirname(output), ".ticket-snapshot-"));
+    try {
+      const path = join(temporary, "snapshot.json");
+      await writeFile(path, JSON.stringify(result, null, 2), { flag: "wx" });
+      // 同文件系统原子发布完整文件，并保留已有目标不覆盖的约束。
+      await link(path, output);
+    } finally {
+      await rm(temporary, { recursive: true, force: true });
+    }
     return { path: output, pagination: client.pagination };
   }
   return result;

@@ -1,4 +1,6 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, spyOn, test } from "bun:test";
+import * as fs from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -227,6 +229,54 @@ test("rejects non-JSON and business error responses without echoing secrets", as
     }
   }
 });
+for (const mode of ["success", "write-failure", "collision"] as const) {
+  test(`publishes JSON snapshots atomically: ${mode}`, async () => {
+    const dir = await mkdtemp(join(tmpdir(), "ticket-snapshot-test-"));
+    const target = join(dir, "snapshot.json");
+    const args = ["--params-json", '{"ticketNumber":"one"}', "--output", target];
+    const originalWrite = fs.writeFile;
+    const write = spyOn(fs, "writeFile").mockImplementationOnce(async (path, data, options) => {
+      expect(String(path)).not.toBe(target);
+      expect(existsSync(target)).toBe(false);
+      if (mode === "write-failure") {
+        await originalWrite(path, '{"data":', options);
+        throw new Error("simulated full disk");
+      }
+      await originalWrite(path, data, options);
+      expect(existsSync(target)).toBe(false);
+      if (mode === "collision") await originalWrite(target, "existing snapshot");
+    });
+    globalThis.fetch = (async () => response({ subject: "客服工单" })) as unknown as typeof fetch;
+    try {
+      if (mode === "success") {
+        expect(await executeRead(session, ticketCommands, "get", args)).toEqual({
+          path: target,
+          pagination: undefined,
+        });
+        expect(JSON.parse(await readFile(target, "utf8")).data).toEqual({ subject: "客服工单" });
+      } else {
+        await expect(executeRead(session, ticketCommands, "get", args)).rejects.toThrow();
+      }
+      expect(write).toHaveBeenCalledTimes(1);
+      write.mockRestore();
+      if (mode === "write-failure") {
+        expect(await fs.readdir(dir)).toEqual([]);
+        await executeRead(session, ticketCommands, "get", args);
+        expect(JSON.parse(await readFile(target, "utf8")).data).toEqual({ subject: "客服工单" });
+      } else if (mode === "collision") {
+        expect(await readFile(target, "utf8")).toBe("existing snapshot");
+      }
+      expect(await fs.readdir(dir)).toEqual(["snapshot.json"]);
+      const saved = await readFile(target, "utf8");
+      await expect(executeRead(session, ticketCommands, "get", args)).rejects.toThrow();
+      expect(await readFile(target, "utf8")).toBe(saved);
+      expect(await fs.readdir(dir)).toEqual(["snapshot.json"]);
+    } finally {
+      write.mockRestore();
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+}
 test("downloads files atomically without overwriting or accepting login pages", async () => {
   const dir = await mkdtemp(join(tmpdir(), "ticket-read-"));
   const path = join(dir, "export.xlsx");
