@@ -125,6 +125,76 @@ test("cursor pagination, truncation and repeated cursor failures", async () => {
     "did not advance",
   );
 });
+for (const mode of [[], ["--all"], ["--all", "--max-pages", "1"]]) {
+  for (const [command, params] of [
+    ["messages", { ticketNumber: "one", before: "X" }],
+    ["admin-trigger-executions", { ticketId: "1", before: 0 }],
+  ] as const) {
+    test(`rejects unchanged initial cursor for ${command} ${mode.join(" ")}`, async () => {
+      const cursors: string[] = [];
+      globalThis.fetch = (async (input: RequestInfo | URL) => {
+        cursors.push(new URL(String(input)).searchParams.get("before")!);
+        return response({ items: [{ id: 1 }], hasMore: true, nextCursor: params.before });
+      }) as unknown as typeof fetch;
+      await expect(
+        executeRead(session, ticketCommands, command, [
+          "--params-json",
+          JSON.stringify(params),
+          ...mode,
+        ]),
+      ).rejects.toThrow("did not advance");
+      expect(cursors).toEqual([String(params.before)]);
+    });
+  }
+}
+for (const initial of [undefined, "X"]) {
+  test(`rejects cursor cycle at page limit from ${initial}`, async () => {
+    const cursors: (string | null)[] = [];
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      cursors.push(new URL(String(input)).searchParams.get("before"));
+      return response({
+        items: [{ id: cursors.length }],
+        hasMore: true,
+        nextCursor: cursors.length === 1 ? "Y" : (initial ?? "Y"),
+      });
+    }) as unknown as typeof fetch;
+    await expect(
+      executeRead(session, ticketCommands, "messages", [
+        "--params-json",
+        JSON.stringify({ ticketNumber: "one", before: initial }),
+        "--all",
+        "--max-pages",
+        "2",
+      ]),
+    ).rejects.toThrow("did not advance");
+    expect(cursors).toEqual([initial ?? null, "Y"]);
+  });
+}
+for (const allPages of [false, true]) {
+  for (const more of [false, true]) {
+    test(`preserves valid continuation and terminal page: all=${allPages}, more=${more}`, async () => {
+      const cursors: string[] = [];
+      globalThis.fetch = (async (input: RequestInfo | URL) => {
+        cursors.push(new URL(String(input)).searchParams.get("before")!);
+        return response({ items: [{ id: 1 }], hasMore: more, nextCursor: more ? "Y" : "X" });
+      }) as unknown as typeof fetch;
+      const result = (await executeRead(session, ticketCommands, "messages", [
+        "--params-json",
+        '{"ticketNumber":"one","before":"X"}',
+        ...(allPages ? ["--all"] : []),
+        "--max-pages",
+        "1",
+      ])) as any;
+      expect(cursors).toEqual(["X"]);
+      expect(result.pagination).toEqual({
+        pagesFetched: 1,
+        truncated: more,
+        next: more ? "Y" : null,
+      });
+      expect(allPages ? result.data : result.data.items).toEqual([{ id: 1 }]);
+    });
+  }
+}
 test("projects metadata and removes nested secrets and signed URLs", async () => {
   globalThis.fetch = (async () =>
     response([

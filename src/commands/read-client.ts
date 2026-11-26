@@ -156,6 +156,7 @@ export class ReadClient {
     const records: unknown[] = [],
       metadata: unknown[] = [],
       seen = new Set<string>();
+    if (cursor && current[pageKey] != null) seen.add(JSON.stringify(current[pageKey]));
     let data: any,
       more = false,
       next: unknown,
@@ -183,13 +184,15 @@ export class ReadClient {
           : items.length >= current[sizeKey];
         next = current[pageKey] + 1;
       }
-      if (!more || !this.allPages || pageCount === this.maxPages) break;
+      if (!more || (!cursor && (!this.allPages || pageCount === this.maxPages))) break;
+      // 单页和达到上限时也会返回续读游标，必须先确认游标推进。
       const marker = JSON.stringify(next);
       if (next == null || seen.has(marker) || !items.length)
         throw new ReadContractError(
           "pagination did not advance; refusing an incomplete full result",
         );
       seen.add(marker);
+      if (!this.allPages || pageCount === this.maxPages) break;
       current[pageKey] = next;
     }
     this.pagination = { pagesFetched: pageCount, truncated: more, next: more ? next : null };
