@@ -1,6 +1,6 @@
 ---
 name: shulex-support
-description: Shulex 产品支持统一入口。用于 Inbox（Agent 会话记录）的单次 badcase、异常回复、失败节点、报错、卡住，或根据 ChatId / 会话 ID / External ID 定位根因；也用于产品咨询、功能需求和售后工单（产品支持工单）。
+description: Shulex 产品支持统一入口。用于 Inbox（Agent 会话记录）的单条和批量 badcase、异常回复、失败节点、报错、卡住，或根据 ChatId / 会话 ID / External ID 定位根因；支持逐条诊断、标准分类及 HTML报告/XLSX明细；也用于产品咨询、功能需求和售后工单（产品支持工单）。
 requires:
   libs:
     - solvea-api
@@ -22,7 +22,7 @@ requires:
 |---|---|
 | 咨询产品使用、配置、排障、售后政策 | 读取 `references/product-docs.md`，基于产品文档回答 |
 | 提出功能需求、产品改进建议，或明确说“提个需求/希望支持/能不能增加” | 读取 `references/tickets.md`，按 `ticket_feature` 整理需求工单；先确认明细再创建 |
-| 提供单个或一批 ChatId / 会话 ID / 外部会话 ID / 工单号，或用文件、文本提供 badcase | 读取 `references/badcase-analysis/overview.md`，按文本（单条/批量）或语音流程诊断 |
+| 提供单个或一批 ChatId / 会话 ID / 外部会话 ID / 工单号，或用文件、文本提供 badcase | 读取 `references/badcase-analysis/overview.md`，按文本（单条/批量）或语音流程诊断；批量逐条取证后分类，交付HTML报告和固定10列XLSX |
 | 明确要提交工单，或文档查询无法解决 | 读取 `references/tickets.md`，收集必要信息并确认后创建 |
 | 查询某个工单怎么样了 | 读取 `references/tickets.md`，根据工单号查询状态和最新消息 |
 | 继续补充某个工单的问题 | 读取 `references/tickets.md`，根据工单号追加用户消息 |

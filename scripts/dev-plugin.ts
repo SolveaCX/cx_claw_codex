@@ -144,6 +144,10 @@ export async function prepareDeveloperPlugin(outputRoot = devRoot): Promise<void
     writeFile(join(pluginRoot, "plugin-cli.dev.mjs"), launcherSource(source.version), {
       mode: 0o755,
     }),
+    // Skills use the same public entry point in stable and development plugins.
+    writeFile(join(pluginRoot, "plugin-cli.mjs"), launcherSource(source.version), {
+      mode: 0o755,
+    }),
     writeFile(
       marketplaceFile,
       `${JSON.stringify(
@@ -211,6 +215,7 @@ async function enableForPlayground(playgroundRoot: string, outputRoot: string): 
     instructionsHeading,
     "",
     "- 本项目使用 `cxclaw-dev@cxclaw-dev` 开发版插件。",
+    "- 项目配置禁用正式版 `cxclaw@cxclaw`；验证前确认实际加载的开发版 skill 包含本次改动。",
     "- 用户没有明确要求时，不要在本地安装正式版 `cxclaw` 插件。",
   ].join("\n");
   let instructions = "# Playground 项目说明\n";
@@ -246,6 +251,19 @@ async function enableForPlayground(playgroundRoot: string, outputRoot: string): 
   config = enabled.test(config)
     ? config.replace(enabled, "$1true")
     : `${config.trimEnd()}${config.trim() ? "\n\n" : ""}${section}\nenabled = true\n`;
+  // Override the user's stable plugin only inside this playground.
+  const stableSection = /(^\[plugins\."cxclaw@cxclaw"\][^\n]*\n)([\s\S]*?)(?=^\[|$(?![\s\S]))/m;
+  if (stableSection.test(config)) {
+    config = config.replace(stableSection, (_match, heading: string, body: string) => {
+      const flag = /^enabled\s*=\s*(?:true|false)(\s*(?:#[^\n]*)?)$/m;
+      return (
+        heading +
+        (flag.test(body) ? body.replace(flag, "enabled = false$1") : `enabled = false\n${body}`)
+      );
+    });
+  } else {
+    config = `${config.trimEnd()}\n\n[plugins."cxclaw@cxclaw"]\nenabled = false\n`;
+  }
   await writeFile(configFile, config);
 }
 

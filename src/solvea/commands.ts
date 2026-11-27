@@ -113,7 +113,10 @@ export async function runSolveaCommand(
     case "get-agent":
       return client.getAgent(id());
     case "get-chatflow-graph":
-      return client.getChatflowGraph(option(args, "--agent-id", true)!);
+      return client.getChatflowGraph(
+        option(args, "--agent-id", true)!,
+        option(args, "--version", args.includes("--version")),
+      );
     case "create-agent":
       return client.createAgent(await data(args));
     case "delete-agent":

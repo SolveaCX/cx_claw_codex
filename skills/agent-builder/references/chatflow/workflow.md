@@ -78,6 +78,17 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow validate \
 
 本地无网络或尚未准备登录态时，可在 compile 和 validate 后加 `--offline` 做结构预检。离线模式跳过远端 AI 字段、插件存在性和插件参数合同检查；上传前必须联网复核。
 
+## 只读查询历史版本
+
+已知版本号时使用以下任一命令（租户命令携带当前会话context）：
+
+```bash
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent get-chatflow --agent-id <agent_id> --version <version> --context <contextId> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow inspect --agent-id <agent_id> --version <version> --context <contextId> --pretty
+```
+
+`--version`为明确的整数版本号，返回指定版本完整图；不存在或返回版本/Agent不匹配则报错，不回退到最新图。inspect返回的Agent元信息仍为当前值。省略版本时保持原行为：优先当前用户草稿，否则最新发布图，必须核对返回的status和version。历史排查按目标轮flow_version查询，修改前重新读取当前图，不能直接把历史图作为待保存的编辑基线。
+
 ## 增量修改
 
 1. 先 inspect 拉当前图，并写入本次 patch graph：
