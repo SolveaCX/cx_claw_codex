@@ -433,8 +433,14 @@ export async function renderBadcaseReport(data: unknown, outputDir: string) {
   await mkdir(dir, { recursive: true });
   const tmp = await mkdtemp(join(dir, ".badcase-"));
   try {
-    await writeFile(join(tmp, "badcase-report.html"), html);
-    await workbook.xlsx.writeFile(join(tmp, "badcase-details.xlsx"));
+    const xlsx = Buffer.from(await workbook.xlsx.writeBuffer());
+    const standalone = html.replace(
+      "__WORKBENCH_XLSX__",
+      () =>
+        `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${xlsx.toString("base64")}`,
+    );
+    await writeFile(join(tmp, "badcase-report.html"), standalone);
+    await writeFile(join(tmp, "badcase-details.xlsx"), xlsx);
     for (const name of ["badcase-report.html", "badcase-details.xlsx"])
       await rename(join(tmp, name), join(dir, name));
   } finally {

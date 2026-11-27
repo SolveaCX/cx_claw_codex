@@ -96,6 +96,11 @@ test("renders offline artifacts with escaped data, text IDs, safe spreadsheet va
     expect(html).not.toContain("</script><img src=x");
     expect(html).not.toContain("__WORKBENCH_DATA__");
     expect(html).toContain("\\u003c/script\\u003e");
+    const embedded = html.match(
+      /href="data:application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,([^"]+)"/,
+    )?.[1];
+    expect(embedded).toBeTruthy();
+    expect(Buffer.from(embedded!, "base64")).toEqual(await readFile(result.xlsx));
     const w = new ExcelJS.Workbook();
     await w.xlsx.readFile(result.xlsx);
     const s = w.getWorksheet("诊断明细")!;

@@ -7,6 +7,12 @@
       /[&<>"']/g,
       (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
     );
+  const displayTime = (value) =>
+    String(value || "").replace(
+      /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}):\d{2}(?:\.\d+)?(Z|[+-]\d{2}:\d{2})$/,
+      (_, date, time, zone) =>
+        `${date} ${time} ${["Z", "+00:00"].includes(zone) ? "UTC" : `UTC${zone}`}`,
+    );
   const prose = (c, field) =>
     `<div class="markdown">${D.presentation.cases[c.caseId][field].html}</div>`;
   const chatIdButton = (id) =>
@@ -87,7 +93,7 @@
       (c) =>
         (!S.primary || (S.primary === "__uncategorized" ? !c.primary : c.primary === S.primary)) &&
         (!S.secondary || c.secondary === S.secondary) &&
-        (!S.agent || c.agentId === S.agent) &&
+        (!S.agent || (S.agent === "__unknown" ? !c.agentId : c.agentId === S.agent)) &&
         (!S.certainty || c.certainty === S.certainty) &&
         (!S.status || c.status === S.status) &&
         (!S.priority || c.priority === S.priority) &&
@@ -141,7 +147,7 @@
     return `<select aria-label="${label}" data-filter="${key}"><option value="">${label}</option>${values.map((v) => `<option value="${E(v[0])}" ${S[key] === v[0] ? "selected" : ""}>${E(v[1])}</option>`).join("")}</select>`;
   }
   function filtersBar() {
-    return `<div class="filterbar"><input aria-label="搜索问题" data-search placeholder="搜索问题、chatId、caseId…" value="${E(S.q)}">${options("agent", "全部 Agent", [...new Map(D.cases.filter((c) => c.agentId).map((c) => [c.agentId, c.agentName || c.agentId]))])}${options(
+    return `<div class="filterbar"><input aria-label="搜索问题" data-search placeholder="搜索问题、chatId、caseId…" value="${E(S.q)}">${options("agent", "全部 Agent", [...new Map(D.cases.map((c) => [c.agentId || "__unknown", c.agentName || c.agentId || "Agent未确认"]))])}${options(
       "status",
       "全部状态",
       [...new Set(D.cases.map((c) => c.status))].map((x) => [x, x]),
@@ -186,7 +192,7 @@
     return `<div class="groups"><button data-group="" class="${!S.primary && !S.blank ? "selected" : ""}">全部问题 <b>${D.cases.length}</b></button>${categoryGroups
       .map(
         ([name, n]) =>
-          `<button data-group="${E(name)}" class="${S.primary === name ? "selected" : ""}">${E(name)}<b>${n}</b></button>${
+          `<button data-group="${E(name)}" class="${S.primary === name || (name === "未定类" && S.primary === "__uncategorized") ? "selected" : ""}">${E(name)}<b>${n}</b></button>${
             S.primary === name
               ? count(
                   D.cases.filter((c) => c.primary === name),
@@ -206,7 +212,7 @@
   }
   function renderList() {
     const list = filtered();
-    main.innerHTML = `<div class="pagehead"><div><h1>${titles[S.view]}</h1><p>${S.fix ? `修复项 ${E(S.fix)} · ` : ""}选择一条问题，对照会话查看定位与修复建议</p></div>${badge("诊断快照")}</div>${filtersBar()}<div class="results">${
+    main.innerHTML = `<div class="pagehead"><div><h1>${titles[S.view]}</h1><p>${S.fix ? `修复项 ${E(S.fix)} · ` : ""}${E(D.batch.tenantName)} · ${D.cases.length} 个问题</p></div></div>${filtersBar()}<div class="results">${
       S.view === "agents"
         ? `<div class="groups"><button data-agent="">全部 Agent <b>${D.cases.length}</b></button>${count(
             D.cases,
@@ -214,26 +220,26 @@
           )
             .map(
               ([id, n]) =>
-                `<button data-agent="${E(id)}" class="${S.agent === id ? "selected" : ""}">${E(D.cases.find((c) => c.agentId === id).agentName || "Agent未确认")}<b>${n}</b></button>`,
+                `<button data-agent="${E(id || "__unknown")}" class="${S.agent === (id || "__unknown") ? "selected" : ""}">${E(D.cases.find((c) => c.agentId === id).agentName || "Agent未确认")}<b>${n}</b></button>`,
             )
             .join("")}</div>`
         : groupPanel()
-    }<div><div class="countline"><span id="result-count">${list.length} 个问题 / 全部 ${D.cases.length} 个</span><span>点击问题查看对话 →</span></div><div id="case-list">${caseTable(list)}</div></div></div>`;
+    }<div><div class="countline"><span id="result-count">${list.length} 个问题 / 全部 ${D.cases.length} 个</span></div><div id="case-list">${caseTable(list)}</div></div></div>`;
   }
   function overview() {
     const confirmed = D.cases.filter((c) => c.certainty === "confirmed").length;
     const unique = new Set(D.cases.map((c) => c.chatId).filter(Boolean)).size;
     const cats = count(D.cases, (c) => c.primary || "未定类");
     const agentCounts = count(D.cases, (c) => c.agentId);
-    main.innerHTML = `<div class="pagehead"><div><h1>排查总览</h1><p>${E(D.batch.tenantName)} · ${E(D.batch.scope)}</p></div>${badge("诊断快照")}</div>${D.batch.notice ? `<div class="notice">${E(D.batch.notice)}</div>` : ""}<div class="stats"><button class="stat accent" data-drill="all"><span class="label">本批独立问题 ↗</span><b>${D.cases.length}</b><small>${D.batch.includedCount} 条纳入记录 · ${unique} 个会话</small></button><button class="stat" data-drill="confirmed"><span class="label">直接原因已确认 ↗</span><b>${confirmed}</b><small>诊断确认，不代表已完成修复</small></button><button class="stat" data-drill="partial"><span class="label">仍需补证 ↗</span><b>${D.cases.length - confirmed}</b><small>查看具体缺口与下一步</small></button><button class="stat" data-drill="P0"><span class="label">P0 优先复核 ↗</span><b>${D.cases.filter((c) => c.priority === "P0").length}</b><small>优先级来自本次诊断数据</small></button></div><div class="grid2"><section class="panel"><div class="panelhead"><h2>问题分布</h2><button class="textbtn" data-view="categories">按分类排查 ↗</button></div>${cats.map(([name, n]) => `<button class="barrow" data-category-drill="${E(name)}"><span>${E(name)}</span><span class="bartrack"><i style="width:${(n / D.cases.length) * 100}%"></i></span><b>${n}</b></button>`).join("")}<p class="muted" style="font-size:11px">分母为 ${D.cases.length} 个问题，非 Agent 错误率。<button class="textbtn" data-drill="blank">${D.cases.filter((c) => !c.secondary).length} 项二级分类待复核 ↗</button></p></section><section class="panel"><div class="panelhead"><h2>Agent 分布</h2><button class="textbtn" data-view="agents">查看全部 ↗</button></div>${agentCounts
+    main.innerHTML = `<div class="pagehead"><div><h1>排查总览</h1><p>${E(D.batch.tenantName)} · ${E(D.batch.scope)}</p></div></div>${D.batch.notice ? `<div class="notice">${E(D.batch.notice)}</div>` : ""}<div class="stats"><button class="stat accent" data-drill="all"><span class="label">问题总数</span><b>${D.cases.length}</b><small>${D.batch.includedCount} 条纳入记录 · ${unique} 个会话</small></button><button class="stat" data-drill="confirmed"><span class="label">已定位原因</span><b>${confirmed}</b><small>${D.cases.filter((c) => c.status === "已验证通过").length} 个已验证通过</small></button><button class="stat" data-drill="partial"><span class="label">待补充证据</span><b>${D.cases.length - confirmed}</b><small>${D.fixes.filter((f) => !f.ready).length} 项方案待补证</small></button><button class="stat" data-drill="P0"><span class="label">P0 优先处理</span><b>${D.cases.filter((c) => c.priority === "P0").length}</b><small>查看关联问题与修复建议</small></button></div><div class="grid2"><section class="panel"><div class="panelhead"><h2>问题分布</h2><button class="textbtn" data-view="categories">按分类排查 ↗</button></div>${cats.map(([name, n]) => `<button class="barrow" data-category-drill="${E(name)}"><span>${E(name)}</span><span class="bartrack"><i style="width:${(n / D.cases.length) * 100}%"></i></span><b>${n}</b></button>`).join("")}<p class="muted" style="font-size:11px">共 ${D.cases.length} 个问题 · <button class="textbtn" data-drill="blank">${D.cases.filter((c) => !c.secondary).length} 项二级分类待复核 ↗</button></p></section><section class="panel"><div class="panelhead"><h2>Agent 分布</h2><button class="textbtn" data-view="agents">查看全部 ↗</button></div>${agentCounts
       .slice(0, 5)
       .map(
         ([id, n]) =>
-          `<button class="barrow" style="grid-template-columns:1fr 80px 24px" data-agent-drill="${E(id)}"><span>${E(D.cases.find((c) => c.agentId === id).agentName || "Agent未确认")}</span><span class="bartrack"><i style="width:${(n / D.cases.length) * 100}%"></i></span><b>${n}</b></button>`,
+          `<button class="barrow" style="grid-template-columns:1fr 80px 24px" data-agent-drill="${E(id || "__unknown")}"><span>${E(D.cases.find((c) => c.agentId === id).agentName || "Agent未确认")}</span><span class="bartrack"><i style="width:${(n / D.cases.length) * 100}%"></i></span><b>${n}</b></button>`,
       )
       .join(
         "",
-      )}</section></div><div class="grid2"><section class="panel"><div class="panelhead"><h2>主要发现</h2><span class="muted" style="font-size:11px">点击 case 核对对话</span></div>${D.batch.findings.map((f) => `<article class="finding"><h3>${E(f.title)}</h3><p>${E(f.summary)}</p>${f.caseIds.map(link).join("")}</article>`).join("")}</section><section class="panel"><div class="panelhead"><h2>优先修复与补证</h2><button class="textbtn" data-view="fixes">全部 ${D.fixes.length} 项 ↗</button></div>${D.fixes
+      )}</section></div><div class="grid2"><section class="panel"><div class="panelhead"><h2>主要发现</h2></div>${D.batch.findings.map((f) => `<article class="finding"><h3>${E(f.title)}</h3><p>${E(f.summary)}</p>${f.caseIds.map(link).join("")}</article>`).join("")}</section><section class="panel"><div class="panelhead"><h2>优先修复与补证</h2><button class="textbtn" data-view="fixes">全部 ${D.fixes.length} 项 ↗</button></div>${D.fixes
       .slice()
       .sort((a, b) => a.priority.localeCompare(b.priority))
       .slice(0, 4)
@@ -243,7 +249,7 @@
       )
       .join(
         "",
-      )}</section></div><p class="muted" style="font-size:11px">源记录 ${D.batch.sourceCount} 条 · 纳入 ${D.batch.includedCount} 条 · 排除 ${D.batch.excludedCount} 条。会话按获取时的内容展示，缺失或发送状态不明处单独标注。生成：${E(D.batch.generatedAt)}</p>`;
+      )}</section></div><p class="muted" style="font-size:11px">源记录 ${D.batch.sourceCount} 条 · 纳入 ${D.batch.includedCount} 条 · 排除 ${D.batch.excludedCount} 条。会话按获取时的内容展示，缺失或发送状态不明处单独标注。生成：${E(displayTime(D.batch.generatedAt))}</p>`;
   }
   function renderFixes() {
     const selected = S.fix && fixes.get(S.fix);
@@ -278,7 +284,7 @@
       event: "流程记录",
       unknown: "角色未确认",
     };
-    main.innerHTML = `<div class="detailtop"><button class="button" data-back>← 返回${titles[S.view]}</button><span class="muted">${E(c.caseId)} · ${E(c.source)}</span><span class="spacer"></span><button class="button" data-prev ${index <= 0 ? "disabled" : ""} aria-label="上一条问题">← 上一条</button><button class="button" data-next ${index < 0 || index >= list.length - 1 ? "disabled" : ""} aria-label="下一条问题">下一条 →</button></div><h1 class="detailtitle">${E(c.problem)}</h1><div class="detailmeta">${badge(c.priority, c.priority === "P0" ? "p0" : "")}${badge(c.status, c.status === "待补充信息" ? "amber" : "")}</div><dl class="case-context"><div><dt>chatId</dt><dd>${chatIdButton(c.chatId)}</dd></div><div><dt>Agent名称</dt><dd>${E(c.agentName || "未确认")}</dd></div><div><dt>agentId</dt><dd>${E(c.agentId || "未确认")}</dd></div><div><dt>Flow版本</dt><dd>会话运行 ${E(c.flowVersion?.historical || "未取得")} · 当前 ${E(c.flowVersion?.current || "未取得")}</dd></div></dl><div class="mobiletabs"><button class="${S.pane === "conversation" ? "active" : ""}" data-pane="conversation">对话</button><button class="${S.pane === "diagnosis" ? "active" : ""}" data-pane="diagnosis">诊断与建议</button></div><div class="workspace" data-pane="${S.pane}"><section class="conversation"><div class="panehead"><h2>会话记录</h2><button class="textbtn" data-target>定位问题消息 ↓</button></div><div class="convnote">${conv ? `${conv.messages.length} 条已取得记录 · ${E(conv.completeness)}<br>快照：${E(conv.snapshotAt)}；时间按原始记录标注。` : "未取得会话内容，缺口见右侧诊断。"}</div><div class="message-scroll">${conv ? conv.messages.map((m, i) => `<article id="message-${i}" class="message ${E(m.role)} ${m.id === c.targetMessageId ? "target" : ""}" data-message-index="${i}"><div class="message-head"><span class="avatar">${m.role === "customer" ? "客" : m.role === "ai" ? "AI" : m.role === "human" ? "人" : "·"}</span><span>${labels[m.role]}</span><span>${E(m.time)}</span>${m.turn ? `<span>第 ${E(m.turn)} 轮</span>` : ""}${m.id === c.targetMessageId ? '<span class="targetlabel">本问题目标消息</span>' : ""}</div><div class="bubble">${m.text ? `<div class="markdown">${D.presentation.messages[conv.conversationId][m.id]}</div>` : '<span class="muted">无可展示的对客文本</span>'}${m.attachments.map((a) => `<span class="attachment">附件 · ${E(a)}</span>`).join("")}</div></article>`).join("") : '<div class="empty">会话原文不可用</div>'}</div></section><section class="diagnosis"><div class="panehead"><h2>定位与修复建议</h2>${badge(c.certainty === "confirmed" ? "直接原因已确认" : "待补证", c.certainty === "confirmed" ? "green" : "amber")}</div><div class="diagnosis-content"><section><h3>问题分类</h3><p>${E(c.primary || "未确定")} ${c.secondary ? " / " + E(c.secondary) : " / 二级待复核"}</p>${c.suggestedCategory ? `<p>模型建议分类：${E(c.suggestedCategory)}</p>` : ""}${c.classificationGap ? `<p class="muted" style="font-size:12px;margin-top:8px">${E(c.classificationGap)}</p>` : ""}</section><section><h3>问题定位</h3>${prose(c, "diagnosis")}</section><section><h3>关键证据 <button class="textbtn" data-target>对照目标消息 ↗</button></h3>${prose(c, "evidence")}</section><section class="recommendation"><h3>${E(c.treatment || "处理方式待确认")} · 修复建议</h3>${prose(c, "recommendation")}${c.fixId ? `<button class="textbtn" data-fix="${E(c.fixId)}">关联修复项 ${E(c.fixId)} ↗</button>` : ""}</section>${c.gaps ? `<section class="gap"><h3>待补证</h3>${prose(c, "gaps")}</section>` : ""}<details class="tech"><summary>技术证据与来源</summary><pre>${E(c.technical)}\n\n目标消息：${E(c.targetMessageId || "未取得")}\n${E(c.source)}</pre></details></div></section></div>`;
+    main.innerHTML = `<div class="detailtop"><button class="button" data-back>← 返回${titles[S.view]}</button><span class="muted">${E(c.caseId)} · ${E(c.source)}</span><span class="spacer"></span><button class="button" data-prev ${index <= 0 ? "disabled" : ""} aria-label="上一条问题">← 上一条</button><button class="button" data-next ${index < 0 || index >= list.length - 1 ? "disabled" : ""} aria-label="下一条问题">下一条 →</button></div><h1 class="detailtitle">${E(c.problem)}</h1><div class="detailmeta">${badge(c.priority, c.priority === "P0" ? "p0" : "")}${badge(c.status, c.status === "待补充信息" ? "amber" : "")}</div><dl class="case-context"><div><dt>chatId</dt><dd>${chatIdButton(c.chatId)}</dd></div><div><dt>Agent名称</dt><dd>${E(c.agentName || "未确认")}</dd></div><div><dt>agentId</dt><dd>${E(c.agentId || "未确认")}</dd></div><div><dt>Flow版本</dt><dd>会话运行 ${E(c.flowVersion?.historical || "未取得")} · 当前 ${E(c.flowVersion?.current || "未取得")}</dd></div></dl><div class="mobiletabs"><button class="${S.pane === "conversation" ? "active" : ""}" data-pane="conversation">对话</button><button class="${S.pane === "diagnosis" ? "active" : ""}" data-pane="diagnosis">诊断与建议</button></div><div class="workspace" data-pane="${S.pane}"><section class="conversation"><div class="panehead"><h2>会话记录</h2><button class="textbtn" data-target>定位问题消息 ↓</button></div><details class="convnote"><summary>${conv ? `${conv.messages.length} 条会话记录` : "会话记录待补充"}</summary><p>${conv ? `${E(conv.completeness)}<br>取证时间：${E(displayTime(conv.snapshotAt))}` : "缺口见问题定位。"}</p></details><div class="message-scroll">${conv ? conv.messages.map((m, i) => `<article id="message-${i}" class="message ${E(m.role)} ${m.id === c.targetMessageId ? "target" : ""}" data-message-index="${i}"><div class="message-head"><span class="avatar">${m.role === "customer" ? "客" : m.role === "ai" ? "AI" : m.role === "human" ? "人" : "·"}</span><span>${labels[m.role]}</span><span>${E(displayTime(m.time))}</span>${m.turn ? `<span>第 ${E(m.turn)} 轮</span>` : ""}${m.id === c.targetMessageId ? '<span class="targetlabel">本问题目标消息</span>' : ""}</div><div class="bubble">${m.text ? `<div class="markdown">${D.presentation.messages[conv.conversationId][m.id]}</div>` : '<span class="muted">无可展示的对客文本</span>'}${m.attachments.map((a) => `<span class="attachment">附件 · ${E(a)}</span>`).join("")}</div></article>`).join("") : '<div class="empty">会话原文不可用</div>'}</div></section><section class="diagnosis"><div class="panehead"><h2>定位与修复建议</h2>${badge(c.certainty === "confirmed" ? "直接原因已确认" : "待补证", c.certainty === "confirmed" ? "green" : "amber")}</div><div class="diagnosis-content"><section><h3>问题分类</h3><p>${E(c.primary || "未确定")} ${c.secondary ? " / " + E(c.secondary) : " / 二级待复核"}</p>${c.suggestedCategory ? `<p>模型建议分类：${E(c.suggestedCategory)}</p>` : ""}${c.classificationGap ? `<p class="muted" style="font-size:12px;margin-top:8px">${E(c.classificationGap)}</p>` : ""}</section><section><h3>问题定位</h3>${prose(c, "diagnosis")}</section><section><h3>关键证据 <button class="textbtn" data-target>对照目标消息 ↗</button></h3>${prose(c, "evidence")}</section><section class="recommendation"><h3>${E(c.treatment || "处理方式待确认")} · 修复建议</h3>${prose(c, "recommendation")}${c.fixId ? `<button class="textbtn" data-fix="${E(c.fixId)}">关联修复项 ${E(c.fixId)} ↗</button>` : ""}</section>${c.gaps ? `<section class="gap"><h3>待补证</h3>${prose(c, "gaps")}</section>` : ""}<details class="tech"><summary>技术证据与来源</summary><pre>${E(c.technical)}\n\n目标消息：${E(c.targetMessageId || "未取得")}\n${E(c.source)}</pre></details></div></section></div>`;
     requestAnimationFrame(() => focusTarget(false));
   }
   function focusTarget(switchPane = true) {
@@ -305,7 +311,7 @@
       hash = "overview";
     }
     document.getElementById("breadcrumb").textContent =
-      `本批排查 / ${titles[S.view]}${hash.startsWith("case/") ? " / Case" : ""}`;
+      `${titles[S.view]}${hash.startsWith("case/") ? " / 问题详情" : ""}`;
     document
       .querySelectorAll("nav button")
       .forEach((b) => b.classList.toggle("active", b.dataset.view === S.view));
@@ -318,7 +324,7 @@
     document
       .querySelectorAll("nav button")
       .forEach((b) => b.classList.toggle("active", b.dataset.view === S.view));
-    document.getElementById("breadcrumb").textContent = `本批排查 / ${titles[S.view]}`;
+    document.getElementById("breadcrumb").textContent = `${titles[S.view]}`;
     if (S.view === "overview") overview();
     else if (S.view === "fixes") renderFixes();
     else renderList();
@@ -435,8 +441,9 @@
   });
   window.addEventListener("hashchange", render);
   document.getElementById("tenant").textContent = D.batch.tenantName;
-  document.getElementById("scope").textContent = `${D.batch.accountId} · ${D.batch.environment}`;
-  document.getElementById("snapshot").textContent = `诊断快照 · ${D.batch.snapshotAt}`;
-  document.title = `${D.batch.tenantName} · Badcase 排查工作台`;
+  document.getElementById("scope").textContent =
+    `${D.batch.accountId} · ${{ prod: "生产环境", staging: "测试环境" }[D.batch.environment] || D.batch.environment}`;
+  document.getElementById("snapshot").textContent = `分析时间 · ${displayTime(D.batch.snapshotAt)}`;
+  document.title = `${D.batch.tenantName} · CXClaw 排查工作台`;
   render();
 })();
