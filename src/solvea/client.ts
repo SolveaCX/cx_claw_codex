@@ -288,8 +288,28 @@ export class SolveaClient {
       squareAgent: false,
     });
   }
-  async getChatflowGraph(id: string) {
-    return this.post("/api_v2/gpt/chatflow/queryGraph/latest", { agentId: Number(id) });
+  async getChatflowGraph(id: string, version?: string) {
+    if (version === undefined) {
+      return this.post("/api_v2/gpt/chatflow/queryGraph/latest", { agentId: Number(id) });
+    }
+    if (!/^-?\d+$/.test(version) || !Number.isSafeInteger(Number(version))) {
+      throw new Error("--version must be a safe integer");
+    }
+    const graph = await this.post("/api_v2/gpt/chatflow/queryGraph", {
+      agentId: Number(id),
+      version: Number(version),
+    });
+    // 历史诊断不能静默使用最新图或空图，避免错误归因。
+    const result = graph as JsonObject | null;
+    if (
+      !result?.graph ||
+      result.version == null ||
+      Number(result.version) !== Number(version) ||
+      String(result.agentId) !== String(Number(id))
+    ) {
+      throw new Error(`ChatFlow graph for agent ${id} version ${version} was not returned`);
+    }
+    return graph;
   }
   async createAgent(data: JsonObject, idempotencyKey?: string) {
     return this.request(

@@ -39,7 +39,11 @@ export const resources = {
       "Update an agent",
       "--id <agent-id> (--data <json> | --data-file <path>)",
     ),
-    "get-chatflow": action("get-chatflow-graph", "Get an agent chatflow", "--agent-id <agent-id>"),
+    "get-chatflow": action(
+      "get-chatflow-graph",
+      "Get an agent chatflow (latest may be a draft)",
+      "--agent-id <agent-id> [--version <integer>]",
+    ),
   },
   intent: {
     list: action("list-intents", "List intents", "[--category <category>]"),

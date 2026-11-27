@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { Session } from "../types.js";
 import { isNativeSolveaCommand, runSolveaCommand } from "./commands.js";
+import { runAgentBuilder } from "../workflows/agent-builder.js";
 
 const originalFetch = globalThis.fetch;
 afterEach(() => {
@@ -27,6 +28,79 @@ const session: Session = {
 };
 
 describe("native Solvea command registry", () => {
+  test("reads the requested ChatFlow version through resource and inspect commands", async () => {
+    const requests: Array<{ url: string; body: unknown }> = [];
+    const historicalGraph = {
+      agentId: 7,
+      version: 59,
+      status: "PUBLISHED",
+      graph: { nodes: [], edges: [] },
+    };
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input);
+      requests.push({ url, body: init?.body ? JSON.parse(String(init.body)) : undefined });
+      const result = url.endsWith("/bots")
+        ? [{ projectId: 302 }]
+        : url.endsWith("/queryAgent")
+          ? [{ id: 7, name: "Current agent" }]
+          : historicalGraph;
+      return new Response(JSON.stringify(result), { status: 200 });
+    }) as typeof fetch;
+
+    expect(
+      await runSolveaCommand(session, "get-chatflow-graph", ["--agent-id", "7", "--version", "59"]),
+    ).toEqual(historicalGraph);
+    expect(requests.at(-1)).toEqual({
+      url: "https://apps-staging.example/api_v2/gpt/chatflow/queryGraph",
+      body: { agentId: 7, version: 59 },
+    });
+    expect(
+      await runAgentBuilder(session, "chatflow", ["inspect", "--agent-id", "7", "--version", "59"]),
+    ).toMatchObject({ graph: historicalGraph });
+    expect(requests.at(-1)?.body).toEqual({ agentId: 7, version: 59 });
+
+    await runSolveaCommand(session, "get-chatflow-graph", ["--agent-id", "7"]);
+    expect(requests.at(-1)?.url).toEndWith("/queryGraph/latest");
+    expect(requests.at(-1)?.body).toEqual({ agentId: 7 });
+  });
+
+  test("rejects invalid or missing version arguments without a graph request", async () => {
+    let calls = 0;
+    globalThis.fetch = (async (_input: string | URL | Request) => {
+      calls++;
+      return new Response("{}");
+    }) as typeof fetch;
+    for (const value of ["abc", "1.5", "9007199254740992", "", "--pretty"]) {
+      await expect(
+        runSolveaCommand(session, "get-chatflow-graph", ["--agent-id", "7", "--version", value]),
+      ).rejects.toThrow("--version");
+    }
+    await expect(
+      runSolveaCommand(session, "get-chatflow-graph", ["--agent-id", "7", "--version"]),
+    ).rejects.toThrow("--version");
+    expect(calls).toBe(0);
+  });
+
+  test("does not substitute latest or empty graphs for the requested version", async () => {
+    for (const response of [
+      null,
+      { agentId: 7 },
+      { agentId: 7, version: 62, graph: {} },
+      { agentId: 8, version: 59, graph: {} },
+    ]) {
+      const paths: string[] = [];
+      globalThis.fetch = (async (input) => {
+        paths.push(String(input));
+        return new Response(JSON.stringify(response));
+      }) as typeof fetch;
+      await expect(
+        runSolveaCommand(session, "get-chatflow-graph", ["--agent-id", "7", "--version", "59"]),
+      ).rejects.toThrow("was not returned");
+      expect(paths).toHaveLength(1);
+      expect(paths[0]).toEndWith("/queryGraph");
+    }
+  });
+
   test("keeps migrated API commands explicit", () => {
     expect(isNativeSolveaCommand("get-agent")).toBe(true);
     expect(isNativeSolveaCommand("delete-agent")).toBe(true);

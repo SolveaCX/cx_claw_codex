@@ -39,13 +39,14 @@ import { runKbBuilder } from "./workflows/kb-builder.js";
 import { runTicketAnalytics, ticketAnalyticsHelp } from "./workflows/ticket-analytics.js";
 import { errorOutput } from "./cli-error.js";
 import { isFlatAnalyticsCommand } from "./commands/analytics.js";
+import { runBadcase, badcaseHelp } from "./workflows/badcase-report.js";
 
 const print = (value: unknown) => console.log(JSON.stringify(value, null, 2));
 const usage = () =>
   [
     "cxclawctl <resource> <action> [options]",
     "cxclawctl auth|tenant|context|profile|sls|doctor|update|setup|version",
-    "cxclawctl agent-builder|agent-tester|delivery|poc|kb-builder|ticket-analytics <action>",
+    "cxclawctl agent-builder|agent-tester|delivery|poc|kb-builder|ticket-analytics|badcase <action>",
     resourceHelp(),
     "Example: cxclawctl intent create --data-file intent.json",
   ].join("\n\n");
@@ -182,6 +183,10 @@ const businessArgs = (args: string[]) => stripOptions(args, runtimeOptions);
 
 async function main(args = process.argv.slice(2)) {
   const [command, action, ...rest] = args;
+  if (command === "badcase") {
+    if (!action || action === "help" || flag(args, "--help")) return console.log(badcaseHelp);
+    return print(await runBadcase(action, rest));
+  }
   if (command === "ticket-analytics" && (!action || action === "help" || flag(args, "--help")))
     return console.log(ticketAnalyticsHelp);
   if (!command || command === "help" || flag(args, "--help")) {

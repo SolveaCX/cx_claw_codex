@@ -22,6 +22,7 @@ describe("local development plugin", () => {
     const manifest = JSON.parse(readFileSync(join(plugin, "plugin.json"), "utf8"));
     const mcp = JSON.parse(readFileSync(join(plugin, "mcp.json"), "utf8"));
     const launcher = readFileSync(join(plugin, "plugin-cli.dev.mjs"), "utf8");
+    const skillLauncher = readFileSync(join(plugin, "plugin-cli.mjs"), "utf8");
 
     expect(marketplace.name).toBe("cxclaw-dev");
     expect(marketplace.plugins[0].source.path).toBe("./plugins/cxclaw-dev");
@@ -32,6 +33,7 @@ describe("local development plugin", () => {
     expect(mcp.mcpServers["tenant-panel-dev"].args[0]).toBe("${PLUGIN_ROOT}/plugin-cli.dev.mjs");
     expect(launcher).toContain(join(import.meta.dirname, "..", "dist", "cli.js"));
     expect(launcher).not.toContain("npx");
+    expect(skillLauncher).toBe(launcher);
   });
 
   test("enables the plugin only in the exact top-level playground directory", async () => {
@@ -39,6 +41,11 @@ describe("local development plugin", () => {
     const playground = join(workspace, "playground");
     const fuzzyMatch = join(workspace, "local-playground");
     mkdirSync(playground, { recursive: true });
+    mkdirSync(join(playground, ".codex"), { recursive: true });
+    writeFileSync(
+      join(playground, ".codex", "config.toml"),
+      '[plugins."cxclaw@cxclaw"]\n# Existing preference\nenabled = true\n\n[plugins."other@tools"]\nenabled = true\n',
+    );
     mkdirSync(join(fuzzyMatch, ".codex"), { recursive: true });
     writeFileSync(
       join(playground, ".codex-placeholder"),
@@ -61,6 +68,14 @@ describe("local development plugin", () => {
     );
     expect(readFileSync(join(playground, "AGENTS.md"), "utf8")).toContain("用户没有明确要求时");
     expect(readFileSync(join(playground, "AGENTS.md"), "utf8")).toContain("Keep this rule.");
+    const config = readFileSync(join(playground, ".codex", "config.toml"), "utf8");
+    expect(config).toContain('[plugins."cxclaw@cxclaw"]\n# Existing preference\nenabled = false');
+    expect(config).toContain('[plugins."other@tools"]\nenabled = true');
+    await syncDeveloperPluginToPlaygrounds(output, workspace);
+    expect(readFileSync(join(playground, ".codex", "config.toml"), "utf8")).toBe(config);
+    expect(
+      readFileSync(join(playground, ".codex", "plugins", "cxclaw-dev", "plugin-cli.mjs"), "utf8"),
+    ).toContain(join(import.meta.dirname, "..", "dist", "cli.js"));
     expect(() => readFileSync(join(fuzzyMatch, ".codex", "config.toml"), "utf8")).toThrow();
   });
 });

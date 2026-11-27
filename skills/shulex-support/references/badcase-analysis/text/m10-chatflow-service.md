@@ -19,19 +19,27 @@ M10 只处理已经进入 CHAT_FLOW 之后的问题：
 
 ## 排查顺序
 
-### 1. 读取当前生效 graph / 配置
+### 1. 先读取目标轮历史配置，再对照当前配置
 
-从会话记录的 `strategyAction`、`context.ext` 或已知测试结果确认 `agentId`，然后执行：
+从目标轮会话记录的 `strategyAction`、`context.ext` 或已知测试结果确认 `agentId` 和 `flow_version`。有明确版本时先读取该版本的完整图：
 
 ```bash
-node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow inspect --agent-id <agentId> --pretty
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent get-chatflow --agent-id <agentId> --version <flow_version> --context <contextId> --pretty
 ```
 
-只要本轮确认进入 CHAT_FLOW，报告前必须读取当前生效的 ChatFlow 图配置。读取图配置的目的不是只做节点/边校验，而是看到全局业务流程，理解失败节点的上游来源、下游去向、变量和工具结果如何传递，必要时给出准确可行的配置建议。
+也可用 `agent-builder chatflow inspect --agent-id <agentId> --version <flow_version>` 同时取得当前Agent元信息和指定版本图；Agent元信息仍是当前值，不是历史快照。命令返回必须核对agentId、version及graph内容。指定版本未取得时保留错误和缺口，不能静默退回最新图。多轮或子图涉及不同版本时分别读取并缓存，不把版本数组的第一项套到所有目标轮。
+
+然后对照当前图，判断历史问题是否仍存在、修改建议是否仍适用：
+
+```bash
+node "<PLUGIN_ROOT>/plugin-cli.mjs" agent-builder chatflow inspect --agent-id <agentId> --context <contextId> --pretty
+```
+
+只要本轮确认进入 CHAT_FLOW，报告前必须尝试读取目标轮版本及当前配置。未指定版本的查询优先返回当前用户草稿，没有草稿才返回最新发布图，因此成功返回不等于已取得线上生效图。核对发布状态和版本；已从可信元信息确认当前发布版本号时可按该版本补查，否则保留发布图缺口。读取图配置要理解全局业务流程、失败节点的上下游、变量和工具结果如何传递，不能只做节点/边校验。
 
 `chatflow_run_info` 只能说明“实际跑了哪些节点”，不能说明“图上原本应该怎么连、节点怎么配、上下游业务和数据流是什么、用户后台当前看到的是否就是这张图”。
 
-`get-agent` 只返回 Agent 元信息，不等于已经读取 ChatFlow 图。inspect 成功前不得输出最终报告，也不得只凭会话记录给出修改节点配置的强建议。
+`get-agent` 只返回 Agent 元信息，不等于已经读取 ChatFlow 图。inspect 失败或只取得草稿时，可交付明确标注缺口的阶段结果，不阻塞批量中其他 case；依赖缺失图才能确定的配置根因不得标为已确认，也不得只凭会话记录给出修改节点配置的强建议。已取得的历史图仍可证明历史机制，但不能代替当前修改前的核对。
 
 需要补充 Agent 类型、版本等元信息时，可执行：
 
@@ -42,7 +50,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" agent get --id <agentId> --pretty
 关注点：
 
 - 当前线上生效图是否就是用户以为的那张图。
-- 对比运行记录中的 `flow_version`、节点 id 和当前 graph。当前图与历史运行版本无法对应时，只能说明当前状态，不能据此断言历史配置根因。
+- 对比目标轮 `flow_version`、节点 id 与指定版本graph，再比较当前图。历史图缺失时不能用当前图断言历史配置根因；历史图存在也不等于已取得当时完整模型输入，引用的知识、模板、工具仍需核对其历史适用性。
 - 节点 title / id / type 是否能和 `chatflow_run_info`、日志对上。
 - 按 `node_id` 在 graph 中定位失败节点，不要只按 title 猜节点。
 - CODE 节点报错时，读取 CODE 节点的实际 `source_code`、输入变量选择器和输出字段，确认报错语句确实存在于当前生效配置。
@@ -251,9 +259,9 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" sls query \
 
 最终报告不要堆源码名。用业务语言先说发生了什么，再说明为什么，并给出最小证据：
 
-- 必须写清楚节点 title / id / type，以及它前后走了哪条边。
-- 配置问题标 `[可自行调整]`，说明用户可在后台检查哪个节点、模板、变量、工具或知识配置。
-- 系统异常、parser 错误、服务 ERROR、外部接口异常标 `[需联系研发]`，给出 trace、armsTrace、节点名和关键日志。
+- 对象名称、分支、业务结论与技术证据的表达遵循 [core-flow 第5步](core-flow.md#5-分类并输出结论和建议)，不另设口径。
+- 配置问题的处理方式使用“业务配置优化”，说明具体节点、模板、变量、工具或知识对象及修改条件。
+- 系统异常、parser 错误、服务 ERROR、外部接口异常需研发介入时使用“产研处理”，给出 trace、armsTrace、节点名和关键日志；能自行取得的证据先查，不将处理方式当作分类。
 - 如果只是停在 `USER_INPUT` 或人审等待，先说明这是等待态；只有超时、resume 失败、用户输入没有恢复执行时才判异常。
 - 如果 NOTE 未连接、未从 START 可达，不要作为运行时根因；NOTE 是画布注释。
 - 如果日志没查到，写“日志未能确认：<原因>”，不要伪造日志结论。

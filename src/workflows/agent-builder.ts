@@ -493,7 +493,9 @@ async function inspect(client: SolveaClient | undefined, args: string[]) {
   }
   const item = Array.isArray(agent) ? (agent[0] as JsonObject) : (agent as JsonObject);
   const id = String(item?.id ?? item?.agentId ?? agentId ?? "");
-  const graph = id ? await client.getChatflowGraph(id) : undefined;
+  const graph = id
+    ? await client.getChatflowGraph(id, option(args, "--version", args.includes("--version")))
+    : undefined;
   const result = { agent: item, graph };
   const out = option(args, "--out");
   if (out) await writeJson(out, graph);

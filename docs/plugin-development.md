@@ -16,6 +16,7 @@ bun run dev:plugin
 1. 构建本地 `dist/cli.js` 和 `dist/mcp-apps/` 中的 MCP App 产物。
 2. 在 `_tmp_/codex-plugin-dev/` 生成本地 marketplace 和开发插件。
 3. 将开发插件同步到仓库根目录下的 `./playground/`，并写入项目级 marketplace、配置和 `AGENTS.md`。
+   项目配置启用 `cxclaw-dev@cxclaw-dev`，同时禁用 `cxclaw@cxclaw`；用户级正式版设置保持不变。
 4. 清理全局 `cxclaw-dev` 注册，确保开发插件只在该目录中启用。
 5. 让开发插件直接执行当前仓库的 `dist/cli.js`，不经过 npm。
 
@@ -51,6 +52,17 @@ bun run dev:plugin
 ```
 
 它会重新生成并同步本地开发插件。修改 skills、manifest 或 MCP 配置后，完全退出并重新打开 ChatGPT desktop app，让宿主重新发现插件结构。
+
+### 验证实际加载的 skill
+
+宿主读取的是安装缓存，不是 `playground/.codex/plugins/` 源目录。相同版本号下，仅确认同步目录一致不足以证明新会话已加载新 skill。
+
+- 新会话应只发现 `cxclaw-dev:*`，不加载正式版 `cxclaw:*`。项目级禁用不卸载正式插件，其他项目仍沿用原设置。
+- 核对实际 skill 路径中的文件与源码一致，新增 references 也必须存在。若缓存仍旧，在项目本地 marketplace 重新安装开发插件，再检查实际缓存；不要只反复运行构建。
+- 自动化验证可使用宿主 app-server 的 `config/read`（指定 cwd）、`skills/list`（指定 cwds、forceReload）和 `plugin/install`（指定项目 marketplacePath 与 pluginName）。重新安装可能写入用户级启用项，须恢复安装前的用户级选择，保证开发插件仅在项目启用。
+- 已读取旧规则的会话不作为新版独立验收；重新加载后新开会话，用原始输入验证。
+
+项目开关与缓存行为参考 [OpenAI 插件文档](https://developers.openai.com/plugins/build/plugins#enable-or-disable-a-plugin-for-a-repo)。
 
 ## MCP App 前端开发规范
 
