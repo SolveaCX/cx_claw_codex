@@ -150,6 +150,8 @@ function buildCxclawMcpServer(service: LiveTestService): McpServer {
           uri: LIVE_TEST_URI,
           mimeType: MCP_APP_MIME_TYPE,
           text: await loadMcpAppHtml("live-test"),
+          // Customer attachments may be hosted outside Shulex; the view only loads them as images.
+          _meta: { ui: { csp: { resourceDomains: ["https:"] } } },
         },
       ],
     }),

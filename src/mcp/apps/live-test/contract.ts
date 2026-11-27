@@ -14,7 +14,8 @@ export const LiveTestStartInputSchema = z
         turns: z
           .array(
             z.object({
-              message: z.string().min(1).max(20_000),
+              message: z.string().max(20_000).default(""),
+              attachments: z.array(z.string().trim().min(1)).optional(),
               expected: z
                 .object({
                   intentId: z.union([z.number().int(), z.string().min(1)]).optional(),
@@ -31,17 +32,26 @@ export const LiveTestStartInputSchema = z
           .max(10),
       })
       .optional(),
-    message: z.string().min(1).max(20_000).optional(),
+    message: z.string().max(20_000).optional(),
+    attachments: z.array(z.string().trim().min(1)).optional(),
     chatId: z.string().optional(),
     metadata: z.record(z.string(), z.unknown()).default({}),
     option: z.record(z.string(), z.unknown()).default({}),
   })
   .superRefine((value, context) => {
     const testScope = value.testScope ?? (value.agentId === undefined ? "END_TO_END" : "AGENT");
-    if (Boolean(value.case) === Boolean(value.message))
+    if (Boolean(value.case) === Boolean(value.message || value.attachments?.length))
       context.addIssue({
         code: "custom",
-        message: "case.turns 和 message 必须且只能提供一个",
+        message: "case.turns 和 message/attachments 必须且只能提供一个",
+      });
+    const turns = value.case?.turns ?? [{ message: value.message, attachments: value.attachments }];
+    if (turns.some((turn) => !turn.message?.trim() && !turn.attachments?.length))
+      context.addIssue({ code: "custom", message: "每轮必须提供 message 或 attachments" });
+    if ("attachments" in value.metadata || "__attachments" in value.metadata)
+      context.addIssue({
+        code: "custom",
+        message: "附件请使用 attachments 或 case.turns[].attachments，不要放入 metadata",
       });
     if (testScope === "AGENT" && value.agentId === undefined)
       context.addIssue({ code: "custom", message: "AGENT 测试必须提供 agentId" });
@@ -74,6 +84,7 @@ export const LiveTestRunInputSchema = z.object({
 export const LiveTestTurnSchema = z.object({
   index: z.number().int().min(0),
   user: z.string(),
+  attachments: z.array(z.string()).optional(),
   assistant: z.string().default(""),
   status: z.enum(["queued", "running", "succeeded", "failed", "cancelled"]),
   startedAt: z.number().optional(),

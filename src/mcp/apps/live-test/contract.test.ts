@@ -52,3 +52,20 @@ describe("LiveTestStatusInputSchema", () => {
     );
   });
 });
+
+test("attachment input accepts attachment-only turns and rejects metadata shortcuts", () => {
+  const attachments = ["https://example.com/receipt.jpg"];
+  for (const input of [{ attachments }, { case: { turns: [{ attachments }] } }]) {
+    expect(LiveTestStartInputSchema.safeParse({ contextId: "ctx", ...input }).success).toBe(true);
+  }
+  for (const input of [
+    { message: " " },
+    { attachments: [" "] },
+    { case: { turns: [{ message: "" }] } },
+    { case: { turns: [{ message: "hi" }] }, attachments },
+    { message: "hi", metadata: { attachments } },
+    { message: "hi", metadata: { __attachments: attachments } },
+  ]) {
+    expect(LiveTestStartInputSchema.safeParse({ contextId: "ctx", ...input }).success).toBe(false);
+  }
+});

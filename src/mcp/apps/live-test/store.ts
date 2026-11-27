@@ -30,7 +30,12 @@ export class LiveTestStore {
       "contextId" | "profileId" | "accountId" | "environment" | "agentId"
     > & { testScope?: LiveTestSnapshot["testScope"] },
     turns: (
-      string | { message: string; expected?: LiveTestSnapshot["turns"][number]["expected"] }
+      | string
+      | {
+          message: string;
+          attachments?: string[];
+          expected?: LiveTestSnapshot["turns"][number]["expected"];
+        }
     )[],
   ): Promise<LiveTestSnapshot> {
     const now = Date.now();
@@ -49,6 +54,7 @@ export class LiveTestStore {
         return {
           index,
           user: turn.message,
+          ...(turn.attachments?.length ? { attachments: turn.attachments } : {}),
           expected: turn.expected,
           assistant: "",
           status: "queued",

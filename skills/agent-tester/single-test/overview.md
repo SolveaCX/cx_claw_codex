@@ -13,10 +13,16 @@
 
 ## 两种调用方式
 
-`case` 和 `message` 必须且只能提供一个：
+固定 `case` 和探索模式 `message` / `attachments` 必须且只能选择一种：
 
 - **固定用例**：传 `case.turns`，一次工具调用自动按顺序执行全部用户问题，并在内部复用同一个测试 ChatId。直接测试和 badcase 复测优先使用这种方式。
 - **灵活探索**：传 `message` 执行一轮；继续同一对话时，把上次结果中的 `chatId` 原样传回。适用于 Agent 根据上一轮结果临时生成下一问。
+
+测试气泡会直接展示图片缩略图，点击打开原图；其它附件显示文件名链接，图片加载失败时回退为链接。附件按轮保存在测试快照中。
+
+附件是当前轮用户消息的一部分：固定用例传 `case.turns[].attachments`，探索模式传顶层 `attachments`，值为 URL 字符串数组。支持只有附件、没有正文的消息；多轮中只在实际上传的那一轮传附件，不要每轮重复携带。工具会把附件传入 chat 请求顶层，由正常 chat 链路关联 USER 消息并执行识别。
+
+不要把附件塞进 `metadata.attachments` 或 `metadata.__attachments`，工具会拒绝这类入参。普通 `Attachments` 业务字段有 URL 不代表模型已经读取图片，也不代表生成了 `AttachmentSummary`。不带业务 metadata 的测试仍可携带原用户附件。
 
 ## metadata 确认（单测必做）
 
@@ -31,8 +37,9 @@
 | `botId` | 否 | 默认使用当前 CXClaw 请求携带的 Bot ID；只有当前请求没有 Bot ID 时才向用户确认。 |
 | `flowVersion` | 否 | 仅 `AGENT + CHAT_FLOW` 支持。默认省略，`live_test.start` 会调用 `chatflow/queryGraph/latest` 取得当前用户草稿或最新发布版本。`END_TO_END` 和 `SINGLE_AGENT` 不得传入。 |
 | `touchPoint` | 否 | 默认 `LIVE_CHAT`，传入时统一使用大写值。 |
-| `case` | 二选一 | `{ "caseId"?: string, "turns": [{ "message": string, "expected"?: object }] }`。至少一轮。 |
+| `case` | 二选一 | `{ "caseId"?: string, "turns": [{ "message"?: string, "attachments"?: string[], "expected"?: object }] }`。至少一轮。 |
 | `message` | 二选一 | 灵活探索模式的一条用户问题。 |
+| `attachments` | 否 | 探索模式当前轮附件 URL 数组；固定用例放在对应 `case.turns[]` 中，支持纯附件轮次。 |
 | `chatId` | 否 | 只在 `message` 模式继续上一轮测试对话时传入。固定 `case` 模式由工具内部维护。 |
 | `metadata` | 否 | 经用户确认后，仅追加完成测试所需的业务上下文。 |
 | `option` | 否 | 仅追加接口支持的其它选项。 |

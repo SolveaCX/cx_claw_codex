@@ -287,6 +287,7 @@ export class LiveTestRunner {
           chatId,
           touchPoint: input.touchPoint,
           message: turn.user,
+          ...(turn.attachments?.length ? { attachments: turn.attachments } : {}),
           metadata,
           option: { ...filtered(input.option, protectedOptions), debug: true, verbose: true },
         };

@@ -382,3 +382,68 @@ describe("LiveTest runner", () => {
     });
   });
 });
+
+for (const touchPoint of ["EMAIL", "LIVE_CHAT"]) {
+  test(`persists and sends only current turn attachments over ${touchPoint}`, async () => {
+    process.env.CXCLAW_LIVE_TEST_STATE_DIR = stateRoot;
+    const bodies: Record<string, unknown>[] = [];
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input);
+      if (url.endsWith("/api_v2/gpt/bots"))
+        return new Response(JSON.stringify([{ projectId: 302, id: 723 }]), { status: 200 });
+      if (url.endsWith(touchPoint === "EMAIL" ? "/chat" : "/chat/stream")) {
+        bodies.push(JSON.parse(String(init?.body)));
+        const action = { chatId: "attachment-chat", type: "MESSAGE", content: "received" };
+        return new Response(
+          touchPoint === "EMAIL"
+            ? JSON.stringify(action)
+            : `data: ${JSON.stringify({ isEnd: true, data: action })}\n\n`,
+          { status: 200 },
+        );
+      }
+      throw new Error(`unexpected request ${url}`);
+    }) as typeof fetch;
+    const turns = [
+      { message: "", attachments: ["https://example.com/receipt.jpg"] },
+      { message: "Please check it" },
+      { message: "Manual", attachments: ["https://example.com/manual.pdf"] },
+    ];
+    const store = new LiveTestStore();
+    const snapshot = await store.create(
+      {
+        contextId: "ctx_test",
+        profileId: "profile-test",
+        accountId: 12,
+        environment: "staging",
+        testScope: "END_TO_END",
+      },
+      turns,
+    );
+    expect(
+      (await store.read(snapshot.profileId, snapshot.testRunId)).turns[0]?.attachments,
+    ).toEqual(turns[0]!.attachments);
+    await new LiveTestRunner(store, async () => structuredClone(session)).run(
+      snapshot,
+      {
+        contextId: "ctx_test",
+        testScope: "END_TO_END",
+        botId: 723,
+        touchPoint,
+        case: { turns },
+        metadata: {},
+        option: {},
+      },
+      new AbortController().signal,
+    );
+    const saved = await store.read(snapshot.profileId, snapshot.testRunId);
+    expect(saved.status).toBe("succeeded");
+    expect(bodies).toHaveLength(3);
+    expect(bodies[0]?.attachments).toEqual(turns[0]!.attachments);
+    expect(bodies[0]?.message).toBe("");
+    expect(bodies[1]?.attachments).toBeUndefined();
+    expect(bodies[1]?.chatId).toBe("attachment-chat");
+    expect(bodies[2]?.attachments).toEqual(turns[2]!.attachments);
+    expect(saved.turns[2]?.attachments).toEqual(turns[2]!.attachments);
+    expect(bodies[0]?.metadata).not.toHaveProperty("attachments");
+  });
+}
