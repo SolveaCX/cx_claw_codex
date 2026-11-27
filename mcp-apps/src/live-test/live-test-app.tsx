@@ -9,6 +9,8 @@ import {
   type TraceStep,
 } from "./trace.js";
 
+import { AttachmentList } from "./attachment-list.js";
+
 type Outcome = {
   actionType?: string;
   handoff?: boolean;
@@ -19,6 +21,7 @@ type Outcome = {
 type Turn = {
   index: number;
   user: string;
+  attachments?: string[];
   assistant: string;
   status: string;
   error?: string;
@@ -158,11 +161,13 @@ function MessageRow({
   turn,
   failedNodeTitle,
   onExecution,
+  onOpenAttachment,
 }: {
   role: "user" | "assistant";
   turn: Turn;
   failedNodeTitle?: string;
   onExecution: () => void;
+  onOpenAttachment?: (url: string) => void;
 }) {
   const [copied, setCopied] = useState(false);
   const isUser = role === "user";
@@ -191,7 +196,10 @@ function MessageRow({
             }`}
           >
             {isUser ? (
-              turn.user
+              <>
+                {turn.user ? <span>{turn.user}</span> : null}
+                <AttachmentList attachments={turn.attachments} onOpen={onOpenAttachment} />
+              </>
             ) : running && !turn.assistant ? (
               <span className="lt-dots" aria-label="等待 Agent 回复">
                 <span />
@@ -622,7 +630,12 @@ export function LiveTestApp() {
               <div className="lt-messages">
                 {visibleTurns.map((turn) => (
                   <div className="lt-turn" key={turn.index}>
-                    <MessageRow role="user" turn={turn} onExecution={() => undefined} />
+                    <MessageRow
+                      role="user"
+                      turn={turn}
+                      onExecution={() => undefined}
+                      onOpenAttachment={openInBrowser}
+                    />
                     <MessageRow
                       role="assistant"
                       turn={turn}

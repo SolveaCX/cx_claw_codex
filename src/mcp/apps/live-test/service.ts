@@ -31,7 +31,9 @@ export class LiveTestService {
     if (this.activeContexts.has(input.contextId))
       throw new Error(`context ${input.contextId} already has an active LiveTest`);
     const testScope = input.testScope ?? (input.agentId === undefined ? "END_TO_END" : "AGENT");
-    const turns = input.case?.turns ?? [{ message: input.message! }];
+    const turns = input.case?.turns ?? [
+      { message: input.message ?? "", attachments: input.attachments },
+    ];
     const snapshot = await this.store.create(
       {
         contextId: input.contextId,

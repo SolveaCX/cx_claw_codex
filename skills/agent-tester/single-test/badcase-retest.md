@@ -15,6 +15,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
 从原会话中：
 
 - 只提取客户 `USER` 消息，保持原顺序。
+- 同时保留每条 USER 消息的原始 `attachments` URL 数组，放到对应 `case.turns[].attachments`；纯附件轮次也要保留。不要只复制正文或文件名，不要从 AgentAction 的 metadata 复制累计附件代替逐轮附件。
 - 不重放原 AI、人工客服、系统或流程消息。
 - 为每轮 USER 消息保留紧随其后的原 AgentAction，作为本地 baseline，仅用于测试后比较，不传入 `live_test.start`。
 - 原会话发生转人工，或 AgentAction 为 `TO_AGENT`、`STOPPED`、`HUMAN_REVIEW` 后停止提取后续轮次。
@@ -29,6 +30,8 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
 - `flowVersion`：仅 `CHAT_FLOW` 使用。用户显式版本优先，否则工具入参省略；`live_test.start` 会通过 `chatflow/queryGraph/latest` 取得当前用户草稿或最新发布版本。`SINGLE_AGENT` 省略该参数。
 - `touchPoint`：用户显式值优先，其次使用原会话 touchPoint，仍缺失时默认 `LIVE_CHAT`。
 - `metadata`：经用户确认后，只复制完成测试确实需要的业务字段。
+
+附件不属于业务 metadata。用户要求还原原 case 时，按原 USER 消息传附件；不要复制原 `AttachmentSummary`、AI 提取的订单号等结果来冒充附件识别。原附件缺失、不可访问或仅有图标/缩略图时，明确披露复测输入差异。
 
 不要复制旧 ChatId、运行状态、内部路由字段或工具固定注入的 metadata。
 
@@ -46,7 +49,7 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
   "case": {
     "caseId": "historical-chat-id",
     "turns": [
-      {"message": "第一轮客户问题"},
+      {"message": "第一轮客户问题", "attachments": ["https://example.com/receipt.jpg"]},
       {"message": "第二轮客户问题"}
     ]
   },
@@ -63,6 +66,8 @@ node "<PLUGIN_ROOT>/plugin-cli.mjs" transcript get \
 工具完成后，使用 `contextId + testRunId` 调用一次 `live_test.transcript`。
 
 按 USER 消息顺序将新 AgentAction 与原 baseline 对齐。不要仅根据快照回复文本判断是否修复，因为完整路由、工具和节点信息在会话记录中。
+
+带附件的复测还要核对新 USER 消息的 `attachments`、系统累计的 `__attachments`、实际 `AttachmentSummary` 和相关抽取字段。仅 `ai_fields` 中的 `Attachments` 有 URL 不能判定链路已对齐；摘要未生成时应先定位附件链路，不要直接归因于提示词。
 
 ## 对比结论
 
